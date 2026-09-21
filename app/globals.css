@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Coast design tokens — the law. No raw hex in components. */
+/* Light + dark palettes defined together. Dark mode from day one. */
+
+:root {
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+
+  /* type roles */
+  --type-hero-number-size: clamp(3rem, 12vw, 4.5rem);
+  --type-hero-number-weight: 700;
+  --type-title-size: 1.25rem;
+  --type-title-weight: 600;
+  --type-body-size: 1rem;
+  --type-caption-size: 0.8125rem;
+  --type-micro-size: 0.6875rem;
+
+  /* space: 4pt grid */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+
+  /* radius */
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px; --radius-full: 999px;
+
+  /* motion */
+  --dur-micro: 120ms; --dur-standard: 240ms; --dur-heroic: 400ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* LIGHT — calm, not anxious */
+  --surface-primary: #FAFAF8;
+  --surface-secondary: #F1EFEA;
+  --surface-card: #FFFFFF;
+  --surface-inset: #EDEBE6;
+  --text-primary: #1C1B1A;
+  --text-secondary: #6E6A64;
+  --text-micro: #9A958D;
+  --text-hero-number: #14342B;
+  --accent-progress: #1F7A5C;
+  --accent-progress-soft: #DDF0E7;
+  --accent-gold: #B98A2F;
+  --signal-warning: #B7791F;
+  --signal-warning-soft: #FBF0D9;
+  --signal-critical: #B3372F;
+  --signal-critical-soft: #F9E3E1;
+  --border-subtle: #E4E1DA;
+  --skeleton: #E8E5DE;
+  --ring-track: #E7E4DC;
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --surface-primary: #121210;
+  --surface-secondary: #1A1A17;
+  --surface-card: #1E1E1B;
+  --surface-inset: #262622;
+  --text-primary: #F2F0EB;
+  --text-secondary: #B3AFA6;
+  --text-micro: #7E7A72;
+  --text-hero-number: #EAF6EF;
+  --accent-progress: #4CC38A;
+  --accent-progress-soft: #173A2C;
+  --accent-gold: #D9A93F;
+  --signal-warning: #E0A63F;
+  --signal-warning-soft: #3A2E14;
+  --signal-critical: #E06C64;
+  --signal-critical-soft: #3D211F;
+  --border-subtle: #2C2C28;
+  --skeleton: #242422;
+  --ring-track: #2A2A26;
+
+  color-scheme: dark;
+}
+
+/* elevation: 3 levels, subtle */
+.elev-1 { box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); }
+.elev-2 { box-shadow: 0 4px 12px rgb(0 0 0 / 0.07); }
+.elev-3 { box-shadow: 0 12px 32px rgb(0 0 0 / 0.10); }
+
+/* money: tabular numerals — non-negotiable */
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+html {
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  min-height: 100dvh;
+}
+
+/* focus visibility — accessibility floor */
+:focus-visible {
+  outline: 2px solid var(--accent-progress);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* skeleton shimmer */
+@keyframes coast-shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--skeleton) 25%, var(--surface-card) 50%, var(--skeleton) 75%);
+  background-size: 800px 100%;
+  animation: coast-shimmer 1.4s var(--ease-out) infinite;
+  border-radius: var(--radius-md);
+}
+
+/* range inputs: the what-if sliders */
+input[type="range"].whatif {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"].whatif::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--ring-track);
+}
+input[type="range"].whatif::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -7px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--accent-progress);
+  border: 3px solid var(--surface-card);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+}
+input[type="range"].whatif::-moz-range-track {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--ring-track);
+}
+input[type="range"].whatif::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent-progress);
+  border: 3px solid var(--surface-card);
+}

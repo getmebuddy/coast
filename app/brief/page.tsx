@@ -1,0 +1,174 @@
+"use client";
+
+/**
+ * Brief tab — the morning brief. Scannable in ~30 seconds, calm plain English.
+ * Computes from the ledger via /api/brief; read-state persists server-side
+ * (falls back to localStorage when signed out / demo mode).
+ */
+import { useEffect, useState } from "react";
+import type { Brief } from "@/lib/brief";
+import { formatUSD } from "@/lib/fire";
+import ShareCard from "../components/ShareCard";
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-xl bg-[var(--surface-card)] p-5 elev-1">
+      <h2 className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+        {title}
+      </h2>
+      <div className="mt-3 space-y-2.5">{children}</div>
+    </section>
+  );
+}
+
+export default function BriefPage() {
+  const [brief, setBrief] = useState<Brief | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/brief", { cache: "no-store" });
+        if (!res.ok) throw new Error("brief failed");
+        const data = (await res.json()) as Brief;
+        if (!cancelled) setBrief(data);
+      } catch {
+        if (!cancelled) setError(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (error) {
+    return (
+      <div className="pt-10 text-center">
+        <p className="text-[var(--type-title-size)] font-semibold">We couldn't load your brief.</p>
+        <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          Your data is safe — try again in a moment.
+        </p>
+      </div>
+    );
+  }
+
+  if (!brief) {
+    return (
+      <div className="space-y-4 pt-2" aria-label="Loading your brief">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="skeleton h-28" />
+        ))}
+      </div>
+    );
+  }
+
+  const paceOver = brief.budgetSpentCents > brief.budgetExpectedCents;
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-[var(--type-title-size)] font-bold">{brief.greeting}.</h1>
+        <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          Here's your money, in about 30 seconds.
+        </p>
+      </div>
+
+      {brief.quiet && (
+        <div className="rounded-xl bg-[var(--accent-progress-soft)] p-5 text-center">
+          <p className="text-[var(--type-body-size)] text-[var(--text-primary)]">
+            Nothing new since yesterday — quiet mornings are good.
+          </p>
+        </div>
+      )}
+
+      {brief.newActivity.length > 0 && (
+        <Section title="New activity">
+          {brief.newActivity.map((a) => (
+            <div key={a.id} className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate text-[var(--type-body-size)]">
+                  {a.merchant}
+                  {a.pending && (
+                    <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[var(--type-micro-size)] text-[var(--signal-warning)]">
+                      pending
+                    </span>
+                  )}
+                </p>
+                <p className="text-[var(--type-micro-size)] text-[var(--text-micro)] capitalize">{a.kind}</p>
+              </div>
+              <span className={`tnum font-semibold ${a.amountCents < 0 ? "text-[var(--text-primary)]" : "text-[var(--accent-progress)]"}`}>
+                {formatUSD(a.amountCents)}
+              </span>
+            </div>
+          ))}
+          <p className="pt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            {formatUSD(brief.newActivityTotalCents)} out since yesterday.
+            {brief.pendingCount > 0 && ` ${brief.pendingCount} still pending.`}
+          </p>
+        </Section>
+      )}
+
+      {brief.billsDue.length > 0 && (
+        <Section title="Bills due this week">
+          {brief.billsDue.map((b) => (
+            <div key={b.merchant} className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[var(--type-body-size)]">{b.merchant}</p>
+                <p className="text-[var(--type-micro-size)] text-[var(--text-micro)]">due {b.dueDate}</p>
+              </div>
+              <span className="tnum font-semibold">{formatUSD(b.amountCents)}</span>
+            </div>
+          ))}
+          <p className="pt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            {formatUSD(brief.billsDueTotalCents)} committed this week.
+          </p>
+        </Section>
+      )}
+
+      <Section title="September budget pace">
+        <div className="h-2.5 overflow-hidden rounded-full bg-[var(--ring-track)]">
+          <div
+            className={`h-full rounded-full ${paceOver ? "bg-[var(--signal-warning)]" : "bg-[var(--accent-progress)]"}`}
+            style={{ width: `${Math.min(100, (brief.budgetSpentCents / brief.budgetLimitCents) * 100)}%` }}
+          />
+        </div>
+        <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          {formatUSD(brief.budgetSpentCents)} spent of {formatUSD(brief.budgetLimitCents)}.{" "}
+          {paceOver
+            ? `Running ${formatUSD(brief.budgetSpentCents - brief.budgetExpectedCents)} ahead of pace — easy does it.`
+            : `${formatUSD(brief.budgetExpectedCents - brief.budgetSpentCents)} under pace. Nicely done.`}
+        </p>
+      </Section>
+
+      {brief.priceChanges.length > 0 && (
+        <Section title="Subscription watch">
+          {brief.priceChanges.map((p) => (
+            <div key={p.merchant} className="flex items-center justify-between gap-3">
+              <p className="text-[var(--type-body-size)]">
+                {p.merchant}{" "}
+                <span className="tnum text-[var(--text-secondary)]">
+                  {p.prevAmountCents !== null ? formatUSD(p.prevAmountCents) : ""} → {formatUSD(p.amountCents)}
+                </span>
+              </p>
+              <span className="rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[var(--type-micro-size)] text-[var(--signal-warning)]">
+                price up
+              </span>
+            </div>
+          ))}
+          <p className="pt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            {formatUSD(brief.monthlyRecurringCents)} a month across your subscriptions.
+          </p>
+        </Section>
+      )}
+
+      <Section title="One line on your number">
+        <p className="text-[var(--type-body-size)] text-[var(--text-primary)]">{brief.fireNudge}</p>
+      </Section>
+
+      <div className="pt-1">
+        <ShareCard brief={brief} />
+      </div>
+    </div>
+  );
+}

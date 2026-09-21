@@ -1,0 +1,4605 @@
+{
+  "meta": {
+    "generated": "2026-09-19",
+    "range": [
+      "2026-06-01",
+      "2026-09-19"
+    ],
+    "household": "Demo — high-earning saver"
+  },
+  "accounts": [
+    {
+      "id": "checking",
+      "name": "Chase Checking",
+      "type": "checking",
+      "balance_cents": 1842000
+    },
+    {
+      "id": "credit",
+      "name": "Amex Gold",
+      "type": "credit",
+      "balance_cents": -321000
+    },
+    {
+      "id": "brokerage",
+      "name": "Vanguard Brokerage",
+      "type": "investment",
+      "balance_cents": 15000000
+    }
+  ],
+  "transactions": [
+    {
+      "id": "demo-txn-00438",
+      "date": "2026-09-19",
+      "merchant": "Target",
+      "amount_cents": -10619,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00437",
+      "date": "2026-09-19",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5907,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00439",
+      "date": "2026-09-18",
+      "merchant": "Whole Foods",
+      "amount_cents": -8420,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": true
+    },
+    {
+      "id": "demo-txn-00436",
+      "date": "2026-09-18",
+      "merchant": "CVS",
+      "amount_cents": -2565,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00435",
+      "date": "2026-09-18",
+      "merchant": "Whole Foods",
+      "amount_cents": -9990,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00434",
+      "date": "2026-09-18",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3745,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00433",
+      "date": "2026-09-18",
+      "merchant": "HEB",
+      "amount_cents": -10479,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00432",
+      "date": "2026-09-17",
+      "merchant": "Uber",
+      "amount_cents": -2465,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00431",
+      "date": "2026-09-17",
+      "merchant": "Target",
+      "amount_cents": -7533,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00430",
+      "date": "2026-09-17",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5792,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00429",
+      "date": "2026-09-17",
+      "merchant": "United Airlines",
+      "amount_cents": -28196,
+      "category": "Travel",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00428",
+      "date": "2026-09-16",
+      "merchant": "CVS",
+      "amount_cents": -3637,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00427",
+      "date": "2026-09-16",
+      "merchant": "Dentist Copay",
+      "amount_cents": -7463,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00426",
+      "date": "2026-09-16",
+      "merchant": "Target",
+      "amount_cents": -10788,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00425",
+      "date": "2026-09-16",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4933,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00424",
+      "date": "2026-09-15",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -5564,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00423",
+      "date": "2026-09-15",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4075,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00422",
+      "date": "2026-09-15",
+      "merchant": "CVS",
+      "amount_cents": -3208,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00421",
+      "date": "2026-09-15",
+      "merchant": "Whole Foods",
+      "amount_cents": -10759,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00057",
+      "date": "2026-09-15",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00008",
+      "date": "2026-09-15",
+      "merchant": "Employer Payroll",
+      "amount_cents": 800000,
+      "category": "Income",
+      "kind": "income",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00420",
+      "date": "2026-09-14",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5141,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00419",
+      "date": "2026-09-13",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5795,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00418",
+      "date": "2026-09-12",
+      "merchant": "Chipotle",
+      "amount_cents": -3540,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00417",
+      "date": "2026-09-12",
+      "merchant": "Dentist Copay",
+      "amount_cents": -7561,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00416",
+      "date": "2026-09-12",
+      "merchant": "Whole Foods",
+      "amount_cents": -11884,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00415",
+      "date": "2026-09-12",
+      "merchant": "Starbucks",
+      "amount_cents": -1343,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00414",
+      "date": "2026-09-12",
+      "merchant": "Shell",
+      "amount_cents": -6725,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00413",
+      "date": "2026-09-11",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4610,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00412",
+      "date": "2026-09-10",
+      "merchant": "DART",
+      "amount_cents": -519,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00411",
+      "date": "2026-09-10",
+      "merchant": "Starbucks",
+      "amount_cents": -1076,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00410",
+      "date": "2026-09-10",
+      "merchant": "Local Thai",
+      "amount_cents": -5515,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00409",
+      "date": "2026-09-09",
+      "merchant": "Chipotle",
+      "amount_cents": -3438,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00408",
+      "date": "2026-09-09",
+      "merchant": "Whole Foods",
+      "amount_cents": -8752,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00407",
+      "date": "2026-09-08",
+      "merchant": "Local Thai",
+      "amount_cents": -5221,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00406",
+      "date": "2026-09-08",
+      "merchant": "Carter’s",
+      "amount_cents": -4141,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00056",
+      "date": "2026-09-08",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00405",
+      "date": "2026-09-07",
+      "merchant": "Amazon",
+      "amount_cents": -7107,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00404",
+      "date": "2026-09-07",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3500,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00403",
+      "date": "2026-09-07",
+      "merchant": "DART",
+      "amount_cents": -605,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00402",
+      "date": "2026-09-06",
+      "merchant": "Amazon",
+      "amount_cents": -5728,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00401",
+      "date": "2026-09-06",
+      "merchant": "Costco",
+      "amount_cents": -14689,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00400",
+      "date": "2026-09-06",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5445,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00399",
+      "date": "2026-09-05",
+      "merchant": "Trader Joes",
+      "amount_cents": -7442,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00398",
+      "date": "2026-09-05",
+      "merchant": "Local Thai",
+      "amount_cents": -5854,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00397",
+      "date": "2026-09-05",
+      "merchant": "Carter’s",
+      "amount_cents": -4683,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00396",
+      "date": "2026-09-05",
+      "merchant": "Zara",
+      "amount_cents": -8832,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00395",
+      "date": "2026-09-05",
+      "merchant": "DART",
+      "amount_cents": -645,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00077",
+      "date": "2026-09-05",
+      "merchant": "Vanguard Brokerage",
+      "amount_cents": -500000,
+      "category": "Investing",
+      "kind": "transfer",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00394",
+      "date": "2026-09-04",
+      "merchant": "Target",
+      "amount_cents": -11339,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00393",
+      "date": "2026-09-04",
+      "merchant": "Zara",
+      "amount_cents": -8561,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00392",
+      "date": "2026-09-04",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -5750,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00391",
+      "date": "2026-09-04",
+      "merchant": "DART",
+      "amount_cents": -723,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00390",
+      "date": "2026-09-03",
+      "merchant": "Chipotle",
+      "amount_cents": -3683,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00389",
+      "date": "2026-09-03",
+      "merchant": "Carter’s",
+      "amount_cents": -4116,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00388",
+      "date": "2026-09-03",
+      "merchant": "Target",
+      "amount_cents": -6336,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00073",
+      "date": "2026-09-03",
+      "merchant": "Daycare — Bright Kids",
+      "amount_cents": -145000,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00069",
+      "date": "2026-09-03",
+      "merchant": "AT&T",
+      "amount_cents": -11850,
+      "category": "Utilities",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00065",
+      "date": "2026-09-03",
+      "merchant": "Xcel Energy",
+      "amount_cents": -16100,
+      "category": "Utilities",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00061",
+      "date": "2026-09-03",
+      "merchant": "Progressive",
+      "amount_cents": -17600,
+      "category": "Insurance",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00041",
+      "date": "2026-09-03",
+      "merchant": "Audible",
+      "amount_cents": -1495,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00037",
+      "date": "2026-09-03",
+      "merchant": "1Password",
+      "amount_cents": -299,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00032",
+      "date": "2026-09-03",
+      "merchant": "Gym — Lifetime",
+      "amount_cents": -4900,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00028",
+      "date": "2026-09-03",
+      "merchant": "NYTimes",
+      "amount_cents": -1700,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00024",
+      "date": "2026-09-03",
+      "merchant": "YouTube Premium",
+      "amount_cents": -1399,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00020",
+      "date": "2026-09-03",
+      "merchant": "iCloud+",
+      "amount_cents": -299,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00016",
+      "date": "2026-09-03",
+      "merchant": "Spotify",
+      "amount_cents": -1199,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00012",
+      "date": "2026-09-03",
+      "merchant": "Netflix",
+      "amount_cents": -1799,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00387",
+      "date": "2026-09-02",
+      "merchant": "Whole Foods",
+      "amount_cents": -11146,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00386",
+      "date": "2026-09-02",
+      "merchant": "HEB",
+      "amount_cents": -8655,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00385",
+      "date": "2026-09-02",
+      "merchant": "Amazon",
+      "amount_cents": -8013,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00384",
+      "date": "2026-09-02",
+      "merchant": "Dentist Copay",
+      "amount_cents": -4685,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00383",
+      "date": "2026-09-01",
+      "merchant": "Amazon",
+      "amount_cents": -7685,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00382",
+      "date": "2026-09-01",
+      "merchant": "Amazon",
+      "amount_cents": -5068,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00381",
+      "date": "2026-09-01",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4929,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00380",
+      "date": "2026-09-01",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3185,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00081",
+      "date": "2026-09-01",
+      "merchant": "Rent — AMLI",
+      "amount_cents": -235000,
+      "category": "Housing",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00055",
+      "date": "2026-09-01",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00007",
+      "date": "2026-09-01",
+      "merchant": "Employer Payroll",
+      "amount_cents": 800000,
+      "category": "Income",
+      "kind": "income",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00379",
+      "date": "2026-08-31",
+      "merchant": "CVS",
+      "amount_cents": -2330,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00378",
+      "date": "2026-08-31",
+      "merchant": "Uber",
+      "amount_cents": -3141,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00377",
+      "date": "2026-08-31",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -4442,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00376",
+      "date": "2026-08-30",
+      "merchant": "Carter’s",
+      "amount_cents": -4716,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00375",
+      "date": "2026-08-30",
+      "merchant": "Sweetgreen",
+      "amount_cents": -2600,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00374",
+      "date": "2026-08-30",
+      "merchant": "Uber",
+      "amount_cents": -2926,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00373",
+      "date": "2026-08-29",
+      "merchant": "Sweetgreen",
+      "amount_cents": -3684,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00372",
+      "date": "2026-08-29",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -2983,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00371",
+      "date": "2026-08-29",
+      "merchant": "Carter’s",
+      "amount_cents": -4556,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00370",
+      "date": "2026-08-28",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4173,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00369",
+      "date": "2026-08-28",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -6778,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00368",
+      "date": "2026-08-27",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -5010,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00367",
+      "date": "2026-08-27",
+      "merchant": "Target",
+      "amount_cents": -9253,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00366",
+      "date": "2026-08-27",
+      "merchant": "Target",
+      "amount_cents": -7057,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00365",
+      "date": "2026-08-26",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -7245,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00364",
+      "date": "2026-08-26",
+      "merchant": "Trader Joes",
+      "amount_cents": -8023,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00363",
+      "date": "2026-08-26",
+      "merchant": "Uber",
+      "amount_cents": -2012,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00362",
+      "date": "2026-08-26",
+      "merchant": "Shell",
+      "amount_cents": -6933,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00361",
+      "date": "2026-08-25",
+      "merchant": "Zara",
+      "amount_cents": -7576,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00360",
+      "date": "2026-08-25",
+      "merchant": "Uber",
+      "amount_cents": -1908,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00359",
+      "date": "2026-08-25",
+      "merchant": "DART",
+      "amount_cents": -552,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00054",
+      "date": "2026-08-25",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00358",
+      "date": "2026-08-24",
+      "merchant": "CVS",
+      "amount_cents": -2081,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00357",
+      "date": "2026-08-23",
+      "merchant": "HEB",
+      "amount_cents": -9991,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00356",
+      "date": "2026-08-23",
+      "merchant": "CVS",
+      "amount_cents": -2302,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00355",
+      "date": "2026-08-23",
+      "merchant": "CVS",
+      "amount_cents": -1847,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00354",
+      "date": "2026-08-23",
+      "merchant": "Sweetgreen",
+      "amount_cents": -3799,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00353",
+      "date": "2026-08-22",
+      "merchant": "Chipotle",
+      "amount_cents": -2676,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00352",
+      "date": "2026-08-22",
+      "merchant": "Carter’s",
+      "amount_cents": -4000,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00351",
+      "date": "2026-08-22",
+      "merchant": "Shell",
+      "amount_cents": -4762,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00350",
+      "date": "2026-08-22",
+      "merchant": "Starbucks",
+      "amount_cents": -1441,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00349",
+      "date": "2026-08-21",
+      "merchant": "Chipotle",
+      "amount_cents": -2110,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00348",
+      "date": "2026-08-21",
+      "merchant": "Carter’s",
+      "amount_cents": -3933,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00347",
+      "date": "2026-08-21",
+      "merchant": "Shell",
+      "amount_cents": -6181,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00346",
+      "date": "2026-08-21",
+      "merchant": "DART",
+      "amount_cents": -567,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00345",
+      "date": "2026-08-21",
+      "merchant": "CVS",
+      "amount_cents": -2806,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00344",
+      "date": "2026-08-20",
+      "merchant": "DART",
+      "amount_cents": -485,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00343",
+      "date": "2026-08-20",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5066,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00342",
+      "date": "2026-08-20",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5209,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00341",
+      "date": "2026-08-19",
+      "merchant": "Shell",
+      "amount_cents": -5760,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00340",
+      "date": "2026-08-19",
+      "merchant": "Local Thai",
+      "amount_cents": -5193,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00339",
+      "date": "2026-08-19",
+      "merchant": "Carter’s",
+      "amount_cents": -4797,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00338",
+      "date": "2026-08-18",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -7218,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00053",
+      "date": "2026-08-18",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00337",
+      "date": "2026-08-17",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -4500,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00336",
+      "date": "2026-08-17",
+      "merchant": "Uber",
+      "amount_cents": -1921,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00335",
+      "date": "2026-08-17",
+      "merchant": "Airbnb",
+      "amount_cents": -35584,
+      "category": "Travel",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00334",
+      "date": "2026-08-16",
+      "merchant": "Target",
+      "amount_cents": -5949,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00333",
+      "date": "2026-08-16",
+      "merchant": "Local Thai",
+      "amount_cents": -5520,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00332",
+      "date": "2026-08-16",
+      "merchant": "Dentist Copay",
+      "amount_cents": -6950,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00331",
+      "date": "2026-08-16",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3139,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00330",
+      "date": "2026-08-16",
+      "merchant": "Carter’s",
+      "amount_cents": -2561,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00329",
+      "date": "2026-08-15",
+      "merchant": "Carter’s",
+      "amount_cents": -3733,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00328",
+      "date": "2026-08-15",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4822,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00327",
+      "date": "2026-08-15",
+      "merchant": "Local Thai",
+      "amount_cents": -5397,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00006",
+      "date": "2026-08-15",
+      "merchant": "Employer Payroll",
+      "amount_cents": 800000,
+      "category": "Income",
+      "kind": "income",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00326",
+      "date": "2026-08-14",
+      "merchant": "Starbucks",
+      "amount_cents": -815,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00325",
+      "date": "2026-08-14",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -4753,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00324",
+      "date": "2026-08-13",
+      "merchant": "CVS",
+      "amount_cents": -2625,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00323",
+      "date": "2026-08-13",
+      "merchant": "Local Thai",
+      "amount_cents": -3425,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00322",
+      "date": "2026-08-12",
+      "merchant": "Trader Joes",
+      "amount_cents": -4229,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00321",
+      "date": "2026-08-12",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5932,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00320",
+      "date": "2026-08-12",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5700,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00319",
+      "date": "2026-08-11",
+      "merchant": "Dentist Copay",
+      "amount_cents": -7620,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00318",
+      "date": "2026-08-11",
+      "merchant": "CVS",
+      "amount_cents": -2292,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00317",
+      "date": "2026-08-11",
+      "merchant": "Target",
+      "amount_cents": -8751,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00316",
+      "date": "2026-08-11",
+      "merchant": "Local Thai",
+      "amount_cents": -4145,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00052",
+      "date": "2026-08-11",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00315",
+      "date": "2026-08-10",
+      "merchant": "Starbucks",
+      "amount_cents": -1245,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00314",
+      "date": "2026-08-10",
+      "merchant": "CVS",
+      "amount_cents": -3349,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00313",
+      "date": "2026-08-10",
+      "merchant": "CVS",
+      "amount_cents": -2757,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00312",
+      "date": "2026-08-09",
+      "merchant": "Whole Foods",
+      "amount_cents": -7130,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00311",
+      "date": "2026-08-09",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4826,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00310",
+      "date": "2026-08-09",
+      "merchant": "Chipotle",
+      "amount_cents": -2497,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00309",
+      "date": "2026-08-08",
+      "merchant": "CVS",
+      "amount_cents": -2400,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00308",
+      "date": "2026-08-08",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3135,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00307",
+      "date": "2026-08-08",
+      "merchant": "Whole Foods",
+      "amount_cents": -11573,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00306",
+      "date": "2026-08-08",
+      "merchant": "Shell",
+      "amount_cents": -4662,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00305",
+      "date": "2026-08-07",
+      "merchant": "Costco",
+      "amount_cents": -20472,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00304",
+      "date": "2026-08-07",
+      "merchant": "Whole Foods",
+      "amount_cents": -6742,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00303",
+      "date": "2026-08-07",
+      "merchant": "Costco",
+      "amount_cents": -19396,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00302",
+      "date": "2026-08-07",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5965,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00301",
+      "date": "2026-08-07",
+      "merchant": "Local Thai",
+      "amount_cents": -6177,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00300",
+      "date": "2026-08-06",
+      "merchant": "CVS",
+      "amount_cents": -3129,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00299",
+      "date": "2026-08-06",
+      "merchant": "Chipotle",
+      "amount_cents": -2890,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00298",
+      "date": "2026-08-06",
+      "merchant": "Carter’s",
+      "amount_cents": -3687,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00297",
+      "date": "2026-08-05",
+      "merchant": "CVS",
+      "amount_cents": -3472,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00296",
+      "date": "2026-08-05",
+      "merchant": "Target",
+      "amount_cents": -9362,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00076",
+      "date": "2026-08-05",
+      "merchant": "Vanguard Brokerage",
+      "amount_cents": -500000,
+      "category": "Investing",
+      "kind": "transfer",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00295",
+      "date": "2026-08-04",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -4581,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00294",
+      "date": "2026-08-04",
+      "merchant": "Local Thai",
+      "amount_cents": -4970,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00293",
+      "date": "2026-08-04",
+      "merchant": "HEB",
+      "amount_cents": -8760,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00292",
+      "date": "2026-08-04",
+      "merchant": "Trader Joes",
+      "amount_cents": -7058,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00051",
+      "date": "2026-08-04",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00291",
+      "date": "2026-08-03",
+      "merchant": "DART",
+      "amount_cents": -456,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00290",
+      "date": "2026-08-03",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4646,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00289",
+      "date": "2026-08-03",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5031,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00072",
+      "date": "2026-08-03",
+      "merchant": "Daycare — Bright Kids",
+      "amount_cents": -145000,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00068",
+      "date": "2026-08-03",
+      "merchant": "AT&T",
+      "amount_cents": -11850,
+      "category": "Utilities",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00064",
+      "date": "2026-08-03",
+      "merchant": "Xcel Energy",
+      "amount_cents": -12100,
+      "category": "Utilities",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00060",
+      "date": "2026-08-03",
+      "merchant": "Progressive",
+      "amount_cents": -17600,
+      "category": "Insurance",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00040",
+      "date": "2026-08-03",
+      "merchant": "Audible",
+      "amount_cents": -1495,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00036",
+      "date": "2026-08-03",
+      "merchant": "1Password",
+      "amount_cents": -299,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00031",
+      "date": "2026-08-03",
+      "merchant": "Gym — Lifetime",
+      "amount_cents": -4900,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00027",
+      "date": "2026-08-03",
+      "merchant": "NYTimes",
+      "amount_cents": -1700,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00023",
+      "date": "2026-08-03",
+      "merchant": "YouTube Premium",
+      "amount_cents": -1399,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00019",
+      "date": "2026-08-03",
+      "merchant": "iCloud+",
+      "amount_cents": -299,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00015",
+      "date": "2026-08-03",
+      "merchant": "Spotify",
+      "amount_cents": -1199,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00011",
+      "date": "2026-08-03",
+      "merchant": "Netflix",
+      "amount_cents": -1799,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00288",
+      "date": "2026-08-02",
+      "merchant": "Trader Joes",
+      "amount_cents": -6329,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00287",
+      "date": "2026-08-02",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4709,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00286",
+      "date": "2026-08-02",
+      "merchant": "Starbucks",
+      "amount_cents": -1030,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00285",
+      "date": "2026-08-02",
+      "merchant": "Whole Foods",
+      "amount_cents": -7858,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00284",
+      "date": "2026-08-02",
+      "merchant": "Target",
+      "amount_cents": -6823,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00283",
+      "date": "2026-08-01",
+      "merchant": "Amazon",
+      "amount_cents": -6643,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00282",
+      "date": "2026-08-01",
+      "merchant": "Dentist Copay",
+      "amount_cents": -4977,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00281",
+      "date": "2026-08-01",
+      "merchant": "Dentist Copay",
+      "amount_cents": -6883,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00280",
+      "date": "2026-08-01",
+      "merchant": "Target",
+      "amount_cents": -9912,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00080",
+      "date": "2026-08-01",
+      "merchant": "Rent — AMLI",
+      "amount_cents": -235000,
+      "category": "Housing",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00005",
+      "date": "2026-08-01",
+      "merchant": "Employer Payroll",
+      "amount_cents": 800000,
+      "category": "Income",
+      "kind": "income",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00279",
+      "date": "2026-07-31",
+      "merchant": "Uber",
+      "amount_cents": -2319,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00278",
+      "date": "2026-07-31",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4009,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00277",
+      "date": "2026-07-31",
+      "merchant": "Carter’s",
+      "amount_cents": -4754,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00276",
+      "date": "2026-07-31",
+      "merchant": "CVS",
+      "amount_cents": -2732,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00275",
+      "date": "2026-07-31",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4782,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00274",
+      "date": "2026-07-30",
+      "merchant": "CVS",
+      "amount_cents": -2760,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00273",
+      "date": "2026-07-30",
+      "merchant": "Amazon",
+      "amount_cents": -5198,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00272",
+      "date": "2026-07-30",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -5389,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00271",
+      "date": "2026-07-30",
+      "merchant": "Shell",
+      "amount_cents": -5503,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00270",
+      "date": "2026-07-29",
+      "merchant": "Target",
+      "amount_cents": -10273,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00269",
+      "date": "2026-07-29",
+      "merchant": "Carter’s",
+      "amount_cents": -2600,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00268",
+      "date": "2026-07-29",
+      "merchant": "Target",
+      "amount_cents": -9221,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00267",
+      "date": "2026-07-28",
+      "merchant": "Whole Foods",
+      "amount_cents": -6628,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00266",
+      "date": "2026-07-28",
+      "merchant": "Costco",
+      "amount_cents": -14579,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00265",
+      "date": "2026-07-28",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -5004,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00264",
+      "date": "2026-07-28",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3062,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00050",
+      "date": "2026-07-28",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00263",
+      "date": "2026-07-27",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5488,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00262",
+      "date": "2026-07-27",
+      "merchant": "CVS",
+      "amount_cents": -3134,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00261",
+      "date": "2026-07-27",
+      "merchant": "Amazon",
+      "amount_cents": -4616,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00260",
+      "date": "2026-07-27",
+      "merchant": "Target",
+      "amount_cents": -10390,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00259",
+      "date": "2026-07-26",
+      "merchant": "CVS",
+      "amount_cents": -3777,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00258",
+      "date": "2026-07-26",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -5563,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00257",
+      "date": "2026-07-26",
+      "merchant": "Uber",
+      "amount_cents": -2562,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00256",
+      "date": "2026-07-26",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5123,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00255",
+      "date": "2026-07-25",
+      "merchant": "CVS",
+      "amount_cents": -3470,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00254",
+      "date": "2026-07-25",
+      "merchant": "Zara",
+      "amount_cents": -7480,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00253",
+      "date": "2026-07-25",
+      "merchant": "United Airlines",
+      "amount_cents": -29091,
+      "category": "Travel",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00252",
+      "date": "2026-07-24",
+      "merchant": "Zara",
+      "amount_cents": -6517,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00251",
+      "date": "2026-07-24",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5704,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00250",
+      "date": "2026-07-24",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -5610,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00249",
+      "date": "2026-07-24",
+      "merchant": "Starbucks",
+      "amount_cents": -1299,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00248",
+      "date": "2026-07-23",
+      "merchant": "Trader Joes",
+      "amount_cents": -7885,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00247",
+      "date": "2026-07-23",
+      "merchant": "Local Thai",
+      "amount_cents": -6135,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00246",
+      "date": "2026-07-23",
+      "merchant": "Amazon",
+      "amount_cents": -7613,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00245",
+      "date": "2026-07-23",
+      "merchant": "Shell",
+      "amount_cents": -4114,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00244",
+      "date": "2026-07-23",
+      "merchant": "CVS",
+      "amount_cents": -2550,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00243",
+      "date": "2026-07-22",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4520,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00242",
+      "date": "2026-07-22",
+      "merchant": "HEB",
+      "amount_cents": -7569,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00241",
+      "date": "2026-07-22",
+      "merchant": "Amazon",
+      "amount_cents": -5832,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00240",
+      "date": "2026-07-21",
+      "merchant": "Target",
+      "amount_cents": -7064,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00239",
+      "date": "2026-07-21",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3199,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00238",
+      "date": "2026-07-21",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5914,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00237",
+      "date": "2026-07-21",
+      "merchant": "Local Thai",
+      "amount_cents": -5500,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00049",
+      "date": "2026-07-21",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00236",
+      "date": "2026-07-20",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -6008,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00235",
+      "date": "2026-07-20",
+      "merchant": "Carter’s",
+      "amount_cents": -4917,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00234",
+      "date": "2026-07-20",
+      "merchant": "Carter’s",
+      "amount_cents": -4705,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00233",
+      "date": "2026-07-20",
+      "merchant": "Trader Joes",
+      "amount_cents": -7830,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00232",
+      "date": "2026-07-19",
+      "merchant": "Chipotle",
+      "amount_cents": -3400,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00231",
+      "date": "2026-07-19",
+      "merchant": "Zara",
+      "amount_cents": -5898,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00230",
+      "date": "2026-07-19",
+      "merchant": "Dentist Copay",
+      "amount_cents": -4710,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00229",
+      "date": "2026-07-19",
+      "merchant": "Zara",
+      "amount_cents": -8544,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00228",
+      "date": "2026-07-19",
+      "merchant": "Local Thai",
+      "amount_cents": -5243,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00227",
+      "date": "2026-07-18",
+      "merchant": "Sweetgreen",
+      "amount_cents": -3340,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00226",
+      "date": "2026-07-18",
+      "merchant": "Zara",
+      "amount_cents": -8924,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00225",
+      "date": "2026-07-18",
+      "merchant": "Uber",
+      "amount_cents": -2008,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00224",
+      "date": "2026-07-17",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -6658,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00223",
+      "date": "2026-07-17",
+      "merchant": "Amazon",
+      "amount_cents": -7640,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00222",
+      "date": "2026-07-17",
+      "merchant": "Uber",
+      "amount_cents": -2637,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00221",
+      "date": "2026-07-16",
+      "merchant": "Zara",
+      "amount_cents": -7981,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00220",
+      "date": "2026-07-16",
+      "merchant": "HEB",
+      "amount_cents": -8382,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00219",
+      "date": "2026-07-16",
+      "merchant": "Zara",
+      "amount_cents": -4997,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00218",
+      "date": "2026-07-16",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -6640,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00217",
+      "date": "2026-07-15",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -5204,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00216",
+      "date": "2026-07-15",
+      "merchant": "Amazon",
+      "amount_cents": -4991,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00215",
+      "date": "2026-07-15",
+      "merchant": "Dentist Copay",
+      "amount_cents": -7958,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00214",
+      "date": "2026-07-15",
+      "merchant": "Target",
+      "amount_cents": -7491,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00213",
+      "date": "2026-07-15",
+      "merchant": "Trader Joes",
+      "amount_cents": -6797,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00004",
+      "date": "2026-07-15",
+      "merchant": "Employer Payroll",
+      "amount_cents": 800000,
+      "category": "Income",
+      "kind": "income",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00212",
+      "date": "2026-07-14",
+      "merchant": "HEB",
+      "amount_cents": -6026,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00211",
+      "date": "2026-07-14",
+      "merchant": "Trader Joes",
+      "amount_cents": -6350,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00048",
+      "date": "2026-07-14",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00210",
+      "date": "2026-07-13",
+      "merchant": "CVS",
+      "amount_cents": -3551,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00209",
+      "date": "2026-07-13",
+      "merchant": "Trader Joes",
+      "amount_cents": -5360,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00208",
+      "date": "2026-07-13",
+      "merchant": "Target",
+      "amount_cents": -9523,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00207",
+      "date": "2026-07-12",
+      "merchant": "Sweetgreen",
+      "amount_cents": -4402,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00206",
+      "date": "2026-07-12",
+      "merchant": "Carter’s",
+      "amount_cents": -4587,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00205",
+      "date": "2026-07-12",
+      "merchant": "Amazon",
+      "amount_cents": -4975,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00204",
+      "date": "2026-07-11",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -4309,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00203",
+      "date": "2026-07-11",
+      "merchant": "CVS",
+      "amount_cents": -2719,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00202",
+      "date": "2026-07-11",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5432,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00201",
+      "date": "2026-07-11",
+      "merchant": "United Airlines",
+      "amount_cents": -41281,
+      "category": "Travel",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00200",
+      "date": "2026-07-10",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4371,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00199",
+      "date": "2026-07-10",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4861,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00198",
+      "date": "2026-07-09",
+      "merchant": "Uber",
+      "amount_cents": -1919,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00197",
+      "date": "2026-07-09",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5439,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00196",
+      "date": "2026-07-08",
+      "merchant": "Dentist Copay",
+      "amount_cents": -6366,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00195",
+      "date": "2026-07-08",
+      "merchant": "Dentist Copay",
+      "amount_cents": -7369,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00194",
+      "date": "2026-07-08",
+      "merchant": "Zara",
+      "amount_cents": -8888,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00193",
+      "date": "2026-07-08",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5534,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00192",
+      "date": "2026-07-08",
+      "merchant": "Shell",
+      "amount_cents": -4990,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00191",
+      "date": "2026-07-07",
+      "merchant": "HEB",
+      "amount_cents": -9640,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00190",
+      "date": "2026-07-07",
+      "merchant": "Amazon",
+      "amount_cents": -4607,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00189",
+      "date": "2026-07-07",
+      "merchant": "DART",
+      "amount_cents": -510,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00047",
+      "date": "2026-07-07",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00188",
+      "date": "2026-07-06",
+      "merchant": "Shell",
+      "amount_cents": -4280,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00187",
+      "date": "2026-07-06",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3466,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00186",
+      "date": "2026-07-06",
+      "merchant": "CVS",
+      "amount_cents": -3679,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00185",
+      "date": "2026-07-05",
+      "merchant": "Sweetgreen",
+      "amount_cents": -4098,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00184",
+      "date": "2026-07-05",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -4243,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00075",
+      "date": "2026-07-05",
+      "merchant": "Vanguard Brokerage",
+      "amount_cents": -500000,
+      "category": "Investing",
+      "kind": "transfer",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00183",
+      "date": "2026-07-04",
+      "merchant": "Local Thai",
+      "amount_cents": -5057,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00182",
+      "date": "2026-07-04",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3121,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00181",
+      "date": "2026-07-04",
+      "merchant": "Carter’s",
+      "amount_cents": -2967,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00180",
+      "date": "2026-07-04",
+      "merchant": "Local Thai",
+      "amount_cents": -3149,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00179",
+      "date": "2026-07-03",
+      "merchant": "CVS",
+      "amount_cents": -2544,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00071",
+      "date": "2026-07-03",
+      "merchant": "Daycare — Bright Kids",
+      "amount_cents": -145000,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00067",
+      "date": "2026-07-03",
+      "merchant": "AT&T",
+      "amount_cents": -11850,
+      "category": "Utilities",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00063",
+      "date": "2026-07-03",
+      "merchant": "Xcel Energy",
+      "amount_cents": -13600,
+      "category": "Utilities",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00059",
+      "date": "2026-07-03",
+      "merchant": "Progressive",
+      "amount_cents": -17600,
+      "category": "Insurance",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00039",
+      "date": "2026-07-03",
+      "merchant": "Audible",
+      "amount_cents": -1495,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00035",
+      "date": "2026-07-03",
+      "merchant": "1Password",
+      "amount_cents": -299,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00033",
+      "date": "2026-07-03",
+      "merchant": "Amazon Prime",
+      "amount_cents": -13900,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00030",
+      "date": "2026-07-03",
+      "merchant": "Gym — Lifetime",
+      "amount_cents": -4900,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00026",
+      "date": "2026-07-03",
+      "merchant": "NYTimes",
+      "amount_cents": -1700,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00022",
+      "date": "2026-07-03",
+      "merchant": "YouTube Premium",
+      "amount_cents": -1399,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00018",
+      "date": "2026-07-03",
+      "merchant": "iCloud+",
+      "amount_cents": -299,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00014",
+      "date": "2026-07-03",
+      "merchant": "Spotify",
+      "amount_cents": -1199,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00010",
+      "date": "2026-07-03",
+      "merchant": "Netflix",
+      "amount_cents": -1799,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00178",
+      "date": "2026-07-02",
+      "merchant": "CVS",
+      "amount_cents": -2102,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00177",
+      "date": "2026-07-02",
+      "merchant": "Costco",
+      "amount_cents": -22896,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00176",
+      "date": "2026-07-01",
+      "merchant": "Chipotle",
+      "amount_cents": -3610,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00175",
+      "date": "2026-07-01",
+      "merchant": "HEB",
+      "amount_cents": -6099,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00174",
+      "date": "2026-07-01",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5895,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00173",
+      "date": "2026-07-01",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4207,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00079",
+      "date": "2026-07-01",
+      "merchant": "Rent — AMLI",
+      "amount_cents": -235000,
+      "category": "Housing",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00003",
+      "date": "2026-07-01",
+      "merchant": "Employer Payroll",
+      "amount_cents": 800000,
+      "category": "Income",
+      "kind": "income",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00172",
+      "date": "2026-06-30",
+      "merchant": "Carter’s",
+      "amount_cents": -4616,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00171",
+      "date": "2026-06-30",
+      "merchant": "Trader Joes",
+      "amount_cents": -7273,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00170",
+      "date": "2026-06-30",
+      "merchant": "Dentist Copay",
+      "amount_cents": -4045,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00169",
+      "date": "2026-06-30",
+      "merchant": "Trader Joes",
+      "amount_cents": -5461,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00168",
+      "date": "2026-06-30",
+      "merchant": "Sweetgreen",
+      "amount_cents": -4008,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00046",
+      "date": "2026-06-30",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00167",
+      "date": "2026-06-29",
+      "merchant": "Carter’s",
+      "amount_cents": -3554,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00166",
+      "date": "2026-06-29",
+      "merchant": "Whole Foods",
+      "amount_cents": -7553,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00165",
+      "date": "2026-06-29",
+      "merchant": "Uber",
+      "amount_cents": -3237,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00164",
+      "date": "2026-06-29",
+      "merchant": "DART",
+      "amount_cents": -638,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00163",
+      "date": "2026-06-29",
+      "merchant": "Trader Joes",
+      "amount_cents": -6318,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00162",
+      "date": "2026-06-28",
+      "merchant": "DART",
+      "amount_cents": -762,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00161",
+      "date": "2026-06-28",
+      "merchant": "CVS",
+      "amount_cents": -3501,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00160",
+      "date": "2026-06-27",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3075,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00159",
+      "date": "2026-06-27",
+      "merchant": "Uber",
+      "amount_cents": -1920,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00158",
+      "date": "2026-06-26",
+      "merchant": "Costco",
+      "amount_cents": -19745,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00157",
+      "date": "2026-06-26",
+      "merchant": "Target",
+      "amount_cents": -5749,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00156",
+      "date": "2026-06-25",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -6932,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00155",
+      "date": "2026-06-25",
+      "merchant": "Whole Foods",
+      "amount_cents": -10709,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00154",
+      "date": "2026-06-24",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3992,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00153",
+      "date": "2026-06-24",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5269,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00152",
+      "date": "2026-06-24",
+      "merchant": "Starbucks",
+      "amount_cents": -981,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00151",
+      "date": "2026-06-23",
+      "merchant": "Dentist Copay",
+      "amount_cents": -5414,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00150",
+      "date": "2026-06-23",
+      "merchant": "Trader Joes",
+      "amount_cents": -6047,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00149",
+      "date": "2026-06-23",
+      "merchant": "Chipotle",
+      "amount_cents": -2219,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00148",
+      "date": "2026-06-23",
+      "merchant": "Dentist Copay",
+      "amount_cents": -4740,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00045",
+      "date": "2026-06-23",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00147",
+      "date": "2026-06-22",
+      "merchant": "Whole Foods",
+      "amount_cents": -8162,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00146",
+      "date": "2026-06-22",
+      "merchant": "DART",
+      "amount_cents": -661,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00145",
+      "date": "2026-06-22",
+      "merchant": "Target",
+      "amount_cents": -6615,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00144",
+      "date": "2026-06-22",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3936,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00143",
+      "date": "2026-06-21",
+      "merchant": "Trader Joes",
+      "amount_cents": -5706,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00142",
+      "date": "2026-06-21",
+      "merchant": "CVS",
+      "amount_cents": -3410,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00141",
+      "date": "2026-06-20",
+      "merchant": "Amazon",
+      "amount_cents": -6733,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00140",
+      "date": "2026-06-20",
+      "merchant": "DART",
+      "amount_cents": -603,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00139",
+      "date": "2026-06-20",
+      "merchant": "Shell",
+      "amount_cents": -5407,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00138",
+      "date": "2026-06-20",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5424,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00137",
+      "date": "2026-06-20",
+      "merchant": "CVS",
+      "amount_cents": -3046,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00136",
+      "date": "2026-06-19",
+      "merchant": "Carter’s",
+      "amount_cents": -3000,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00135",
+      "date": "2026-06-19",
+      "merchant": "Carter’s",
+      "amount_cents": -4018,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00134",
+      "date": "2026-06-19",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -5783,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00133",
+      "date": "2026-06-19",
+      "merchant": "Target",
+      "amount_cents": -8659,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00132",
+      "date": "2026-06-18",
+      "merchant": "CVS",
+      "amount_cents": -2079,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00131",
+      "date": "2026-06-18",
+      "merchant": "Starbucks",
+      "amount_cents": -1029,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00130",
+      "date": "2026-06-17",
+      "merchant": "Starbucks",
+      "amount_cents": -1258,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00129",
+      "date": "2026-06-17",
+      "merchant": "DART",
+      "amount_cents": -474,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00128",
+      "date": "2026-06-16",
+      "merchant": "CVS",
+      "amount_cents": -2422,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00127",
+      "date": "2026-06-16",
+      "merchant": "Whole Foods",
+      "amount_cents": -6362,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00126",
+      "date": "2026-06-16",
+      "merchant": "Trader Joes",
+      "amount_cents": -4542,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00044",
+      "date": "2026-06-16",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00125",
+      "date": "2026-06-15",
+      "merchant": "Target",
+      "amount_cents": -7941,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00124",
+      "date": "2026-06-15",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4591,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00002",
+      "date": "2026-06-15",
+      "merchant": "Employer Payroll",
+      "amount_cents": 800000,
+      "category": "Income",
+      "kind": "income",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00123",
+      "date": "2026-06-14",
+      "merchant": "HEB",
+      "amount_cents": -7578,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00122",
+      "date": "2026-06-14",
+      "merchant": "CVS",
+      "amount_cents": -2005,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00121",
+      "date": "2026-06-14",
+      "merchant": "Whole Foods",
+      "amount_cents": -7857,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00120",
+      "date": "2026-06-14",
+      "merchant": "Target",
+      "amount_cents": -7692,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00119",
+      "date": "2026-06-13",
+      "merchant": "CVS",
+      "amount_cents": -2427,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00118",
+      "date": "2026-06-13",
+      "merchant": "Whole Foods",
+      "amount_cents": -6260,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00117",
+      "date": "2026-06-13",
+      "merchant": "CVS",
+      "amount_cents": -2287,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00116",
+      "date": "2026-06-12",
+      "merchant": "Uber",
+      "amount_cents": -2000,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00115",
+      "date": "2026-06-12",
+      "merchant": "Carter’s",
+      "amount_cents": -4170,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00114",
+      "date": "2026-06-12",
+      "merchant": "DART",
+      "amount_cents": -488,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00113",
+      "date": "2026-06-11",
+      "merchant": "CVS",
+      "amount_cents": -3617,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00112",
+      "date": "2026-06-11",
+      "merchant": "Dentist Copay",
+      "amount_cents": -4049,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00111",
+      "date": "2026-06-11",
+      "merchant": "Zara",
+      "amount_cents": -5822,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00110",
+      "date": "2026-06-11",
+      "merchant": "Zara",
+      "amount_cents": -6905,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00109",
+      "date": "2026-06-10",
+      "merchant": "Carter’s",
+      "amount_cents": -4186,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00108",
+      "date": "2026-06-10",
+      "merchant": "Chipotle",
+      "amount_cents": -1982,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00107",
+      "date": "2026-06-10",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3041,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00106",
+      "date": "2026-06-09",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4490,
+      "category": "Other",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00105",
+      "date": "2026-06-09",
+      "merchant": "Carter’s",
+      "amount_cents": -4524,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00043",
+      "date": "2026-06-09",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00104",
+      "date": "2026-06-08",
+      "merchant": "Whole Foods",
+      "amount_cents": -11238,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00103",
+      "date": "2026-06-08",
+      "merchant": "BuyBuy Baby",
+      "amount_cents": -6793,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00102",
+      "date": "2026-06-08",
+      "merchant": "Shell",
+      "amount_cents": -6080,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00101",
+      "date": "2026-06-07",
+      "merchant": "DART",
+      "amount_cents": -632,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00100",
+      "date": "2026-06-07",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -4379,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00099",
+      "date": "2026-06-07",
+      "merchant": "Costco",
+      "amount_cents": -28133,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00098",
+      "date": "2026-06-07",
+      "merchant": "Sweetgreen",
+      "amount_cents": -4119,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00097",
+      "date": "2026-06-07",
+      "merchant": "Sweetgreen",
+      "amount_cents": -2554,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00096",
+      "date": "2026-06-06",
+      "merchant": "DART",
+      "amount_cents": -624,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00095",
+      "date": "2026-06-06",
+      "merchant": "Amazon",
+      "amount_cents": -5937,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00094",
+      "date": "2026-06-06",
+      "merchant": "HEB",
+      "amount_cents": -9128,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00093",
+      "date": "2026-06-06",
+      "merchant": "Starbucks",
+      "amount_cents": -1472,
+      "category": "Dining",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00092",
+      "date": "2026-06-06",
+      "merchant": "CVS",
+      "amount_cents": -3383,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00091",
+      "date": "2026-06-05",
+      "merchant": "Shell",
+      "amount_cents": -6996,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00090",
+      "date": "2026-06-05",
+      "merchant": "DART",
+      "amount_cents": -597,
+      "category": "Transport",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00074",
+      "date": "2026-06-05",
+      "merchant": "Vanguard Brokerage",
+      "amount_cents": -500000,
+      "category": "Investing",
+      "kind": "transfer",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00089",
+      "date": "2026-06-04",
+      "merchant": "Amazon",
+      "amount_cents": -6510,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00088",
+      "date": "2026-06-03",
+      "merchant": "Target",
+      "amount_cents": -11532,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00087",
+      "date": "2026-06-03",
+      "merchant": "Venmo — split dinner",
+      "amount_cents": -3009,
+      "category": "Other",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00070",
+      "date": "2026-06-03",
+      "merchant": "Daycare — Bright Kids",
+      "amount_cents": -145000,
+      "category": "Kids",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00066",
+      "date": "2026-06-03",
+      "merchant": "AT&T",
+      "amount_cents": -11850,
+      "category": "Utilities",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00062",
+      "date": "2026-06-03",
+      "merchant": "Xcel Energy",
+      "amount_cents": -16000,
+      "category": "Utilities",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00058",
+      "date": "2026-06-03",
+      "merchant": "Progressive",
+      "amount_cents": -17600,
+      "category": "Insurance",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00038",
+      "date": "2026-06-03",
+      "merchant": "Audible",
+      "amount_cents": -1495,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00034",
+      "date": "2026-06-03",
+      "merchant": "1Password",
+      "amount_cents": -299,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00029",
+      "date": "2026-06-03",
+      "merchant": "Gym — Lifetime",
+      "amount_cents": -4900,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00025",
+      "date": "2026-06-03",
+      "merchant": "NYTimes",
+      "amount_cents": -1700,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00021",
+      "date": "2026-06-03",
+      "merchant": "YouTube Premium",
+      "amount_cents": -1399,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00017",
+      "date": "2026-06-03",
+      "merchant": "iCloud+",
+      "amount_cents": -299,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00013",
+      "date": "2026-06-03",
+      "merchant": "Spotify",
+      "amount_cents": -1199,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00009",
+      "date": "2026-06-03",
+      "merchant": "Netflix",
+      "amount_cents": -1799,
+      "category": "Subscriptions",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00086",
+      "date": "2026-06-02",
+      "merchant": "Costco",
+      "amount_cents": -14753,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00085",
+      "date": "2026-06-02",
+      "merchant": "Dentist Copay",
+      "amount_cents": -7271,
+      "category": "Health",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00084",
+      "date": "2026-06-02",
+      "merchant": "CVS",
+      "amount_cents": -2959,
+      "category": "Health",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00042",
+      "date": "2026-06-02",
+      "merchant": "HelloFresh",
+      "amount_cents": -6840,
+      "category": "Groceries",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00083",
+      "date": "2026-06-01",
+      "merchant": "Zara",
+      "amount_cents": -6865,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00082",
+      "date": "2026-06-01",
+      "merchant": "Target",
+      "amount_cents": -10115,
+      "category": "Shopping",
+      "kind": "expense",
+      "account": "credit",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00078",
+      "date": "2026-06-01",
+      "merchant": "Rent — AMLI",
+      "amount_cents": -235000,
+      "category": "Housing",
+      "kind": "expense",
+      "account": "checking",
+      "pending": false
+    },
+    {
+      "id": "demo-txn-00001",
+      "date": "2026-06-01",
+      "merchant": "Employer Payroll",
+      "amount_cents": 800000,
+      "category": "Income",
+      "kind": "income",
+      "account": "checking",
+      "pending": false
+    }
+  ],
+  "recurring": [
+    {
+      "merchant": "Netflix",
+      "amount_cents_avg": 1799,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": true,
+      "prev_amount_cents": 1549,
+      "category": "Subscriptions",
+      "charges_count": 4
+    },
+    {
+      "merchant": "Spotify",
+      "amount_cents_avg": 1199,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4
+    },
+    {
+      "merchant": "iCloud+",
+      "amount_cents_avg": 299,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4
+    },
+    {
+      "merchant": "YouTube Premium",
+      "amount_cents_avg": 1399,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4
+    },
+    {
+      "merchant": "NYTimes",
+      "amount_cents_avg": 1700,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4
+    },
+    {
+      "merchant": "Gym — Lifetime",
+      "amount_cents_avg": 4900,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Health",
+      "charges_count": 4
+    },
+    {
+      "merchant": "Amazon Prime",
+      "amount_cents_avg": 13900,
+      "cadence": "annual",
+      "next_charge_date": "2027-07-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 1
+    },
+    {
+      "merchant": "1Password",
+      "amount_cents_avg": 299,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4
+    },
+    {
+      "merchant": "Audible",
+      "amount_cents_avg": 1495,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4
+    },
+    {
+      "merchant": "HelloFresh",
+      "amount_cents_avg": 6840,
+      "cadence": "weekly",
+      "next_charge_date": "2026-09-22",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Groceries",
+      "charges_count": 16
+    },
+    {
+      "merchant": "Progressive",
+      "amount_cents_avg": 17600,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Insurance",
+      "charges_count": 4
+    },
+    {
+      "merchant": "Xcel Energy",
+      "amount_cents_avg": 16100,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Utilities",
+      "charges_count": 4
+    },
+    {
+      "merchant": "AT&T",
+      "amount_cents_avg": 11850,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Utilities",
+      "charges_count": 4
+    },
+    {
+      "merchant": "Daycare — Bright Kids",
+      "amount_cents_avg": 145000,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Kids",
+      "charges_count": 4
+    }
+  ],
+  "monthlyRecurringCents": 203640,
+  "budgets": [
+    {
+      "category": "__total__",
+      "limit_cents": 1000000
+    },
+    {
+      "category": "Groceries",
+      "limit_cents": 90000
+    },
+    {
+      "category": "Dining",
+      "limit_cents": 70000
+    },
+    {
+      "category": "Shopping",
+      "limit_cents": 80000
+    },
+    {
+      "category": "Transport",
+      "limit_cents": 40000
+    },
+    {
+      "category": "Health",
+      "limit_cents": 30000
+    },
+    {
+      "category": "Kids",
+      "limit_cents": 170000
+    },
+    {
+      "category": "Subscriptions",
+      "limit_cents": 35000
+    }
+  ],
+  "fire": {
+    "annual_spending_cents": 12000000,
+    "portfolio_cents": 15000000,
+    "monthly_savings_cents": 500000,
+    "expected_return_pct": 7
+  }
+}
