@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { magicLinkRedirectTo } from "@/lib/auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ export default function LoginPage() {
       if (mode === "magic") {
         const { error } = await supabase.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+          options: { emailRedirectTo: magicLinkRedirectTo(window.location.origin) },
         });
         if (error) throw error;
         setStatus("Check your email for the sign-in link.");
@@ -88,6 +89,12 @@ export default function LoginPage() {
           {status}
         </p>
       )}
+      {typeof window !== "undefined" &&
+        new URLSearchParams(window.location.search).get("error") === "link" && (
+          <p role="alert" className="mt-3 text-center text-[var(--type-caption-size)] font-semibold text-red-600">
+            That sign-in link didn&apos;t work — request a fresh one below.
+          </p>
+        )}
     </div>
   );
 }
