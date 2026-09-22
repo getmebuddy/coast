@@ -5,6 +5,7 @@
 import HeroNumber from "./components/HeroNumber";
 import TrajectoryRing from "./components/TrajectoryRing";
 import CountUp from "./components/CountUp";
+import ConnectBank from "./components/ConnectBank";
 import { demoCommittedBillsCents, demoFire, demoMonthlyRecurringCents, demoSubscriptions } from "@/lib/demo";
 import { monthYear, progressPct, projectedFire, safeToSpendCents, targetNumberCents, formatUSD } from "@/lib/fire";
 
@@ -79,12 +80,13 @@ export default function Home() {
         </p>
       </section>
 
-      <section aria-label="Demo note">
+      <section aria-label="Demo note" className="space-y-4">
         <HeroNumber
           cents={demoFire.portfolio_cents}
           label="Portfolio"
           sub="Demo mode — connect your bank to see your real trajectory."
         />
+        <ConnectBank />
       </section>
     </div>
   );
