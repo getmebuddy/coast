@@ -5,7 +5,7 @@
 import HeroNumber from "./components/HeroNumber";
 import TrajectoryRing from "./components/TrajectoryRing";
 import CountUp from "./components/CountUp";
-import { demoFire, demoMonthlyRecurringCents, demoRecurring } from "@/lib/demo";
+import { demoCommittedBillsCents, demoFire, demoMonthlyRecurringCents, demoSubscriptions } from "@/lib/demo";
 import { monthYear, progressPct, projectedFire, safeToSpendCents, targetNumberCents, formatUSD } from "@/lib/fire";
 
 export default function Home() {
@@ -18,15 +18,17 @@ export default function Home() {
     targetCents: target,
   });
 
-  // Safe-to-spend: derive a daily number from the demo month
+  // Safe-to-spend: derive a daily number from the demo month.
+  // Committed bills = ALL recurring charges (rent included — it's the
+  // biggest committed outflow, excluding it would overstate what's safe).
   const sts = safeToSpendCents({
     cycleIncomeCents: 16_000_00,
-    committedBillsCents: demoMonthlyRecurringCents,
+    committedBillsCents: demoCommittedBillsCents,
     budgetedSpendCents: 10_000_00,
     daysLeft: 11,
   });
 
-  const subCount = demoRecurring.length;
+  const subCount = demoSubscriptions.length;
 
   return (
     <div className="space-y-8">

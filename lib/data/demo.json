@@ -4332,7 +4332,7 @@
       "id": "demo-txn-00009",
       "date": "2026-06-03",
       "merchant": "Netflix",
-      "amount_cents": -1799,
+      "amount_cents": -1549,
       "category": "Subscriptions",
       "kind": "expense",
       "account": "credit",
@@ -4421,134 +4421,15 @@
   ],
   "recurring": [
     {
-      "merchant": "Netflix",
-      "amount_cents_avg": 1799,
+      "merchant": "Rent — AMLI",
+      "amount_cents_avg": 235000,
       "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": true,
-      "prev_amount_cents": 1549,
-      "category": "Subscriptions",
-      "charges_count": 4
-    },
-    {
-      "merchant": "Spotify",
-      "amount_cents_avg": 1199,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
+      "next_charge_date": "2026-10-01",
       "price_changed": false,
       "prev_amount_cents": null,
-      "category": "Subscriptions",
-      "charges_count": 4
-    },
-    {
-      "merchant": "iCloud+",
-      "amount_cents_avg": 299,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Subscriptions",
-      "charges_count": 4
-    },
-    {
-      "merchant": "YouTube Premium",
-      "amount_cents_avg": 1399,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Subscriptions",
-      "charges_count": 4
-    },
-    {
-      "merchant": "NYTimes",
-      "amount_cents_avg": 1700,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Subscriptions",
-      "charges_count": 4
-    },
-    {
-      "merchant": "Gym — Lifetime",
-      "amount_cents_avg": 4900,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Health",
-      "charges_count": 4
-    },
-    {
-      "merchant": "Amazon Prime",
-      "amount_cents_avg": 13900,
-      "cadence": "annual",
-      "next_charge_date": "2027-07-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Subscriptions",
-      "charges_count": 1
-    },
-    {
-      "merchant": "1Password",
-      "amount_cents_avg": 299,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Subscriptions",
-      "charges_count": 4
-    },
-    {
-      "merchant": "Audible",
-      "amount_cents_avg": 1495,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Subscriptions",
-      "charges_count": 4
-    },
-    {
-      "merchant": "HelloFresh",
-      "amount_cents_avg": 6840,
-      "cadence": "weekly",
-      "next_charge_date": "2026-09-22",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Groceries",
-      "charges_count": 16
-    },
-    {
-      "merchant": "Progressive",
-      "amount_cents_avg": 17600,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Insurance",
-      "charges_count": 4
-    },
-    {
-      "merchant": "Xcel Energy",
-      "amount_cents_avg": 16100,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Utilities",
-      "charges_count": 4
-    },
-    {
-      "merchant": "AT&T",
-      "amount_cents_avg": 11850,
-      "cadence": "monthly",
-      "next_charge_date": "2026-10-03",
-      "price_changed": false,
-      "prev_amount_cents": null,
-      "category": "Utilities",
-      "charges_count": 4
+      "category": "Housing",
+      "charges_count": 4,
+      "monthly_cents": 235000
     },
     {
       "merchant": "Daycare — Bright Kids",
@@ -4558,10 +4439,142 @@
       "price_changed": false,
       "prev_amount_cents": null,
       "category": "Kids",
-      "charges_count": 4
+      "charges_count": 4,
+      "monthly_cents": 145000
+    },
+    {
+      "merchant": "HelloFresh",
+      "amount_cents_avg": 6840,
+      "cadence": "weekly",
+      "next_charge_date": "2026-09-22",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Groceries",
+      "charges_count": 16,
+      "monthly_cents": 29640
+    },
+    {
+      "merchant": "Progressive",
+      "amount_cents_avg": 17600,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Insurance",
+      "charges_count": 4,
+      "monthly_cents": 17600
+    },
+    {
+      "merchant": "Xcel Energy",
+      "amount_cents_avg": 16100,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Utilities",
+      "charges_count": 4,
+      "monthly_cents": 16100
+    },
+    {
+      "merchant": "AT&T",
+      "amount_cents_avg": 11850,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Utilities",
+      "charges_count": 4,
+      "monthly_cents": 11850
+    },
+    {
+      "merchant": "Gym — Lifetime",
+      "amount_cents_avg": 4900,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Health",
+      "charges_count": 4,
+      "monthly_cents": 4900
+    },
+    {
+      "merchant": "Netflix",
+      "amount_cents_avg": 1799,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": true,
+      "prev_amount_cents": 1549,
+      "category": "Subscriptions",
+      "charges_count": 4,
+      "monthly_cents": 1799
+    },
+    {
+      "merchant": "NYTimes",
+      "amount_cents_avg": 1700,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4,
+      "monthly_cents": 1700
+    },
+    {
+      "merchant": "Audible",
+      "amount_cents_avg": 1495,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4,
+      "monthly_cents": 1495
+    },
+    {
+      "merchant": "YouTube Premium",
+      "amount_cents_avg": 1399,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4,
+      "monthly_cents": 1399
+    },
+    {
+      "merchant": "Spotify",
+      "amount_cents_avg": 1199,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4,
+      "monthly_cents": 1199
+    },
+    {
+      "merchant": "1Password",
+      "amount_cents_avg": 299,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4,
+      "monthly_cents": 299
+    },
+    {
+      "merchant": "iCloud+",
+      "amount_cents_avg": 299,
+      "cadence": "monthly",
+      "next_charge_date": "2026-10-03",
+      "price_changed": false,
+      "prev_amount_cents": null,
+      "category": "Subscriptions",
+      "charges_count": 4,
+      "monthly_cents": 299
     }
   ],
-  "monthlyRecurringCents": 203640,
   "budgets": [
     {
       "category": "__total__",
@@ -4601,5 +4614,6 @@
     "portfolio_cents": 15000000,
     "monthly_savings_cents": 500000,
     "expected_return_pct": 7
-  }
+  },
+  "monthlyCommittedBillsCents": 468280
 }

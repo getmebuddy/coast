@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createDecipheriv, createHash } from "crypto";
 import { RemovedTransaction, Transaction } from "plaid";
-import { getPlaidClient, isPlaidConfigured } from "@/lib/plaid";
+import { getPlaidClient, isPlaidConfigured, toAccountUpsertRow } from "@/lib/plaid";
+import { detectRecurring, toRecurringUpsertRows } from "@/lib/recurring";
 import { classifyTransaction, normalizeMerchant } from "@/lib/ledger";
 import { createServerSupabase } from "@/lib/supabase/server";
 
@@ -11,11 +12,13 @@ import { createServerSupabase } from "@/lib/supabase/server";
  * Contract (the heart of Coast):
  *  1. Read the stored cursor for each active plaid_item.
  *  2. Page /transactions/sync until has_more is false.
- *  3. Upsert by (user_id, source='plaid', source_id=plaid transaction_id) —
+ *  3. Enrich accounts via /accounts/get — genuine names, types, balances.
+ *  4. Upsert by (user_id, source='plaid', source_id=plaid transaction_id) —
  *     re-running the sync NEVER duplicates data (idempotent).
- *  4. Mark removed transactions (Plaid `removed`) — ledger rows are immutable,
+ *  5. Mark removed transactions (Plaid `removed`) — ledger rows are immutable,
  *     so removals become a companion tombstone note, not a delete.
- *  5. Advance the cursor ONLY after a successful commit.
+ *  6. Advance the cursor ONLY after a successful commit.
+ *  7. Refresh recurring charges from the ledger (best-effort).
  *
  * Decryption mirrors the exchange route (AES-256-GCM, key from PLAID_SECRET).
  */
@@ -70,38 +73,40 @@ async function syncOneItem(
     hasMore = d.has_more;
   }
 
-  // Ensure accounts exist (map Plaid account_id -> our accounts rows)
+  // Enrich accounts with real metadata: one /accounts/get per item per sync.
+  // Idempotent upsert on (user_id, plaid_account_id) — re-runs update rows
+  // in place, never duplicate. Genuine name, official name, type/subtype,
+  // mask, and current/available balances (integer cents, Plaid convention).
   const plaidAccountIds = [...new Set(added.concat(modified).map((t) => t.account_id))];
   const accountMap = new Map<string, string>();
   if (plaidAccountIds.length > 0) {
-    // Look up existing accounts by name/type later; for now upsert minimal rows keyed by id.
-    // (A production pass joins on a plaid_account_id column; v1 maps by account_id.)
-    for (const plaidAccountId of plaidAccountIds) {
-      const { data: existing } = await supabase
-        .from("accounts")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("plaid_item_id", item.id)
-        .eq("name", plaidAccountId) // v1: name carries the plaid account id until enriched
-        .maybeSingle();
-      if (existing) {
-        accountMap.set(plaidAccountId, existing.id);
-      } else {
-        const { data: created, error } = await supabase
-          .from("accounts")
-          .insert({
-            user_id: userId,
-            plaid_item_id: item.id,
-            name: plaidAccountId,
-            type: "checking",
-            balance_cents: 0,
-          })
-          .select("id")
-          .single();
-        if (error) throw error;
-        accountMap.set(plaidAccountId, created.id);
-      }
-    }
+    const accountsResp = await client.accountsGet({ access_token: accessToken });
+    const metaById = new Map(accountsResp.data.accounts.map((a) => [a.account_id, a]));
+    const nowISO = new Date().toISOString();
+    const rows = plaidAccountIds.map((pid) =>
+      toAccountUpsertRow(userId, item.id, pid, metaById.get(pid), nowISO)
+    );
+    const { data, error } = await supabase
+      .from("accounts")
+      .upsert(rows, { onConflict: "user_id,plaid_account_id" })
+      .select("id, plaid_account_id");
+    if (error) throw error;
+    for (const row of data ?? []) accountMap.set(row.plaid_account_id, row.id);
+
+    // One-time reconciliation: rows written by the pre-enrichment sync
+    // (name carried the Plaid account id, plaid_account_id NULL) are
+    // superseded by the enriched rows above — remove them so re-runs
+    // across the upgrade never leave duplicate accounts behind.
+    // (Their transactions' account_id falls back to NULL via ON DELETE SET
+    // NULL; this sync's upsert re-links every touched transaction.)
+    const { error: cleanupError } = await supabase
+      .from("accounts")
+      .delete()
+      .eq("user_id", userId)
+      .eq("plaid_item_id", item.id)
+      .is("plaid_account_id", null)
+      .in("name", plaidAccountIds);
+    if (cleanupError) throw cleanupError;
   }
 
   const toRow = (t: Transaction): UpsertRow => {
@@ -172,6 +177,60 @@ async function syncOneItem(
   return { item_id: item.id, added: added.length, modified: modified.length, removed: removed.length, upserted: inserted };
 }
 
+/**
+ * Re-run the recurring-charge detector over the user's ledger and persist
+ * the result. Reads ~13 months of posted outflows, detects, and upserts
+ * into `recurring` on (user_id, merchant_normalized) — idempotent.
+ * A user's explicit dismissal ("not a subscription") is preserved.
+ */
+async function refreshRecurring(
+  supabase: ReturnType<typeof createServerSupabase>,
+  userId: string
+): Promise<{ detected: number }> {
+  const since = new Date();
+  since.setUTCDate(since.getUTCDate() - 400);
+  const sinceISO = since.toISOString().slice(0, 10);
+
+  const { data: txns, error } = await supabase
+    .from("transactions")
+    .select("merchant_normalized, amount_cents, posted_at, kind, pending")
+    .eq("user_id", userId)
+    .gte("posted_at", sinceISO)
+    .in("kind", ["expense", "fee"])
+    .eq("pending", false)
+    .lt("amount_cents", 0)
+    .limit(5000);
+  if (error) throw error;
+
+  const detected = detectRecurring(
+    (txns ?? []).map((t) => ({
+      merchant: t.merchant_normalized,
+      amount_cents: t.amount_cents,
+      date: t.posted_at,
+      kind: t.kind,
+      pending: t.pending,
+    }))
+  );
+
+  const { data: existing, error: existingError } = await supabase
+    .from("recurring")
+    .select("merchant_normalized, dismissed")
+    .eq("user_id", userId);
+  if (existingError) throw existingError;
+  const dismissedByMerchant = new Map(
+    (existing ?? []).map((r) => [r.merchant_normalized, r.dismissed] as const)
+  );
+
+  const rows = toRecurringUpsertRows(userId, detected, dismissedByMerchant, new Date().toISOString());
+  if (rows.length > 0) {
+    const { error: upsertError } = await supabase
+      .from("recurring")
+      .upsert(rows, { onConflict: "user_id,merchant_normalized" });
+    if (upsertError) throw upsertError;
+  }
+  return { detected: detected.length };
+}
+
 export async function POST() {
   if (!isPlaidConfigured()) {
     return NextResponse.json({ error: "Plaid is not configured yet." }, { status: 503 });
@@ -195,7 +254,18 @@ export async function POST() {
     for (const item of items ?? []) {
       results.push(await syncOneItem(supabase, user.id, item));
     }
-    return NextResponse.json({ ok: true, items: results });
+
+    // Refresh recurring charges from the ledger. Best-effort by design:
+    // the transactions are safely stored and cursors advanced already,
+    // so a detector failure must not turn the whole sync into a 502.
+    let recurring: { detected: number; error: string | null } = { detected: 0, error: null };
+    try {
+      recurring = { ...(await refreshRecurring(supabase, user.id)), error: null };
+    } catch (e) {
+      console.error("recurring refresh failed (non-fatal)", e);
+      recurring = { detected: 0, error: "detector failed; transactions are safe" };
+    }
+    return NextResponse.json({ ok: true, items: results, recurring });
   } catch (e) {
     console.error("sync failed", e);
     return NextResponse.json(

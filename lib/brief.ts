@@ -7,6 +7,7 @@ import {
   demoFire,
   demoMonthlyRecurringCents,
   demoRecurring,
+  demoSubscriptions,
   demoTransactions,
   monthSpending,
   txnsSince,
@@ -110,8 +111,9 @@ export function buildBrief(now: Date = new Date()): Brief {
   const budgetSpentCents = monthSpending(demoTransactions, y, m);
   const budgetExpectedCents = Math.round((TOTAL_BUDGET_CENTS * dayOfMonth) / daysInMonth);
 
-  // Subscription watch: price changes + total
-  const priceChanges: BriefBill[] = demoRecurring
+  // Subscription watch: price changes + total (cancellable subscriptions only —
+  // rent is recurring but not a subscription, so it lives in bills-due instead)
+  const priceChanges: BriefBill[] = demoSubscriptions
     .filter((r: DemoRecurring) => r.price_changed)
     .map((r) => ({
       merchant: r.merchant,

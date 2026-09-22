@@ -20,13 +20,14 @@ export interface DemoTransaction {
 
 export interface DemoRecurring {
   merchant: string;
-  amount_cents_avg: number;
+  amount_cents_avg: number; // latest charge = expected next bill
   cadence: "weekly" | "monthly" | "annual";
   next_charge_date: string;
   price_changed: boolean;
   prev_amount_cents: number | null;
   category: string;
   charges_count: number;
+  monthly_cents: number; // one charge normalized to a monthly cost
 }
 
 export interface DemoBudget {
@@ -46,7 +47,7 @@ const data = demo as unknown as {
   accounts: Array<{ id: string; name: string; type: string; balance_cents: number }>;
   transactions: DemoTransaction[];
   recurring: DemoRecurring[];
-  monthlyRecurringCents: number;
+  monthlyCommittedBillsCents: number;
   budgets: DemoBudget[];
   fire: FireSettings;
 };
@@ -55,10 +56,22 @@ export const demoAccounts = data.accounts;
 export const demoTransactions: DemoTransaction[] = [...data.transactions].sort((a, b) =>
   b.date.localeCompare(a.date)
 );
+/** Every recurring charge the detector finds — bills, rent, subscriptions. */
 export const demoRecurring = data.recurring;
+/**
+ * The "subscription reveal" subset: recurring charges you could actually
+ * cancel. Housing (rent/mortgage) is committed, not a subscription.
+ */
+export const demoSubscriptions = data.recurring.filter((r) => r.category !== "Housing");
 export const demoBudgets = data.budgets;
 export const demoFire: FireSettings = data.fire;
-export const demoMonthlyRecurringCents = data.monthlyRecurringCents;
+/** Monthly cost across subscriptions (the reveal / price-watch number). */
+export const demoMonthlyRecurringCents = demoSubscriptions.reduce(
+  (s, r) => s + r.monthly_cents,
+  0
+);
+/** Monthly cost across ALL recurring charges incl. rent — the committed-bills number. */
+export const demoCommittedBillsCents = data.monthlyCommittedBillsCents;
 
 /** Spending in a month: expenses + fees only. Transfers/refunds/income excluded. */
 export function monthSpending(txns: DemoTransaction[], year: number, month: number): number {

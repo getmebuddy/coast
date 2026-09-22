@@ -147,6 +147,7 @@ alter table public.recurring enable row level security;
 alter table public.budgets enable row level security;
 alter table public.fire_settings enable row level security;
 alter table public.audit_log enable row level security;
+alter table public.brief_reads enable row level security;
 
 -- profiles: id = auth.uid()
 create policy "own profile" on public.profiles for all using (id = auth.uid()) with check (id = auth.uid());

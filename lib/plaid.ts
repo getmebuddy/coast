@@ -4,7 +4,7 @@
  * Never import this into client components: tokens live here.
  */
 
-import { Configuration, PlaidApi, PlaidEnvironments } from "plaid";
+import { Configuration, PlaidApi, PlaidEnvironments, type AccountBase } from "plaid";
 
 let cached: PlaidApi | null = null;
 
@@ -39,4 +39,68 @@ export function getPlaidClient(): PlaidApi {
 /** Is Plaid configured in this environment? Used to degrade honestly when keys are absent. */
 export function isPlaidConfigured(): boolean {
   return Boolean(process.env.PLAID_CLIENT_ID && process.env.PLAID_SECRET);
+}
+
+/**
+ * Map Plaid's account type/subtype onto Coast's account types.
+ * Plaid depository subtypes (checking/savings/...) collapse onto ours;
+ * anything unrecognized defaults to checking rather than dropping the account.
+ * Pure — safe to unit test without keys.
+ */
+export function mapPlaidAccountType(
+  plaidType: string | null | undefined,
+  plaidSubtype: string | null | undefined
+): string {
+  const t = (plaidType ?? "").toLowerCase();
+  const s = (plaidSubtype ?? "").toLowerCase();
+  if (t === "depository") return s === "savings" ? "savings" : "checking";
+  if (t === "credit") return "credit";
+  if (t === "investment") return "investment";
+  if (t === "loan") return "loan";
+  return "checking";
+}
+
+export interface AccountUpsertRow {
+  user_id: string;
+  plaid_item_id: string;
+  plaid_account_id: string;
+  name: string;
+  official_name: string | null;
+  type: string;
+  subtype: string | null;
+  mask: string | null;
+  balance_cents: number;
+  available_cents: number | null;
+  updated_at: string;
+}
+
+/**
+ * Build the `accounts` upsert row from Plaid account metadata.
+ * Balances follow the Plaid convention verbatim (integer cents; for credit
+ * accounts a positive current balance is the amount owed) and are documented
+ * as such on the column. When metadata is missing (account vanished from
+ * /accounts/get between calls) the row degrades to the Plaid account id as
+ * its name rather than failing the sync. Pure — no I/O.
+ */
+export function toAccountUpsertRow(
+  userId: string,
+  itemId: string,
+  plaidAccountId: string,
+  meta: AccountBase | undefined,
+  nowISO: string
+): AccountUpsertRow {
+  const bal = meta?.balances;
+  return {
+    user_id: userId,
+    plaid_item_id: itemId,
+    plaid_account_id: plaidAccountId,
+    name: meta?.name ?? plaidAccountId,
+    official_name: meta?.official_name ?? null,
+    type: mapPlaidAccountType(meta?.type, meta?.subtype),
+    subtype: meta?.subtype != null ? String(meta.subtype) : null,
+    mask: meta?.mask ?? null,
+    balance_cents: bal?.current != null ? Math.round(bal.current * 100) : 0,
+    available_cents: bal?.available != null ? Math.round(bal.available * 100) : null,
+    updated_at: nowISO,
+  };
 }
