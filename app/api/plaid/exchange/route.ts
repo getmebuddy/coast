@@ -81,6 +81,14 @@ export async function POST(req: Request) {
       throw new Error("service-key-missing");
     }
     const db = createServiceSupabase();
+    // Backstop: every user_id column references profiles(id), which the
+    // on_auth_user_created trigger normally creates at sign-up. Ensure it
+    // here so a missing profile can never fail the connect with a 23503.
+    const { error: profileError } = await db
+      .from("profiles")
+      .upsert({ id: user.id }, { onConflict: "id", ignoreDuplicates: true });
+    if (profileError) throw profileError;
+
     const { data: item, error } = await db
       .from("plaid_items")
       .insert({
