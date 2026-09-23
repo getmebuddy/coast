@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { mapPlaidAccountType, toAccountUpsertRow } from "./plaid";
+import { beforeEach, describe, expect, it } from "vitest";
+import { decryptAccessToken, encryptAccessToken, mapPlaidAccountType, toAccountUpsertRow } from "./plaid";
 import { AccountSubtype, AccountType, type AccountBase } from "plaid";
 
 function meta(overrides: Partial<AccountBase> = {}): AccountBase {
@@ -110,5 +110,33 @@ describe("toAccountUpsertRow", () => {
     );
     expect(row.balance_cents).toBe(0);
     expect(row.available_cents).toBeNull();
+  });
+});
+
+describe("access token encryption", () => {
+  beforeEach(() => {
+    process.env.PLAID_SECRET = "test-secret-for-unit-tests";
+  });
+
+  it("round-trips through encrypt -> decrypt", () => {
+    const token = "access-sandbox-abc123";
+    expect(decryptAccessToken(encryptAccessToken(token))).toBe(token);
+  });
+
+  it("serializes as a \\x-prefixed hex string (PostgREST bytea compatible)", () => {
+    const stored = encryptAccessToken("access-sandbox-abc123");
+    expect(typeof stored).toBe("string");
+    expect(stored.startsWith("\\x")).toBe(true);
+    expect(stored.slice(2)).toMatch(/^[0-9a-f]+$/);
+    // Must survive JSON round-trip (supabase-js sends rows as JSON).
+    expect(decryptAccessToken(JSON.parse(JSON.stringify(stored)))).toBe("access-sandbox-abc123");
+  });
+
+  it("produces unique ciphertexts for the same plaintext (random IV)", () => {
+    const a = encryptAccessToken("same-token");
+    const b = encryptAccessToken("same-token");
+    expect(a).not.toBe(b);
+    expect(decryptAccessToken(a)).toBe("same-token");
+    expect(decryptAccessToken(b)).toBe("same-token");
   });
 });

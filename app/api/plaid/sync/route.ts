@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { createDecipheriv, createHash } from "crypto";
 import { RemovedTransaction, Transaction } from "plaid";
-import { getPlaidClient, isPlaidConfigured, toAccountUpsertRow } from "@/lib/plaid";
+import { decryptAccessToken, getPlaidClient, isPlaidConfigured, toAccountUpsertRow } from "@/lib/plaid";
 import { detectRecurring, toRecurringUpsertRows } from "@/lib/recurring";
 import { classifyTransaction, normalizeMerchant } from "@/lib/ledger";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -21,15 +20,10 @@ import { createServerSupabase } from "@/lib/supabase/server";
  *  7. Refresh recurring charges from the ledger (best-effort).
  *
  * Decryption mirrors the exchange route (AES-256-GCM, key from PLAID_SECRET).
+ * Stored values are `\x`-hex strings (PostgREST bytea serialization).
  */
-function decryptToken(blob: Buffer): string {
-  const key = createHash("sha256").update(process.env.PLAID_SECRET!).digest();
-  const iv = blob.subarray(0, 12);
-  const tag = blob.subarray(12, 28);
-  const enc = blob.subarray(28);
-  const decipher = createDecipheriv("aes-256-gcm", key, iv);
-  decipher.setAuthTag(tag);
-  return Buffer.concat([decipher.update(enc), decipher.final()]).toString("utf8");
+function decryptToken(stored: string): string {
+  return decryptAccessToken(stored);
 }
 
 type UpsertRow = {
@@ -48,7 +42,7 @@ type UpsertRow = {
 async function syncOneItem(
   supabase: ReturnType<typeof createServerSupabase>,
   userId: string,
-  item: { id: string; access_token_encrypted: Buffer; cursor: string | null }
+  item: { id: string; access_token_encrypted: string; cursor: string | null }
 ) {
   const client = getPlaidClient();
   const accessToken = decryptToken(item.access_token_encrypted);

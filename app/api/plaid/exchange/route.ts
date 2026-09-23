@@ -1,25 +1,12 @@
 import { NextResponse } from "next/server";
-import { createHash, randomBytes } from "crypto";
-import { getPlaidClient, isPlaidConfigured } from "@/lib/plaid";
+import { encryptAccessToken, getPlaidClient, isPlaidConfigured } from "@/lib/plaid";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 /**
  * POST /api/plaid/exchange — swap a Plaid public_token for an access token
  * and store the connection. The access token is encrypted at rest and
  * NEVER returned to the client.
- *
- * Encryption here is AES-256-GCM with a key derived from PLAID_SECRET.
- * For production, move this to Supabase Vault / a KMS key.
  */
-function encryptToken(plaintext: string): Buffer {
-  const key = createHash("sha256").update(process.env.PLAID_SECRET!).digest();
-  const iv = randomBytes(12);
-  const { createCipheriv } = require("crypto");
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
-  const enc = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
-  const tag = cipher.getAuthTag();
-  return Buffer.concat([iv, tag, enc]);
-}
 
 export async function POST(req: Request) {
   if (!isPlaidConfigured()) {
@@ -54,7 +41,7 @@ export async function POST(req: Request) {
       .from("plaid_items")
       .insert({
         user_id: user.id,
-        access_token_encrypted: encryptToken(accessToken),
+        access_token_encrypted: encryptAccessToken(accessToken),
         institution_name: institutionName,
         cursor: null,
         status: "active",

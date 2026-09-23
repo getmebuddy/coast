@@ -104,3 +104,40 @@ export function toAccountUpsertRow(
     updated_at: nowISO,
   };
 }
+
+/**
+ * Access-token encryption at rest (AES-256-GCM, key derived from PLAID_SECRET).
+ * For production, move this to Supabase Vault / a KMS key.
+ *
+ * IMPORTANT: values are serialized as `\x`-prefixed hex STRINGS, not Buffers.
+ * supabase-js sends rows as JSON, and JSON.stringify(Buffer) produces
+ * {"type":"Buffer","data":[...]} which PostgREST cannot cast to bytea —
+ * passing a Buffer here used to fail every plaid_items insert.
+ */
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
+
+function tokenKey(): Buffer {
+  const secret = process.env.PLAID_SECRET;
+  if (!secret) throw new Error("Missing required env var: PLAID_SECRET (see .env.example)");
+  return createHash("sha256").update(secret).digest();
+}
+
+/** Encrypt an access token → `\x`-hex string safe for the bytea column. */
+export function encryptAccessToken(plaintext: string): string {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", tokenKey(), iv);
+  const enc = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return `\\x${Buffer.concat([iv, tag, enc]).toString("hex")}`;
+}
+
+/** Decrypt a `\x`-hex string from the bytea column → the access token. */
+export function decryptAccessToken(stored: string): string {
+  const blob = Buffer.from(stored.replace(/^\\x/, ""), "hex");
+  const iv = blob.subarray(0, 12);
+  const tag = blob.subarray(12, 28);
+  const enc = blob.subarray(28);
+  const decipher = createDecipheriv("aes-256-gcm", tokenKey(), iv);
+  decipher.setAuthTag(tag);
+  return Buffer.concat([decipher.update(enc), decipher.final()]).toString("utf8");
+}
