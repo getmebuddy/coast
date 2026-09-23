@@ -90,12 +90,12 @@ export default function TransactionsPage() {
           </li>
         ))}
         {rows.length === 0 && (
-          <li className="px-4 py-10 text-center text-[var(--text-secondary)]">
+          <li className="px-4 py-10 text-[var(--text-secondary)]">
             Nothing matches — try a different search.
           </li>
         )}
       </ul>
-      <p className="text-center text-[var(--type-micro-size)] text-[var(--text-micro)]">
+      <p className="text-[var(--type-micro-size)] text-[var(--text-micro)]">
         Transfers and card payments never count as spending.
       </p>
     </div>

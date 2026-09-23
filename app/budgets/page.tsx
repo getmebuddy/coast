@@ -59,7 +59,7 @@ export default function BudgetsPage() {
         >
           ← Back to budgets
         </button>
-        <div className="rounded-xl bg-[var(--surface-card)] p-5 elev-1">
+        <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
           <h1 className="text-[var(--type-title-size)] font-bold">
             {drill === "__total__" ? "All September spending" : drill}
           </h1>
@@ -78,7 +78,7 @@ export default function BudgetsPage() {
             </li>
           ))}
           {drillTxns.length === 0 && (
-            <li className="px-4 py-10 text-center text-[var(--text-secondary)]">
+            <li className="px-4 py-10 text-[var(--text-secondary)]">
               No charges in this category yet this month.
             </li>
           )}
@@ -108,7 +108,7 @@ export default function BudgetsPage() {
           </li>
         ))}
       </ul>
-      <p className="text-center text-[var(--type-micro-size)] text-[var(--text-micro)]">
+      <p className="text-[var(--type-micro-size)] text-[var(--text-micro)]">
         Tap a category to see its charges, biggest first.
       </p>
     </div>

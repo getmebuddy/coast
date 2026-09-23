@@ -33,13 +33,12 @@ export default function Home() {
 
   return (
     <div className="space-y-8">
-      <section aria-label="Trajectory" className="flex flex-col items-center gap-4 pt-2">
-        <TrajectoryRing pct={pct} />
-        <div className="text-center">
+      <section aria-label="Trajectory" className="space-y-5 pt-2">
+        <div>
           <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
             The Number
           </p>
-          <p className="tnum mt-1 text-2xl font-bold text-[var(--text-hero-number)]">
+          <p className="tnum mt-1 text-3xl font-bold text-[var(--text-hero-number)]">
             {formatUSD(target)}
           </p>
           <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
@@ -48,11 +47,14 @@ export default function Home() {
               : "Not on track yet — your plan needs a nudge"}
           </p>
         </div>
+        <div className="flex justify-center">
+          <TrajectoryRing pct={pct} />
+        </div>
       </section>
 
       <section
         aria-label="Safe to spend"
-        className="rounded-xl bg-[var(--surface-card)] p-5 elev-1"
+        className="rounded-xl bg-[var(--surface-card)] p-6 elev-1"
       >
         <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
           Safe to spend today
@@ -65,7 +67,7 @@ export default function Home() {
 
       <section
         aria-label="Subscriptions"
-        className="rounded-xl bg-[var(--surface-card)] p-5 elev-1"
+        className="rounded-xl bg-[var(--surface-card)] p-6 elev-1"
       >
         <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
           Subscription reveal

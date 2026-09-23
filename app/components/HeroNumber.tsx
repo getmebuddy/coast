@@ -11,7 +11,7 @@ export default function HeroNumber({
   sub?: string;
 }) {
   return (
-    <div className="text-center">
+    <div className="text-left">
       <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
         {label}
       </p>

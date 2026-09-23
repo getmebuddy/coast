@@ -89,7 +89,7 @@ export default function NumberPage() {
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
+      <div>
         <h1 className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
           The Number
         </h1>
@@ -108,7 +108,7 @@ export default function NumberPage() {
         </p>
       </div>
 
-      <div className="rounded-xl bg-[var(--surface-card)] p-5 elev-1 text-center">
+      <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
         {proj.reachable ? (
           <>
             <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
@@ -183,7 +183,7 @@ export default function NumberPage() {
         />
       </div>
 
-      <p className="text-center text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+      <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
         Heard of FIRE? That's this. Drag a slider — the date moves with your thumb.
       </p>
     </div>

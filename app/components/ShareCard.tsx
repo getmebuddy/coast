@@ -122,7 +122,7 @@ export default function ShareCard({ brief }: { brief: Brief }) {
   };
 
   return (
-    <div className="rounded-xl bg-[var(--surface-card)] p-5 elev-1">
+    <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
       <div ref={svgWrap} className="overflow-hidden rounded-lg">
         <CardSVG brief={brief} id="coast-share-svg" />
       </div>

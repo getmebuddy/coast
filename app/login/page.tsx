@@ -85,13 +85,13 @@ export default function LoginPage() {
         {mode === "magic" ? "Use password instead" : "Email me a magic link instead"}
       </button>
       {status && (
-        <p role="status" className="mt-3 text-center text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p role="status" className="mt-3 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
           {status}
         </p>
       )}
       {typeof window !== "undefined" &&
         new URLSearchParams(window.location.search).get("error") === "link" && (
-          <p role="alert" className="mt-3 text-center text-[var(--type-caption-size)] font-semibold text-red-600">
+          <p role="alert" className="mt-3 text-[var(--type-caption-size)] font-semibold text-red-600">
             That sign-in link didn&apos;t work — request a fresh one below.
           </p>
         )}

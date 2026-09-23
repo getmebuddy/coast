@@ -12,7 +12,7 @@ import ShareCard from "../components/ShareCard";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl bg-[var(--surface-card)] p-5 elev-1">
+    <section className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
       <h2 className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
         {title}
       </h2>
@@ -44,7 +44,7 @@ export default function BriefPage() {
 
   if (error) {
     return (
-      <div className="pt-10 text-center">
+      <div className="pt-10">
         <p className="text-[var(--type-title-size)] font-semibold">We couldn't load your brief.</p>
         <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
           Your data is safe — try again in a moment.
@@ -75,7 +75,7 @@ export default function BriefPage() {
       </div>
 
       {brief.quiet && (
-        <div className="rounded-xl bg-[var(--accent-progress-soft)] p-5 text-center">
+        <div className="rounded-xl bg-[var(--accent-progress-soft)] p-6">
           <p className="text-[var(--type-body-size)] text-[var(--text-primary)]">
             Nothing new since yesterday — quiet mornings are good.
           </p>
