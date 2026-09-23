@@ -90,7 +90,11 @@ export default function ConnectBank() {
                 institution_name: metadata?.institution?.name,
               }),
             });
-            if (!exRes.ok) throw new Error("Couldn't finish connecting — try again.");
+            if (!exRes.ok) {
+              const j = await exRes.json().catch(() => ({}));
+              const detail = j.stage ? ` [exchange:${exRes.status}/${j.stage}]` : ` [exchange:${exRes.status}]`;
+              throw new Error(`Couldn't finish connecting — try again.${detail}`);
+            }
 
             setStatus("syncing");
             const syRes = await fetch("/api/plaid/sync", { method: "POST" });

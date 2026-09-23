@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "Sign in first.", stage: "auth" }, { status: 401 });
 
   let body: { public_token?: string; institution_name?: string };
   try {
@@ -27,16 +27,23 @@ export async function POST(req: Request) {
   }
   if (!body.public_token) return NextResponse.json({ error: "Missing public_token." }, { status: 400 });
 
+  let stage = "token-exchange";
   try {
     const client = getPlaidClient();
     const exchange = await client.itemPublicTokenExchange({ public_token: body.public_token });
     const accessToken = exchange.data.access_token;
 
-    // Idempotent: don't create a duplicate item for the same Plaid item id.
-    const itemGet = await client.itemGet({ access_token: accessToken });
-    const institutionName =
-      body.institution_name ?? itemGet.data.item.institution_id ?? "Your bank";
+    // Best-effort: the item id is only a display-name fallback.
+    stage = "item-get";
+    let institutionName = body.institution_name ?? "Your bank";
+    try {
+      const itemGet = await client.itemGet({ access_token: accessToken });
+      institutionName = body.institution_name ?? itemGet.data.item.institution_id ?? "Your bank";
+    } catch (e) {
+      console.warn("itemGet failed, continuing with fallback name", e);
+    }
 
+    stage = "db-insert";
     const { data: item, error } = await supabase
       .from("plaid_items")
       .insert({
@@ -52,9 +59,9 @@ export async function POST(req: Request) {
     if (error) throw error;
     return NextResponse.json({ item });
   } catch (e) {
-    console.error("exchange failed", e);
+    console.error(`exchange failed at ${stage}`, e);
     return NextResponse.json(
-      { error: "We couldn't finish connecting — your data is safe, try again." },
+      { error: "We couldn't finish connecting — your data is safe, try again.", stage },
       { status: 502 }
     );
   }
