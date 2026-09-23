@@ -32,9 +32,10 @@ export function createServerSupabase() {
 }
 
 /** Service-role client for server-side privileged work (sync pipeline).
- *  NEVER import this into client components. */
-export function createServiceSupabase() {
-  // Lazy import so the browser bundle never pulls @supabase/supabase-js service code.
+ *  NEVER import this into client components.
+ *  Typed identically to the session client so query code needs no changes. */
+export function createServiceSupabase(): ReturnType<typeof createServerClient> {
+  // Lazy require so the browser bundle never pulls @supabase/supabase-js service code.
   const { createClient } = require("@supabase/supabase-js");
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

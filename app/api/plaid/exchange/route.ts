@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { encryptAccessToken, getPlaidClient, isPlaidConfigured } from "@/lib/plaid";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { createServerSupabase, createServiceSupabase } from "@/lib/supabase/server";
 
 /**
  * POST /api/plaid/exchange — swap a Plaid public_token for an access token
@@ -44,7 +44,12 @@ export async function POST(req: Request) {
     }
 
     stage = "db-insert";
-    const { data: item, error } = await supabase
+    // Service-role client: SELECT on plaid_items is revoked for
+    // anon/authenticated by design (the token column must never be
+    // client-readable), so INSERT ... RETURNING via the session client
+    // fails with "permission denied". Auth was already verified above.
+    const db = createServiceSupabase();
+    const { data: item, error } = await db
       .from("plaid_items")
       .insert({
         user_id: user.id,

@@ -3,7 +3,7 @@ import { RemovedTransaction, Transaction } from "plaid";
 import { decryptAccessToken, getPlaidClient, isPlaidConfigured, toAccountUpsertRow } from "@/lib/plaid";
 import { detectRecurring, toRecurringUpsertRows } from "@/lib/recurring";
 import { classifyTransaction, normalizeMerchant } from "@/lib/ledger";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { createServerSupabase, createServiceSupabase } from "@/lib/supabase/server";
 
 /**
  * POST /api/plaid/sync — cursor-based incremental transaction sync.
@@ -40,7 +40,7 @@ type UpsertRow = {
 };
 
 async function syncOneItem(
-  supabase: ReturnType<typeof createServerSupabase>,
+  supabase: ReturnType<typeof createServiceSupabase>,
   userId: string,
   item: { id: string; access_token_encrypted: string; cursor: string | null }
 ) {
@@ -178,7 +178,7 @@ async function syncOneItem(
  * A user's explicit dismissal ("not a subscription") is preserved.
  */
 async function refreshRecurring(
-  supabase: ReturnType<typeof createServerSupabase>,
+  supabase: ReturnType<typeof createServiceSupabase>,
   userId: string
 ): Promise<{ detected: number }> {
   const since = new Date();
@@ -236,8 +236,13 @@ export async function POST() {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
 
+  // Service-role client for all DB work below: plaid_items SELECT is revoked
+  // for anon/authenticated by design (token column), and this pipeline reads
+  // the encrypted token. Auth was verified above; RLS is bypassed server-side.
+  const db = createServiceSupabase();
+
   try {
-    const { data: items, error } = await supabase
+    const { data: items, error } = await db
       .from("plaid_items")
       .select("id, access_token_encrypted, cursor")
       .eq("user_id", user.id)
@@ -246,7 +251,7 @@ export async function POST() {
 
     const results = [];
     for (const item of items ?? []) {
-      results.push(await syncOneItem(supabase, user.id, item));
+      results.push(await syncOneItem(db, user.id, item));
     }
 
     // Refresh recurring charges from the ledger. Best-effort by design:
@@ -254,7 +259,7 @@ export async function POST() {
     // so a detector failure must not turn the whole sync into a 502.
     let recurring: { detected: number; error: string | null } = { detected: 0, error: null };
     try {
-      recurring = { ...(await refreshRecurring(supabase, user.id)), error: null };
+      recurring = { ...(await refreshRecurring(db, user.id)), error: null };
     } catch (e) {
       console.error("recurring refresh failed (non-fatal)", e);
       recurring = { detected: 0, error: "detector failed; transactions are safe" };
