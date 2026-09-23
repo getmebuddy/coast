@@ -8,6 +8,33 @@ import { createServerSupabase, createServiceSupabase } from "@/lib/supabase/serv
  * NEVER returned to the client.
  */
 
+/**
+ * Short, safe diagnostic fragment for the client-facing error code.
+ * Carries the PostgREST code + a sanitized message so a failed retry can be
+ * diagnosed without another round-trip. Never includes request payloads —
+ * the access token stays server-side.
+ */
+function diagnosticDetail(e: unknown): string {
+  const parts: string[] = [];
+  if (typeof e === "object" && e !== null) {
+    const rec = e as Record<string, unknown>;
+    if (typeof rec.code === "string" && rec.code) parts.push(rec.code);
+  }
+  const msg =
+    e instanceof Error
+      ? e.message
+      : typeof e === "object" && e !== null && "message" in e
+        ? String((e as Record<string, unknown>).message)
+        : String(e);
+  const clean = msg
+    .replace(/[^a-zA-Z0-9 _\-.]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 64);
+  if (clean) parts.push(clean);
+  return parts.join("-");
+}
+
 export async function POST(req: Request) {
   if (!isPlaidConfigured()) {
     return NextResponse.json({ error: "Plaid is not configured yet." }, { status: 503 });
@@ -48,6 +75,11 @@ export async function POST(req: Request) {
     // anon/authenticated by design (the token column must never be
     // client-readable), so INSERT ... RETURNING via the session client
     // fails with "permission denied". Auth was already verified above.
+    // Fail loudly if the key isn't configured — the deployment needs
+    // SUPABASE_SERVICE_ROLE_KEY in its env vars (and a redeploy after adding).
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("service-key-missing");
+    }
     const db = createServiceSupabase();
     const { data: item, error } = await db
       .from("plaid_items")
@@ -64,9 +96,14 @@ export async function POST(req: Request) {
     if (error) throw error;
     return NextResponse.json({ item });
   } catch (e) {
+    // The client renders this as [exchange:502/<stage>[:<detail>]] — the
+    // detail names the actual failure (e.g. service-key-missing,
+    // 42501-permission-denied) so the next retry is diagnosable on sight.
+    const detail = diagnosticDetail(e);
+    const stageLabel = detail ? `${stage}:${detail}` : stage;
     console.error(`exchange failed at ${stage}`, e);
     return NextResponse.json(
-      { error: "We couldn't finish connecting — your data is safe, try again.", stage },
+      { error: "We couldn't finish connecting — your data is safe, try again.", stage: stageLabel },
       { status: 502 }
     );
   }
