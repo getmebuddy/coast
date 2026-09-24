@@ -13,7 +13,7 @@ import ShareCard from "../components/ShareCard";
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-      <h2 className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+      <h2 className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
         {title}
       </h2>
       <div className="mt-3 space-y-2.5">{children}</div>
@@ -45,8 +45,8 @@ export default function BriefPage() {
   if (error) {
     return (
       <div className="pt-10">
-        <p className="text-[var(--type-title-size)] font-semibold">We couldn't load your brief.</p>
-        <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p className="text-[length:var(--type-title-size)] font-semibold">We couldn't load your brief.</p>
+        <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           Your data is safe — try again in a moment.
         </p>
       </div>
@@ -68,15 +68,15 @@ export default function BriefPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-[var(--type-title-size)] font-bold">{brief.greeting}.</h1>
-        <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <h1 className="text-[length:var(--type-title-size)] font-bold">{brief.greeting}.</h1>
+        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           Here's your money, in about 30 seconds.
         </p>
       </div>
 
       {brief.quiet && (
         <div className="rounded-xl bg-[var(--accent-progress-soft)] p-6">
-          <p className="text-[var(--type-body-size)] text-[var(--text-primary)]">
+          <p className="text-[length:var(--type-body-size)] text-[var(--text-primary)]">
             Nothing new since yesterday — quiet mornings are good.
           </p>
         </div>
@@ -87,22 +87,22 @@ export default function BriefPage() {
           {brief.newActivity.map((a) => (
             <div key={a.id} className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-[var(--type-body-size)]">
+                <p className="truncate text-[length:var(--type-body-size)]">
                   {a.merchant}
                   {a.pending && (
-                    <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[var(--type-micro-size)] text-[var(--signal-warning)]">
+                    <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
                       pending
                     </span>
                   )}
                 </p>
-                <p className="text-[var(--type-micro-size)] text-[var(--text-micro)] capitalize">{a.kind}</p>
+                <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)] capitalize">{a.kind}</p>
               </div>
               <span className={`tnum font-semibold ${a.amountCents < 0 ? "text-[var(--text-primary)]" : "text-[var(--accent-progress)]"}`}>
                 {formatUSD(a.amountCents)}
               </span>
             </div>
           ))}
-          <p className="pt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="pt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             {formatUSD(brief.newActivityTotalCents)} out since yesterday.
             {brief.pendingCount > 0 && ` ${brief.pendingCount} still pending.`}
           </p>
@@ -114,13 +114,13 @@ export default function BriefPage() {
           {brief.billsDue.map((b) => (
             <div key={b.merchant} className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[var(--type-body-size)]">{b.merchant}</p>
-                <p className="text-[var(--type-micro-size)] text-[var(--text-micro)]">due {b.dueDate}</p>
+                <p className="text-[length:var(--type-body-size)]">{b.merchant}</p>
+                <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">due {b.dueDate}</p>
               </div>
               <span className="tnum font-semibold">{formatUSD(b.amountCents)}</span>
             </div>
           ))}
-          <p className="pt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="pt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             {formatUSD(brief.billsDueTotalCents)} committed this week.
           </p>
         </Section>
@@ -133,7 +133,7 @@ export default function BriefPage() {
             style={{ width: `${Math.min(100, (brief.budgetSpentCents / brief.budgetLimitCents) * 100)}%` }}
           />
         </div>
-        <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           {formatUSD(brief.budgetSpentCents)} spent of {formatUSD(brief.budgetLimitCents)}.{" "}
           {paceOver
             ? `Running ${formatUSD(brief.budgetSpentCents - brief.budgetExpectedCents)} ahead of pace — easy does it.`
@@ -145,25 +145,25 @@ export default function BriefPage() {
         <Section title="Subscription watch">
           {brief.priceChanges.map((p) => (
             <div key={p.merchant} className="flex items-center justify-between gap-3">
-              <p className="text-[var(--type-body-size)]">
+              <p className="text-[length:var(--type-body-size)]">
                 {p.merchant}{" "}
                 <span className="tnum text-[var(--text-secondary)]">
                   {p.prevAmountCents !== null ? formatUSD(p.prevAmountCents) : ""} → {formatUSD(p.amountCents)}
                 </span>
               </p>
-              <span className="rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[var(--type-micro-size)] text-[var(--signal-warning)]">
+              <span className="rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
                 price up
               </span>
             </div>
           ))}
-          <p className="pt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="pt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             {formatUSD(brief.monthlyRecurringCents)} a month across your subscriptions.
           </p>
         </Section>
       )}
 
       <Section title="One line on your number">
-        <p className="text-[var(--type-body-size)] text-[var(--text-primary)]">{brief.fireNudge}</p>
+        <p className="text-[length:var(--type-body-size)] text-[var(--text-primary)]">{brief.fireNudge}</p>
       </Section>
 
       <div className="pt-1">

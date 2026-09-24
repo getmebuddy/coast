@@ -33,7 +33,7 @@ export default function TransactionsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-[var(--type-title-size)] font-bold">Activity</h1>
+      <h1 className="text-[length:var(--type-title-size)] font-bold">Activity</h1>
 
       <div className="flex gap-2">
         <label className="sr-only" htmlFor="txn-search">Search transactions</label>
@@ -43,7 +43,7 @@ export default function TransactionsPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search merchants or categories"
-          className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 py-2 text-[var(--type-body-size)]"
+          className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 py-2 text-[length:var(--type-body-size)]"
         />
       </div>
 
@@ -53,7 +53,7 @@ export default function TransactionsPage() {
             key={k}
             onClick={() => setKind(k)}
             aria-pressed={kind === k}
-            className={`rounded-full px-3 py-1.5 text-[var(--type-caption-size)] capitalize transition-colors ${
+            className={`rounded-full px-3 py-1.5 text-[length:var(--type-caption-size)] capitalize transition-colors ${
               kind === k
                 ? "bg-[var(--accent-progress)] text-white"
                 : "bg-[var(--surface-secondary)] text-[var(--text-secondary)]"
@@ -68,15 +68,15 @@ export default function TransactionsPage() {
         {rows.map((t) => (
           <li key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
             <div className="min-w-0">
-              <p className="truncate text-[var(--type-body-size)]">
+              <p className="truncate text-[length:var(--type-body-size)]">
                 {t.merchant}
                 {t.pending && (
-                  <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[var(--type-micro-size)] text-[var(--signal-warning)]">
+                  <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
                     pending
                   </span>
                 )}
               </p>
-              <p className="text-[var(--type-micro-size)] text-[var(--text-micro)]">
+              <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
                 {t.date} · {t.category} · {KIND_LABEL[t.kind]}
               </p>
             </div>
@@ -95,7 +95,7 @@ export default function TransactionsPage() {
           </li>
         )}
       </ul>
-      <p className="text-[var(--type-micro-size)] text-[var(--text-micro)]">
+      <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
         Transfers and card payments never count as spending.
       </p>
     </div>

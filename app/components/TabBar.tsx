@@ -29,7 +29,7 @@ export default function TabBar() {
               key={t.href}
               href={t.href}
               aria-current={active ? "page" : undefined}
-              className={`flex flex-col items-center gap-0.5 py-2.5 text-[var(--type-micro-size)] transition-colors ${
+              className={`flex flex-col items-center gap-0.5 py-2.5 text-[length:var(--type-micro-size)] transition-colors ${
                 active ? "text-[var(--accent-progress)] font-semibold" : "text-[var(--text-micro)]"
               }`}
             >

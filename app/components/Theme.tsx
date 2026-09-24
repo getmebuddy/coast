@@ -34,7 +34,7 @@ export function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-      className="rounded-full bg-[var(--surface-secondary)] px-3 py-1.5 text-[var(--type-caption-size)] text-[var(--text-secondary)] transition-transform active:scale-95"
+      className="rounded-full bg-[var(--surface-secondary)] px-3 py-1.5 text-[length:var(--type-caption-size)] text-[var(--text-secondary)] transition-transform active:scale-95"
     >
       {theme === "light" ? "◐ Dark" : "◑ Light"}
     </button>

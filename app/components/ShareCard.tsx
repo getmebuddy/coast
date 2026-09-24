@@ -132,10 +132,10 @@ export default function ShareCard({ brief }: { brief: Brief }) {
       >
         Share my month
       </button>
-      {state === "shared" && <p className="mt-2 text-center text-[var(--type-caption-size)] text-[var(--accent-progress)]">Shared.</p>}
-      {state === "copied" && <p className="mt-2 text-center text-[var(--type-caption-size)] text-[var(--accent-progress)]">Copied + PNG downloaded.</p>}
+      {state === "shared" && <p className="mt-2 text-center text-[length:var(--type-caption-size)] text-[var(--accent-progress)]">Shared.</p>}
+      {state === "copied" && <p className="mt-2 text-center text-[length:var(--type-caption-size)] text-[var(--accent-progress)]">Copied + PNG downloaded.</p>}
       {state === "error" && (
-        <p className="mt-2 text-center text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p className="mt-2 text-center text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           Sharing didn't work — your data is safe, try again.
         </p>
       )}

@@ -50,7 +50,7 @@ function lifecycleBadge(state: string): { glyph: string; text: string } | null {
 function Badge({ glyph, text, tone }: { glyph: string; text: string; tone: "warn" | "muted" }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[var(--type-micro-size)] font-semibold ${
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[length:var(--type-micro-size)] font-semibold ${
         tone === "warn"
           ? "bg-[var(--signal-warning-soft)] text-[var(--signal-warning)]"
           : "bg-[var(--surface-secondary)] text-[var(--text-secondary)]"
@@ -139,9 +139,9 @@ export default function SubscriptionsList() {
   if (unauthorized) {
     return (
       <div className="space-y-4">
-        <h1 className="text-[var(--type-title-size)] font-bold">Subscriptions</h1>
+        <h1 className="text-[length:var(--type-title-size)] font-bold">Subscriptions</h1>
         <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-          <p className="text-[var(--type-body-size)]">Sign in to see your subscriptions.</p>
+          <p className="text-[length:var(--type-body-size)]">Sign in to see your subscriptions.</p>
           <Link
             href="/login?next=/subscriptions"
             className="mt-4 inline-flex min-h-[44px] items-center rounded-lg bg-[var(--accent-progress)] px-4 font-semibold text-white"
@@ -156,10 +156,10 @@ export default function SubscriptionsList() {
   if (error) {
     return (
       <div className="space-y-4">
-        <h1 className="text-[var(--type-title-size)] font-bold">Subscriptions</h1>
+        <h1 className="text-[length:var(--type-title-size)] font-bold">Subscriptions</h1>
         <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1" role="alert">
-          <p className="text-[var(--type-body-size)] font-semibold">Couldn&apos;t load subscriptions.</p>
-          <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">{error}</p>
+          <p className="text-[length:var(--type-body-size)] font-semibold">Couldn&apos;t load subscriptions.</p>
+          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">{error}</p>
           <button
             type="button"
             onClick={() => setRetryNonce((n) => n + 1)}
@@ -187,8 +187,8 @@ export default function SubscriptionsList() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[var(--type-title-size)] font-bold">Subscriptions</h1>
-        <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <h1 className="text-[length:var(--type-title-size)] font-bold">Subscriptions</h1>
+        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           Every recurring charge Coast found — and what to do about it.
         </p>
       </div>
@@ -196,17 +196,17 @@ export default function SubscriptionsList() {
       {routeErrorCopy && (
         <div
           role="alert"
-          className="rounded-xl bg-[var(--signal-warning-soft)] p-4 text-[var(--type-body-size)] text-[var(--signal-warning)] elev-1"
+          className="rounded-xl bg-[var(--signal-warning-soft)] p-4 text-[length:var(--type-body-size)] text-[var(--signal-warning)] elev-1"
         >
           <p className="font-semibold">{routeErrorCopy}</p>
-          <p className="mt-1 text-[var(--type-caption-size)]">No action was taken.</p>
+          <p className="mt-1 text-[length:var(--type-caption-size)]">No action was taken.</p>
         </div>
       )}
 
       {items.length === 0 ? (
         <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-          <p className="text-[var(--type-body-size)] font-semibold">No subscriptions found yet.</p>
-          <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="text-[length:var(--type-body-size)] font-semibold">No subscriptions found yet.</p>
+          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             Coast watches your connected accounts for recurring charges. Once it spots a pattern,
             it will appear here with a cancel path.
           </p>
@@ -218,13 +218,13 @@ export default function SubscriptionsList() {
             aria-label="Recurring totals"
             className="rounded-xl bg-[var(--surface-card)] p-6 elev-1"
           >
-            <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+            <p className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
               Recurring each month
             </p>
             <p className="tnum mt-1 text-3xl font-bold text-[var(--text-hero-number)]">
               {money(totalMonthly)}
             </p>
-            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               <span>
                 <span className="tnum font-semibold text-[var(--text-primary)]">
                   {activeItems.length}
@@ -246,7 +246,7 @@ export default function SubscriptionsList() {
           {/* Action queue — open requests needing the user come FIRST */}
           {queue.length > 0 && (
             <section aria-label="Action queue" className="space-y-3">
-              <h2 className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+              <h2 className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
                 Needs your attention
               </h2>
               <ul className="space-y-3">
@@ -259,10 +259,10 @@ export default function SubscriptionsList() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="truncate text-[var(--type-body-size)] font-semibold">
+                          <p className="truncate text-[length:var(--type-body-size)] font-semibold">
                             {name}
                           </p>
-                          <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                             {statusCopyOf(request.status, STATUS_COPY)}
                           </p>
                         </div>
@@ -284,7 +284,7 @@ export default function SubscriptionsList() {
           {/* Discovery cards */}
           <section aria-label="All subscriptions" className="space-y-3">
             {queue.length > 0 && (
-              <h2 className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+              <h2 className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
                 All subscriptions
               </h2>
             )}
@@ -300,10 +300,10 @@ export default function SubscriptionsList() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate text-[var(--type-body-size)] font-semibold">
+                        <p className="truncate text-[length:var(--type-body-size)] font-semibold">
                           {name}
                         </p>
-                        <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                           <span className="tnum font-semibold text-[var(--text-primary)]">
                             ~{money(item.monthly_cents)}
                             {cadencePer(item.cadence)}

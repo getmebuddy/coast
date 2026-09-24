@@ -130,15 +130,15 @@ export default function ConnectBank() {
         type="button"
         onClick={connect}
         disabled={disabled}
-        className="w-full rounded-xl bg-[var(--accent-progress)] px-4 py-3 text-[var(--type-body-size)] font-semibold text-white transition-opacity disabled:opacity-60"
+        className="w-full rounded-xl bg-[var(--accent-progress)] px-4 py-3 text-[length:var(--type-body-size)] font-semibold text-white transition-opacity disabled:opacity-60"
       >
         {LABELS[status]}
       </button>
       {error && (
-        <p className="mt-2 text-[var(--type-caption-size)] text-red-500">{error}</p>
+        <p className="mt-2 text-[length:var(--type-caption-size)] text-red-500">{error}</p>
       )}
       {status === "done" && (
-        <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           Your accounts are connected — transactions are syncing into your ledger.
         </p>
       )}

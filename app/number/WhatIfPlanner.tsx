@@ -131,10 +131,10 @@ function MoneyControl({
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2">
-        <label htmlFor={id} className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <label htmlFor={id} className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           {label}
         </label>
-        <span className="tnum text-[var(--type-body-size)] font-semibold">{format(valueCents)}</span>
+        <span className="tnum text-[length:var(--type-body-size)] font-semibold">{format(valueCents)}</span>
       </div>
       <input
         id={id}
@@ -476,6 +476,17 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
       }
       setConfirmOpen(false);
       setScenarioName("");
+      // The temporary handoff scenario is consumed by this save: its values
+      // are now the baseline, so the "not saved" banner must go away instead
+      // of inviting another identical save.
+      if (tempScenario) {
+        try {
+          localStorage.removeItem(TEMP_SCENARIO_KEY);
+        } catch {
+          /* ignore */
+        }
+        setTempScenario(null);
+      }
       trackPlannerEvent("plan_saved", { delta_bucket: deltaBucket(delta) });
       showToast(`Plan saved. ${arrivalMonthLabel(clientProj.arrivalMonth)} is now your baseline.`);
       setTimeout(() => confirmRef.current?.focus(), 50);
@@ -526,10 +537,10 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
     <div className="space-y-6">
       {/* ---- preserved header ---- */}
       <div>
-        <h1 className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+        <h1 className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
           The Number
         </h1>
-        <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           Your finish line — the amount that makes work optional.
         </p>
       </div>
@@ -539,7 +550,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
         <p className="tnum text-3xl font-bold text-[var(--text-hero-number)]">
           {formatUSDCompact(baseTarget)}
         </p>
-        <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           25× your annual spending · 4% rule
         </p>
       </div>
@@ -547,8 +558,8 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
       {/* ---- baseline card ---- */}
       {mode === "setup" && !setupStarted ? (
         <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-          <p className="text-[var(--type-body-size)] font-bold">Start with your Number.</p>
-          <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="text-[length:var(--type-body-size)] font-bold">Start with your Number.</p>
+          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             Add your spending, portfolio, and monthly investing so Coast can build a baseline.
           </p>
           <button
@@ -564,7 +575,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
         </div>
       ) : (
         <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-          <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+          <p className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
             {baselineModeLabel} · projected date
           </p>
           {baseProj.reachable ? (
@@ -572,22 +583,22 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
               <p className="tnum mt-1 text-2xl font-bold text-[var(--text-hero-number)]">
                 {arrivalMonthLabel(baseProj.arrivalMonth)}
               </p>
-              <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+              <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                 {baseProj.months} months away
               </p>
             </>
           ) : (
-            <p className="mt-1 text-[var(--type-body-size)]">
+            <p className="mt-1 text-[length:var(--type-body-size)]">
               Not on track yet — even a small monthly increase moves the date.
             </p>
           )}
           {mode === "saved" && savedAt && (
-            <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               Saved {new Date(savedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </p>
           )}
           {mode === "demo" && (
-            <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               Demo mode — sign in to save your own plan.
             </p>
           )}
@@ -596,8 +607,8 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
 
       {restoreOffer && (
         <div className="rounded-xl bg-[var(--surface-card)] p-5 elev-1" role="status">
-          <p className="text-[var(--type-body-size)] font-semibold">Restore your unsaved scenario?</p>
-          <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="text-[length:var(--type-body-size)] font-semibold">Restore your unsaved scenario?</p>
+          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             You left a scenario unfinished before signing in.
           </p>
           <div className="mt-3 flex gap-2">
@@ -634,20 +645,20 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
       {/* ---- temporary handoff scenario (Subscription Action Center) ---- */}
       {tempScenario && (
         <div className="rounded-xl bg-[var(--accent-progress-soft)] p-5 elev-1" role="status">
-          <p className="text-[var(--type-body-size)] font-bold">
+          <p className="text-[length:var(--type-body-size)] font-bold">
             Temporary scenario — {tempScenario.label}
           </p>
           {tempScenario.note && (
-            <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               {tempScenario.note}
             </p>
           )}
-          <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             This is not saved. Your plan is unchanged — use &ldquo;Save as plan&rdquo; below only
             if you want to keep it.
           </p>
           {(tempScenario.baselineVersion || tempScenario.calcVersion) && (
-            <p className="mt-1 text-[var(--type-micro-size)] text-[var(--text-micro)]">
+            <p className="mt-1 text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
               {formatScenarioProvenance(
                 tempScenario.baselineVersion,
                 tempScenario.calcVersion
@@ -671,11 +682,11 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
             <h2
               ref={heroRef}
               tabIndex={-1}
-              className="text-[var(--type-title-size)] font-bold outline-none"
+              className="text-[length:var(--type-title-size)] font-bold outline-none"
             >
               What if you changed one thing?
             </h2>
-            <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               An illustration, not a forecast — the assumptions behind it are listed below.
             </p>
           </div>
@@ -684,7 +695,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
           <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
             {scenProj.reachable ? (
               <>
-                <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+                <p className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
                   Projected arrival
                 </p>
                 <p className="tnum mt-1 text-2xl font-bold text-[var(--text-hero-number)]">
@@ -692,7 +703,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                 </p>
                 {delta !== null && delta !== 0 ? (
                   <p
-                    className={`mt-2 inline-block rounded-full px-3 py-1 text-[var(--type-caption-size)] font-semibold ${
+                    className={`mt-2 inline-block rounded-full px-3 py-1 text-[length:var(--type-caption-size)] font-semibold ${
                       delta > 0
                         ? "bg-[var(--accent-progress-soft)] text-[var(--accent-progress)]"
                         : "bg-[var(--signal-warning-soft)] text-[var(--signal-warning)]"
@@ -702,18 +713,18 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                     {deltaText} than your {mode === "saved" ? "saved plan" : "baseline"}
                   </p>
                 ) : (
-                  <p className="mt-2 inline-block rounded-full bg-[var(--surface-secondary)] px-3 py-1 text-[var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
+                  <p className="mt-2 inline-block rounded-full bg-[var(--surface-secondary)] px-3 py-1 text-[length:var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
                     {deltaText}
                   </p>
                 )}
-                <p className="mt-3 text-[var(--type-body-size)]">{sentence}</p>
+                <p className="mt-3 text-[length:var(--type-body-size)]">{sentence}</p>
               </>
             ) : (
               <>
-                <p className="text-[var(--type-body-size)] font-bold">
+                <p className="text-[length:var(--type-body-size)] font-bold">
                   Not on track under these assumptions.
                 </p>
-                <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   At {formatUSD(scenProj.effectiveMonthlyInvestmentCents)}/mo invested and{" "}
                   {draft.annualReturnPct.toFixed(2)}% growth, the projection does not reach{" "}
                   {formatUSDCompact(scenProj.targetCents)} within the model horizon. Try raising
@@ -728,7 +739,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
 
           {/* presets */}
           <div>
-            <p className="mb-2 text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+            <p className="mb-2 text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
               Try a preset
             </p>
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -737,7 +748,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                   key={p.id}
                   type="button"
                   onClick={() => applyPreset(p.id)}
-                  className="min-h-[44px] shrink-0 rounded-full bg-[var(--surface-secondary)] px-4 text-[var(--type-caption-size)] font-semibold"
+                  className="min-h-[44px] shrink-0 rounded-full bg-[var(--surface-secondary)] px-4 text-[length:var(--type-caption-size)] font-semibold"
                 >
                   {p.label}
                 </button>
@@ -771,15 +782,15 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                 className="mt-1 h-5 w-5 accent-[var(--accent-progress)]"
               />
               <span>
-                <span className="text-[var(--type-body-size)] font-semibold">Invest the difference</span>
-                <span className="block text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <span className="text-[length:var(--type-body-size)] font-semibold">Invest the difference</span>
+                <span className="block text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   When on, every dollar spent less each month is added to monthly investing.
                 </span>
               </span>
             </label>
 
             <div>
-              <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">Target amount</p>
+              <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">Target amount</p>
               <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Target mode">
                 {(["auto", "custom"] as const).map((m) => (
                   <button
@@ -820,29 +831,29 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                   <button
                     type="button"
                     onClick={() => setDraft((d) => ({ ...d, targetMode: "auto" }))}
-                    className="min-h-[44px] text-[var(--type-caption-size)] font-semibold text-[var(--accent-progress)]"
+                    className="min-h-[44px] text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)]"
                   >
                     Use 25× spending instead
                   </button>
                 </div>
               ) : (
-                <p className="tnum mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <p className="tnum mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   {formatUSD(resolveTargetCents(draft))} — 25 times your annual spending
                 </p>
               )}
             </div>
 
             <details className="rounded-lg bg-[var(--surface-secondary)] p-4">
-              <summary className="min-h-[44px] cursor-pointer text-[var(--type-body-size)] font-semibold">
+              <summary className="min-h-[44px] cursor-pointer text-[length:var(--type-body-size)] font-semibold">
                 Advanced assumptions
               </summary>
               <div className="mt-4 space-y-6">
                 <div>
                   <div className="flex items-baseline justify-between">
-                    <label htmlFor="whatif-return" className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                    <label htmlFor="whatif-return" className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                       Expected return <span className="italic">(assumption, not a behavior)</span>
                     </label>
-                    <span className="tnum text-[var(--type-body-size)] font-semibold">
+                    <span className="tnum text-[length:var(--type-body-size)] font-semibold">
                       {draft.annualReturnPct.toFixed(2)}%
                     </span>
                   </div>
@@ -874,7 +885,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
           {/* feasibility note */}
           {(feas.state === "note" || feas.state === "acknowledge") && (
             <div className="rounded-xl bg-[var(--surface-card)] p-5 elev-1" role="note">
-              <p className="text-[var(--type-body-size)]">
+              <p className="text-[length:var(--type-body-size)]">
                 Heads up: {formatUSD(scenProj.effectiveMonthlyInvestmentCents)}/mo is more than your
                 recent average surplus of {formatUSD(initial.observedSurplusCents ?? 0)}/mo — the
                 projection assumes the full amount gets invested.
@@ -885,10 +896,10 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
           {/* comparison */}
           {changed.length > 0 && (
             <div className="rounded-xl bg-[var(--surface-card)] p-5 elev-1">
-              <p className="mb-3 text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+              <p className="mb-3 text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
                 Saved plan vs this scenario
               </p>
-              <div className="grid grid-cols-[1fr_1fr_1fr] gap-2 text-[var(--type-caption-size)]">
+              <div className="grid grid-cols-[1fr_1fr_1fr] gap-2 text-[length:var(--type-caption-size)]">
                 <span className="sr-only">Assumption</span>
                 <span className="font-semibold text-[var(--text-secondary)]">Saved plan</span>
                 <span className="font-semibold text-[var(--text-secondary)]">This scenario</span>
@@ -896,7 +907,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                   <FragmentRow key={c.key} c={c} />
                 ))}
               </div>
-              <div className="mt-3 grid grid-cols-[1fr_1fr_1fr] gap-2 border-t border-[var(--border-subtle)] pt-3 text-[var(--type-caption-size)]">
+              <div className="mt-3 grid grid-cols-[1fr_1fr_1fr] gap-2 border-t border-[var(--border-subtle)] pt-3 text-[length:var(--type-caption-size)]">
                 <span className="font-semibold">Arrival</span>
                 <span className="tnum">{arrivalMonthLabel(baseProj.arrivalMonth)}</span>
                 <span className="tnum font-semibold">{arrivalMonthLabel(scenProj.arrivalMonth)}</span>
@@ -909,9 +920,14 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
             <button
               type="button"
               onClick={openSave}
-              className="min-h-[48px] w-full rounded-lg bg-[var(--accent-progress)] font-semibold text-white transition-transform active:scale-[0.99]"
+              disabled={mode === "saved" && changed.length === 0}
+              className="min-h-[48px] w-full rounded-lg bg-[var(--accent-progress)] font-semibold text-white transition-transform active:scale-[0.99] disabled:opacity-60"
             >
-              {mode === "demo" ? "Sign in to save plan" : "Save as plan"}
+              {mode === "demo"
+                ? "Sign in to save plan"
+                : mode === "saved" && changed.length === 0
+                  ? "Saved ✓"
+                  : "Save as plan"}
             </button>
             <div className="flex gap-2">
               <button
@@ -934,10 +950,10 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
 
           {/* model note */}
           <details className="rounded-xl bg-[var(--surface-card)] p-5 elev-1">
-            <summary className="min-h-[44px] cursor-pointer text-[var(--type-body-size)] font-semibold">
+            <summary className="min-h-[44px] cursor-pointer text-[length:var(--type-body-size)] font-semibold">
               How this projection works
             </summary>
-            <div className="mt-2 space-y-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            <div className="mt-2 space-y-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               <p>
                 <strong>Illustration, not a guarantee.</strong> Coast compounds monthly using the
                 assumptions shown. It does not include taxes, fees, or market volatility.
@@ -960,10 +976,10 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
           <div className="w-full max-w-md rounded-2xl bg-[var(--surface-card)] p-6 elev-1">
             {conflict ? (
               <>
-                <h3 id="save-confirm-title" ref={confirmRef} tabIndex={-1} className="text-[var(--type-title-size)] font-bold outline-none">
+                <h3 id="save-confirm-title" ref={confirmRef} tabIndex={-1} className="text-[length:var(--type-title-size)] font-bold outline-none">
                   Your saved plan changed
                 </h3>
-                <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   Someone — or another device — updated the plan after you started this scenario.
                   Review the latest before saving again.
                 </p>
@@ -986,16 +1002,16 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
               </>
             ) : (
               <>
-                <h3 id="save-confirm-title" ref={confirmRef} tabIndex={-1} className="text-[var(--type-title-size)] font-bold outline-none">
+                <h3 id="save-confirm-title" ref={confirmRef} tabIndex={-1} className="text-[length:var(--type-title-size)] font-bold outline-none">
                   Save as plan?
                 </h3>
-                <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   This will update your saved plan{changed.length > 0 ? " — these fields change:" : "."}
                 </p>
                 {changed.length > 0 && (
                   <ul className="mt-3 space-y-2">
                     {changed.map((c) => (
-                      <li key={c.key} className="flex items-baseline justify-between gap-2 text-[var(--type-caption-size)]">
+                      <li key={c.key} className="flex items-baseline justify-between gap-2 text-[length:var(--type-caption-size)]">
                         <span className="font-semibold">{c.label}</span>
                         <span className="tnum text-[var(--text-secondary)]">
                           {c.baselineText} → <span className="font-semibold text-[var(--text-primary)]">{c.scenarioText}</span>
@@ -1005,7 +1021,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                   </ul>
                 )}
                 <div className="mt-4">
-                  <label htmlFor="scenario-name" className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                  <label htmlFor="scenario-name" className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                     Scenario name <span className="italic">(optional)</span>
                   </label>
                   <input
@@ -1026,7 +1042,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                       onChange={(e) => setAckFeas(e.target.checked)}
                       className="mt-1 h-5 w-5 accent-[var(--accent-progress)]"
                     />
-                    <span className="text-[var(--type-caption-size)]">
+                    <span className="text-[length:var(--type-caption-size)]">
                       I understand {formatUSD(scenProj.effectiveMonthlyInvestmentCents)}/mo is more
                       than my recent average surplus — the projection assumes the full amount gets
                       invested.
@@ -1034,7 +1050,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                   </label>
                 )}
                 {saveError && (
-                  <p role="alert" className="mt-3 text-[var(--type-caption-size)] font-semibold text-red-600">
+                  <p role="alert" className="mt-3 text-[length:var(--type-caption-size)] font-semibold text-red-600">
                     {saveError}
                   </p>
                 )}
@@ -1062,7 +1078,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
       )}
 
       {toast && (
-        <div role="status" className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[var(--text-primary)] px-4 py-2 text-[var(--type-caption-size)] font-semibold text-[var(--surface-card)] shadow-lg">
+        <div role="status" className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[var(--text-primary)] px-4 py-2 text-[length:var(--type-caption-size)] font-semibold text-[var(--surface-card)] shadow-lg">
           {toast}
         </div>
       )}

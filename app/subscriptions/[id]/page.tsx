@@ -87,7 +87,7 @@ function RepresentativeAmount({ series }: { series: SeriesRow }) {
     return (
       <span>
         <span className="tnum">~{money(single)}</span>
-        <span className="mt-1 block text-[var(--type-caption-size)] font-normal text-[var(--text-secondary)]">
+        <span className="mt-1 block text-[length:var(--type-caption-size)] font-normal text-[var(--text-secondary)]">
           Recent charges ranged {money(m.min_cents)} – {money(m.max_cents)}
         </span>
       </span>
@@ -99,10 +99,10 @@ function RepresentativeAmount({ series }: { series: SeriesRow }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+      <dt className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
         {label}
       </dt>
-      <dd className="mt-0.5 text-[var(--type-body-size)] text-[var(--text-primary)]">{children}</dd>
+      <dd className="mt-0.5 text-[length:var(--type-body-size)] text-[var(--text-primary)]">{children}</dd>
     </div>
   );
 }
@@ -244,12 +244,12 @@ export default function SubscriptionDetailPage() {
       <div className="space-y-4">
         <Link
           href="/subscriptions"
-          className="inline-flex min-h-[44px] items-center text-[var(--type-caption-size)] font-semibold text-[var(--accent-progress)]"
+          className="inline-flex min-h-[44px] items-center text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)]"
         >
           ← All subscriptions
         </Link>
         <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1" role="alert">
-          <p className="text-[var(--type-body-size)] font-semibold">
+          <p className="text-[length:var(--type-body-size)] font-semibold">
             {loadError ?? "Could not load the subscription."}
           </p>
           <button
@@ -511,21 +511,21 @@ export default function SubscriptionDetailPage() {
     <div className="space-y-6">
       <Link
         href="/subscriptions"
-        className="inline-flex min-h-[44px] items-center text-[var(--type-caption-size)] font-semibold text-[var(--accent-progress)]"
+        className="inline-flex min-h-[44px] items-center text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)]"
       >
         ← All subscriptions
       </Link>
 
       <div>
-        <h1 className="text-[var(--type-title-size)] font-bold">{name}</h1>
-        <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <h1 className="text-[length:var(--type-title-size)] font-bold">{name}</h1>
+        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           {billingChannelLabel(series.billing_channel)}
         </p>
       </div>
 
       {notice && (
         <div role="status" className="rounded-xl bg-[var(--accent-progress-soft)] p-4 elev-1">
-          <p className="text-[var(--type-body-size)] text-[var(--accent-progress)]">{notice}</p>
+          <p className="text-[length:var(--type-body-size)] text-[var(--accent-progress)]">{notice}</p>
         </div>
       )}
 
@@ -541,7 +541,7 @@ export default function SubscriptionDetailPage() {
             <span className="text-xl font-bold text-[var(--text-hero-number)]">
               <RepresentativeAmount series={series} />
             </span>
-            <span className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            <span className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               {" "}
               {cadencePer(series.cadence)}
             </span>
@@ -615,7 +615,7 @@ export default function SubscriptionDetailPage() {
                   )
                 }
                 disabled={patching}
-                className="inline-flex min-h-[44px] items-center px-3 text-[var(--type-caption-size)] font-semibold text-[var(--accent-progress)] underline disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center px-3 text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)] underline disabled:opacity-50"
               >
                 Not a subscription
               </button>
@@ -628,7 +628,7 @@ export default function SubscriptionDetailPage() {
                   )
                 }
                 disabled={patching}
-                className="inline-flex min-h-[44px] items-center px-3 text-[var(--type-caption-size)] font-semibold text-[var(--accent-progress)] underline disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center px-3 text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)] underline disabled:opacity-50"
               >
                 Mark duplicate
               </button>
@@ -636,19 +636,19 @@ export default function SubscriptionDetailPage() {
           )}
         </div>
         {series.lifecycle_state === "kept" && (
-          <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             <span aria-hidden="true">✓ </span>You chose to keep this subscription. Coast will still
             flag price increases.
           </p>
         )}
         {series.lifecycle_state === "ended" && (
-          <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             <span aria-hidden="true">✕ </span>This series is ended — no further action is needed
             unless a new charge appears.
           </p>
         )}
         {series.lifecycle_state === "reopened" && (
-          <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             <span aria-hidden="true">↻ </span>
             {STATUS_COPY.reopened}
           </p>
@@ -691,14 +691,14 @@ export default function SubscriptionDetailPage() {
 
       {!openRequest && preview && !preview.eligible && preview.state === "unsupported" && (
         <section aria-label="Unsupported merchant" className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-          <h2 className="text-[var(--type-title-size)] font-bold">No verified route yet</h2>
-          <p className="mt-2 text-[var(--type-body-size)]">
+          <h2 className="text-[length:var(--type-title-size)] font-bold">No verified route yet</h2>
+          <p className="mt-2 text-[length:var(--type-body-size)]">
             {preview.copy ?? STATUS_COPY.unsupported}
           </p>
-          <p className="mt-3 text-[var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
+          <p className="mt-3 text-[length:var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
             What you can do instead:
           </p>
-          <ul className="mt-1 list-disc space-y-1 pl-5 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             <li>Check your email for the original signup receipt.</li>
             <li>Look for the billing descriptor on your statement.</li>
             <li>Cancel where you subscribed — on the merchant&apos;s site or in your app-store account.</li>
@@ -708,8 +708,8 @@ export default function SubscriptionDetailPage() {
 
       {!openRequest && preview && !preview.eligible && preview.state !== "unsupported" && (
         <section aria-label="Route unavailable" className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-          <h2 className="text-[var(--type-title-size)] font-bold">Can&apos;t cancel through Coast</h2>
-          <p className="mt-2 text-[var(--type-body-size)] text-[var(--text-secondary)]">
+          <h2 className="text-[length:var(--type-title-size)] font-bold">Can&apos;t cancel through Coast</h2>
+          <p className="mt-2 text-[length:var(--type-body-size)] text-[var(--text-secondary)]">
             {preview.reason === "action_unsupported"
               ? `Coast doesn't support cancelling ${registryName} through the Action Center.`
               : `This route isn't available right now${
@@ -721,29 +721,29 @@ export default function SubscriptionDetailPage() {
 
       {!openRequest && preview && preview.eligible && (
         <section aria-label="Route preview" className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-          <h2 className="text-[var(--type-title-size)] font-bold">
+          <h2 className="text-[length:var(--type-title-size)] font-bold">
             Here is how this cancellation works
           </h2>
 
           {preview.route_type === "assisted" ? (
-            <p className="mt-2 text-[var(--type-body-size)] text-[var(--text-secondary)]">
+            <p className="mt-2 text-[length:var(--type-body-size)] text-[var(--text-secondary)]">
               Assisted cancellation isn&apos;t enabled yet, so Coast can&apos;t submit this on your
               behalf. The steps below are the best available path.
             </p>
           ) : (
             <>
               {preview.destination_host && (
-                <p className="mt-2 text-[var(--type-body-size)]">
+                <p className="mt-2 text-[length:var(--type-body-size)]">
                   Destination: <span className="tnum font-semibold">{preview.destination_host}</span>
                 </p>
               )}
 
               {steps.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-[var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
+                  <p className="text-[length:var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
                     Expected steps
                   </p>
-                  <ol className="mt-1 list-decimal space-y-1.5 pl-5 text-[var(--type-body-size)]">
+                  <ol className="mt-1 list-decimal space-y-1.5 pl-5 text-[length:var(--type-body-size)]">
                     {steps.map((s, i) => (
                       <li key={i}>{s}</li>
                     ))}
@@ -753,10 +753,10 @@ export default function SubscriptionDetailPage() {
 
               {dataShared.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-[var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
+                  <p className="text-[length:var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
                     Data shared
                   </p>
-                  <ul className="mt-1 list-disc space-y-1 pl-5 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                  <ul className="mt-1 list-disc space-y-1 pl-5 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                     {dataShared.map((d, i) => (
                       <li key={i}>{d}</li>
                     ))}
@@ -764,13 +764,13 @@ export default function SubscriptionDetailPage() {
                 </div>
               )}
 
-              <p className="mt-4 text-[var(--type-body-size)]">
+              <p className="mt-4 text-[length:var(--type-body-size)]">
                 Fee:{" "}
                 <span className="tnum font-semibold">
                   {preview.fee_cents > 0 ? money(preview.fee_cents) : "Free"}
                 </span>
                 {preview.fee_note && (
-                  <span className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                  <span className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                     {" "}
                     — {preview.fee_note}
                   </span>
@@ -779,10 +779,10 @@ export default function SubscriptionDetailPage() {
 
               {warnings.length > 0 && (
                 <div className="mt-3 rounded-lg bg-[var(--signal-warning-soft)] p-3">
-                  <p className="text-[var(--type-caption-size)] font-semibold text-[var(--signal-warning)]">
+                  <p className="text-[length:var(--type-caption-size)] font-semibold text-[var(--signal-warning)]">
                     Before you continue
                   </p>
-                  <ul className="mt-1 list-disc space-y-1 pl-5 text-[var(--type-caption-size)] text-[var(--signal-warning)]">
+                  <ul className="mt-1 list-disc space-y-1 pl-5 text-[length:var(--type-caption-size)] text-[var(--signal-warning)]">
                     {warnings.map((w, i) => (
                       <li key={i}>{w}</li>
                     ))}
@@ -792,10 +792,10 @@ export default function SubscriptionDetailPage() {
 
               {requirements.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-[var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
+                  <p className="text-[length:var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
                     You&apos;ll need
                   </p>
-                  <ul className="mt-1 list-disc space-y-1 pl-5 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                  <ul className="mt-1 list-disc space-y-1 pl-5 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                     {requirements.map((r, i) => (
                       <li key={i}>{r}</li>
                     ))}
@@ -803,14 +803,14 @@ export default function SubscriptionDetailPage() {
                 </div>
               )}
 
-              <p className="mt-4 text-[var(--type-micro-size)] text-[var(--text-micro)]">
+              <p className="mt-4 text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
                 Route last verified {formatDate(preview.source_checked_at) ?? "unknown"}
                 {preview.registry_version != null && ` · version ${preview.registry_version}`}
                 {preview.confidence && ` · ${preview.confidence} confidence`}
               </p>
 
               {preview.next_status_copy && (
-                <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   After you start: {preview.next_status_copy}
                 </p>
               )}
@@ -818,7 +818,7 @@ export default function SubscriptionDetailPage() {
               {preview.route_type === "direct" && (
                 <div
                   role="note"
-                  className="mt-4 rounded-lg bg-[var(--surface-secondary)] p-3 text-[var(--type-body-size)]"
+                  className="mt-4 rounded-lg bg-[var(--surface-secondary)] p-3 text-[length:var(--type-body-size)]"
                 >
                   This opens {preview.destination_host ?? "the merchant's site"} in a new tab.
                   Coast cannot confirm cancellation until you return or we see evidence.
@@ -859,11 +859,11 @@ export default function SubscriptionDetailPage() {
             <h2
               ref={statusHeadingRef}
               tabIndex={-1}
-              className="text-[var(--type-title-size)] font-bold outline-none"
+              className="text-[length:var(--type-title-size)] font-bold outline-none"
             >
               {action?.next_step_copy ?? statusCopyOf(openRequest.status, STATUS_COPY)}
             </h2>
-            <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               {openRequest.action_type} · {openRequest.route_type} route
               {openRequest.verification_level &&
                 ` · ${VERIFICATION_LABEL[openRequest.verification_level] ?? openRequest.verification_level}`}
@@ -872,27 +872,27 @@ export default function SubscriptionDetailPage() {
             {/* Guided steps */}
             {openRequest.route_type !== "direct" && actionable && steps.length > 0 && (
               <div className="mt-4">
-                <p className="text-[var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
+                <p className="text-[length:var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
                   Follow these steps
                 </p>
-                <ol className="mt-1 list-decimal space-y-1.5 pl-5 text-[var(--type-body-size)]">
+                <ol className="mt-1 list-decimal space-y-1.5 pl-5 text-[length:var(--type-body-size)]">
                   {steps.map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}
                 </ol>
-                <p className="mt-2 text-[var(--type-micro-size)] text-[var(--text-micro)]">
+                <p className="mt-2 text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
                   {preview?.registry_version != null && `Route version ${preview.registry_version} · `}
                   Last verified {formatDate(preview?.source_checked_at) ?? "unknown"}
                 </p>
                 {reportDone ? (
-                  <p role="status" className="mt-3 text-[var(--type-caption-size)] font-semibold text-[var(--accent-progress)]">
+                  <p role="status" className="mt-3 text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)]">
                     Thanks — your report was filed. Coast will review this route.
                   </p>
                 ) : (
                   <div className="mt-3">
                     <label
                       htmlFor="stale-note"
-                      className="text-[var(--type-caption-size)] text-[var(--text-secondary)]"
+                      className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]"
                     >
                       Notice something wrong with these steps?
                     </label>
@@ -903,13 +903,13 @@ export default function SubscriptionDetailPage() {
                       onChange={(e) => setReportNote(e.target.value)}
                       placeholder="Optional note"
                       maxLength={280}
-                      className="mt-1 min-h-[44px] w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 text-[var(--type-body-size)]"
+                      className="mt-1 min-h-[44px] w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 text-[length:var(--type-body-size)]"
                     />
                     <button
                       type="button"
                       onClick={reportStale}
                       disabled={reporting}
-                      className="mt-2 inline-flex min-h-[44px] items-center rounded-lg bg-[var(--surface-secondary)] px-4 text-[var(--type-caption-size)] font-semibold disabled:opacity-50"
+                      className="mt-2 inline-flex min-h-[44px] items-center rounded-lg bg-[var(--surface-secondary)] px-4 text-[length:var(--type-caption-size)] font-semibold disabled:opacity-50"
                     >
                       {reporting ? "Filing…" : "This no longer matches"}
                     </button>
@@ -923,7 +923,7 @@ export default function SubscriptionDetailPage() {
               <div className="mt-4">
                 <div
                   role="note"
-                  className="rounded-lg bg-[var(--surface-secondary)] p-3 text-[var(--type-body-size)]"
+                  className="rounded-lg bg-[var(--surface-secondary)] p-3 text-[length:var(--type-body-size)]"
                 >
                   This opens the merchant&apos;s cancellation page in a new tab. Coast cannot
                   confirm cancellation until you return or we see evidence.
@@ -943,19 +943,19 @@ export default function SubscriptionDetailPage() {
             {/* Timeline */}
             {action && action.events.length > 0 && (
               <div className="mt-5">
-                <p className="text-[var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
+                <p className="text-[length:var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
                   Timeline
                 </p>
                 <ol aria-label="Action timeline" className="mt-2 space-y-2">
                   {action.events.map((ev: ActionEvent) => (
-                    <li key={ev.id} className="flex gap-3 text-[var(--type-body-size)]">
+                    <li key={ev.id} className="flex gap-3 text-[length:var(--type-body-size)]">
                       <span
                         aria-hidden="true"
                         className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--accent-progress)]"
                       />
                       <div>
                         <p>{eventLabel(ev.event_type)}</p>
-                        <p className="text-[var(--type-micro-size)] text-[var(--text-micro)]">
+                        <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
                           <span className="tnum">{formatDateTime(ev.occurred_at) ?? "—"}</span>
                           {" · "}
                           {ev.actor_type}
@@ -977,7 +977,7 @@ export default function SubscriptionDetailPage() {
                 }}
               >
                 <fieldset>
-                  <legend className="text-[var(--type-body-size)] font-bold">
+                  <legend className="text-[length:var(--type-body-size)] font-bold">
                     What happened?
                   </legend>
                   <div className="mt-2 space-y-1">
@@ -994,14 +994,14 @@ export default function SubscriptionDetailPage() {
                           onChange={() => setOutcomeChoice(o.value)}
                           className="h-5 w-5 accent-[var(--accent-progress)]"
                         />
-                        <span className="text-[var(--type-body-size)]">{o.label}</span>
+                        <span className="text-[length:var(--type-body-size)]">{o.label}</span>
                       </label>
                     ))}
                   </div>
                 </fieldset>
 
                 <fieldset className="mt-4">
-                  <legend className="text-[var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
+                  <legend className="text-[length:var(--type-caption-size)] font-semibold text-[var(--text-secondary)]">
                     Evidence <span className="font-normal">(optional)</span>
                   </legend>
                   <div className="mt-1 space-y-1">
@@ -1024,13 +1024,13 @@ export default function SubscriptionDetailPage() {
                           onChange={() => setEvidenceChoice(e.value)}
                           className="h-5 w-5 accent-[var(--accent-progress)]"
                         />
-                        <span className="text-[var(--type-body-size)]">{e.label}</span>
+                        <span className="text-[length:var(--type-body-size)]">{e.label}</span>
                       </label>
                     ))}
                   </div>
                   <label
                     htmlFor="evidence-desc"
-                    className="mt-2 block text-[var(--type-caption-size)] text-[var(--text-secondary)]"
+                    className="mt-2 block text-[length:var(--type-caption-size)] text-[var(--text-secondary)]"
                   >
                     Add a note <span className="font-normal">(optional)</span>
                   </label>
@@ -1041,7 +1041,7 @@ export default function SubscriptionDetailPage() {
                     onChange={(e) => setEvidenceDesc(e.target.value)}
                     placeholder="e.g. confirmation number shown on screen"
                     maxLength={280}
-                    className="mt-1 min-h-[44px] w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 text-[var(--type-body-size)]"
+                    className="mt-1 min-h-[44px] w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 text-[length:var(--type-body-size)]"
                   />
                 </fieldset>
 
@@ -1050,7 +1050,7 @@ export default function SubscriptionDetailPage() {
                     <div>
                       <label
                         htmlFor="prior-amount"
-                        className="text-[var(--type-caption-size)] text-[var(--text-secondary)]"
+                        className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]"
                       >
                         Old monthly amount ($)
                       </label>
@@ -1069,7 +1069,7 @@ export default function SubscriptionDetailPage() {
                     <div>
                       <label
                         htmlFor="new-amount"
-                        className="text-[var(--type-caption-size)] text-[var(--text-secondary)]"
+                        className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]"
                       >
                         New monthly amount ($)
                       </label>
@@ -1089,7 +1089,7 @@ export default function SubscriptionDetailPage() {
                 )}
 
                 {formError && (
-                  <p role="alert" className="mt-3 text-[var(--type-caption-size)] font-semibold text-[var(--signal-critical)]">
+                  <p role="alert" className="mt-3 text-[length:var(--type-caption-size)] font-semibold text-[var(--signal-critical)]">
                     {formError}
                   </p>
                 )}
@@ -1110,7 +1110,7 @@ export default function SubscriptionDetailPage() {
                 type="button"
                 onClick={withdraw}
                 disabled={withdrawing}
-                className="mt-3 inline-flex min-h-[44px] items-center px-2 text-[var(--type-caption-size)] font-semibold text-[var(--signal-critical)] underline disabled:opacity-50"
+                className="mt-3 inline-flex min-h-[44px] items-center px-2 text-[length:var(--type-caption-size)] font-semibold text-[var(--signal-critical)] underline disabled:opacity-50"
               >
                 {withdrawing ? "Withdrawing…" : "Withdraw this request"}
               </button>
@@ -1120,38 +1120,38 @@ export default function SubscriptionDetailPage() {
           {/* Savings */}
           {savings && (savings.monthly_cents > 0 || savings.annual_cents > 0 || savings.one_time_cents > 0 || savings.basis?.note) && (
             <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-              <h2 className="text-[var(--type-title-size)] font-bold">
+              <h2 className="text-[length:var(--type-title-size)] font-bold">
                 Savings — {VERIFICATION_LABEL[savings.verification] ?? savings.verification}
               </h2>
               {savings.verification === "reported" && (
-                <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   Reported by you — not yet verified against your ledger.
                 </p>
               )}
               <dl className="mt-3 space-y-2">
                 <div className="flex items-baseline justify-between">
-                  <dt className="text-[var(--type-body-size)]">Monthly</dt>
-                  <dd className="tnum text-[var(--type-body-size)] font-bold">
+                  <dt className="text-[length:var(--type-body-size)]">Monthly</dt>
+                  <dd className="tnum text-[length:var(--type-body-size)] font-bold">
                     {money(savings.monthly_cents)}
                   </dd>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <dt className="text-[var(--type-body-size)]">Annual</dt>
-                  <dd className="tnum text-[var(--type-body-size)] font-bold">
+                  <dt className="text-[length:var(--type-body-size)]">Annual</dt>
+                  <dd className="tnum text-[length:var(--type-body-size)] font-bold">
                     {money(savings.annual_cents)}
                   </dd>
                 </div>
                 {savings.one_time_cents > 0 && (
                   <div className="flex items-baseline justify-between">
-                    <dt className="text-[var(--type-body-size)]">One-time refund</dt>
-                    <dd className="tnum text-[var(--type-body-size)] font-bold">
+                    <dt className="text-[length:var(--type-body-size)]">One-time refund</dt>
+                    <dd className="tnum text-[length:var(--type-body-size)] font-bold">
                       {money(savings.one_time_cents)}
                     </dd>
                   </div>
                 )}
               </dl>
               {savings.basis?.note && (
-                <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   {savings.basis.note}
                 </p>
               )}
@@ -1166,7 +1166,7 @@ export default function SubscriptionDetailPage() {
                 </button>
               )}
               {handoffError && (
-                <p role="alert" className="mt-2 text-[var(--type-caption-size)] font-semibold text-[var(--signal-critical)]">
+                <p role="alert" className="mt-2 text-[length:var(--type-caption-size)] font-semibold text-[var(--signal-critical)]">
                   {handoffError}
                 </p>
               )}
@@ -1176,17 +1176,17 @@ export default function SubscriptionDetailPage() {
           {/* Planner handoff */}
           {handoff && (
             <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-              <h2 className="text-[var(--type-title-size)] font-bold">What this could change</h2>
-              <p className="mt-2 text-[var(--type-body-size)] text-[var(--text-secondary)]">
+              <h2 className="text-[length:var(--type-title-size)] font-bold">What this could change</h2>
+              <p className="mt-2 text-[length:var(--type-body-size)] text-[var(--text-secondary)]">
                 {handoff.handoff.note}
               </p>
-              <p className="tnum mt-3 text-[var(--type-body-size)]">
+              <p className="tnum mt-3 text-[length:var(--type-body-size)]">
                 Temporary scenario: invest{" "}
                 <span className="font-bold">
                   {money(handoff.handoff.scenario_monthly_investment_cents)}/mo
                 </span>
               </p>
-              <p className="mt-1 text-[var(--type-micro-size)] text-[var(--text-micro)]">
+              <p className="mt-1 text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
                 Temporary only ·{" "}
                 {formatScenarioProvenance(
                   handoff.handoff.baseline_version,
@@ -1194,7 +1194,7 @@ export default function SubscriptionDetailPage() {
                 )}
               </p>
               {handoff.baseline_note && (
-                <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   {handoff.baseline_note}
                 </p>
               )}
@@ -1207,13 +1207,13 @@ export default function SubscriptionDetailPage() {
                   >
                     Explore in What-If planner
                   </button>
-                  <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                  <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                     This opens a temporary scenario — nothing is saved. The planner&apos;s
                     &ldquo;Save as plan&rdquo; confirmation is the only way to change your plan.
                   </p>
                 </>
               ) : (
-                <p className="mt-3 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+                <p className="mt-3 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
                   These savings are cash only — the current planner can&apos;t model their
                   duration, so there&apos;s no Number impact to explore.
                 </p>

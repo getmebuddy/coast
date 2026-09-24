@@ -12,7 +12,7 @@ export default function HeroNumber({
 }) {
   return (
     <div className="text-left">
-      <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+      <p className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
         {label}
       </p>
       <CountUp
@@ -20,7 +20,7 @@ export default function HeroNumber({
         className="text-hero font-bold text-[var(--text-hero-number)] leading-none mt-1 block"
       />
       {sub && (
-        <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">{sub}</p>
+        <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">{sub}</p>
       )}
     </div>
   );

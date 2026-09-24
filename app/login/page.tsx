@@ -44,13 +44,13 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto max-w-sm pt-10">
-      <h1 className="text-[var(--type-title-size)] font-bold">Welcome to Coast</h1>
-      <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+      <h1 className="text-[length:var(--type-title-size)] font-bold">Welcome to Coast</h1>
+      <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
         Sign in to see your real numbers. Demo mode works without an account.
       </p>
       <form onSubmit={submit} className="mt-6 space-y-3">
         <div>
-          <label htmlFor="email" className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <label htmlFor="email" className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             Email
           </label>
           <input
@@ -64,7 +64,7 @@ export default function LoginPage() {
         </div>
         {mode === "password" && (
           <div>
-            <label htmlFor="password" className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            <label htmlFor="password" className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               Password
             </label>
             <input
@@ -86,18 +86,18 @@ export default function LoginPage() {
       </form>
       <button
         onClick={() => setMode(mode === "magic" ? "password" : "magic")}
-        className="mt-3 w-full text-center text-[var(--type-caption-size)] text-[var(--accent-progress)] font-semibold"
+        className="mt-3 w-full text-center text-[length:var(--type-caption-size)] text-[var(--accent-progress)] font-semibold"
       >
         {mode === "magic" ? "Use password instead" : "Email me a magic link instead"}
       </button>
       {status && (
-        <p role="status" className="mt-3 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p role="status" className="mt-3 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           {status}
         </p>
       )}
       {typeof window !== "undefined" &&
         new URLSearchParams(window.location.search).get("error") === "link" && (
-          <p role="alert" className="mt-3 text-[var(--type-caption-size)] font-semibold text-red-600">
+          <p role="alert" className="mt-3 text-[length:var(--type-caption-size)] font-semibold text-red-600">
             That sign-in link didn&apos;t work — request a fresh one below.
           </p>
         )}

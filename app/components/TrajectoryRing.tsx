@@ -67,7 +67,7 @@ export default function TrajectoryRing({
         <span className="tnum text-4xl font-bold text-[var(--text-hero-number)]">
           {sweep.toFixed(1)}%
         </span>
-        <span className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)] mt-1">
+        <span className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)] mt-1">
           of the way
         </span>
       </div>

@@ -35,13 +35,13 @@ export default function Home() {
     <div className="space-y-8">
       <section aria-label="Trajectory" className="space-y-5 pt-2">
         <div>
-          <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+          <p className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
             The Number
           </p>
           <p className="tnum mt-1 text-3xl font-bold text-[var(--text-hero-number)]">
             {formatUSD(target)}
           </p>
-          <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
             {proj.reachable
               ? `On track for ${monthYear(proj.dateISO)} — ${proj.months} months out`
               : "Not on track yet — your plan needs a nudge"}
@@ -56,11 +56,11 @@ export default function Home() {
         aria-label="Safe to spend"
         className="rounded-xl bg-[var(--surface-card)] p-6 elev-1"
       >
-        <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+        <p className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
           Safe to spend today
         </p>
         <CountUp cents={sts} className="mt-1 block text-4xl font-bold text-[var(--text-hero-number)]" />
-        <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           Income minus committed bills minus your budget, split over the days left.
         </p>
       </section>
@@ -69,15 +69,15 @@ export default function Home() {
         aria-label="Subscriptions"
         className="rounded-xl bg-[var(--surface-card)] p-6 elev-1"
       >
-        <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+        <p className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
           Subscription reveal
         </p>
-        <p className="mt-2 text-[var(--type-body-size)] text-[var(--text-primary)]">
+        <p className="mt-2 text-[length:var(--type-body-size)] text-[var(--text-primary)]">
           We found{" "}
           <CountUp cents={demoMonthlyRecurringCents} className="font-bold text-[var(--accent-progress)]" />{" "}
           in <span className="font-bold">{subCount}</span> subscriptions.
         </p>
-        <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
           One price went up this month — see the Brief for the details.
         </p>
       </section>

@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <header className="sticky top-0 z-40 border-b border-[var(--border-subtle)] bg-[var(--surface-primary)]/90 backdrop-blur">
           <div className="mx-auto max-w-xl flex items-center justify-between px-4 py-3">
-            <span className="text-[var(--type-title-size)] font-bold tracking-tight text-[var(--text-hero-number)]">
+            <span className="text-[length:var(--type-title-size)] font-bold tracking-tight text-[var(--text-hero-number)]">
               Coast
             </span>
             <ThemeToggle />

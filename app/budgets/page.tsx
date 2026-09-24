@@ -19,7 +19,7 @@ function PaceBar({ spent, limit }: { spent: number; limit: number }) {
           style={{ width: `${pct}%` }}
         />
       </div>
-      <div className="mt-1 flex justify-between text-[var(--type-micro-size)] text-[var(--text-micro)]">
+      <div className="mt-1 flex justify-between text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
         <span className="tnum">{formatUSD(spent)}</span>
         <span className="tnum">{formatUSD(limit)}</span>
       </div>
@@ -55,12 +55,12 @@ export default function BudgetsPage() {
       <div className="space-y-4">
         <button
           onClick={() => setDrill(null)}
-          className="text-[var(--type-caption-size)] text-[var(--accent-progress)] font-semibold"
+          className="text-[length:var(--type-caption-size)] text-[var(--accent-progress)] font-semibold"
         >
           ← Back to budgets
         </button>
         <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-          <h1 className="text-[var(--type-title-size)] font-bold">
+          <h1 className="text-[length:var(--type-title-size)] font-bold">
             {drill === "__total__" ? "All September spending" : drill}
           </h1>
           {drillBudget && <PaceBar spent={drillSpent} limit={drillBudget.limit_cents} />}
@@ -69,8 +69,8 @@ export default function BudgetsPage() {
           {drillTxns.map((t) => (
             <li key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
               <div className="min-w-0">
-                <p className="truncate text-[var(--type-body-size)]">{t.merchant}</p>
-                <p className="text-[var(--type-micro-size)] text-[var(--text-micro)]">
+                <p className="truncate text-[length:var(--type-body-size)]">{t.merchant}</p>
+                <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
                   {t.date} · {t.category}
                 </p>
               </div>
@@ -89,7 +89,7 @@ export default function BudgetsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-[var(--type-title-size)] font-bold">September budgets</h1>
+      <h1 className="text-[length:var(--type-title-size)] font-bold">September budgets</h1>
       <ul className="space-y-3">
         {rows.map((b) => (
           <li key={b.category}>
@@ -98,7 +98,7 @@ export default function BudgetsPage() {
               className="w-full rounded-xl bg-[var(--surface-card)] p-4 text-left elev-1 transition-transform active:scale-[0.99]"
             >
               <div className="flex items-center justify-between">
-                <p className="text-[var(--type-body-size)] font-semibold">
+                <p className="text-[length:var(--type-body-size)] font-semibold">
                   {b.category === "__total__" ? "Monthly ceiling" : b.category}
                 </p>
                 <span aria-hidden className="text-[var(--text-micro)]">›</span>
@@ -108,7 +108,7 @@ export default function BudgetsPage() {
           </li>
         ))}
       </ul>
-      <p className="text-[var(--type-micro-size)] text-[var(--text-micro)]">
+      <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
         Tap a category to see its charges, biggest first.
       </p>
     </div>
