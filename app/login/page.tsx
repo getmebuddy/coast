@@ -16,19 +16,25 @@ export default function LoginPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus(null);
+    // Honor ?next= (e.g. /login?next=/number) so post-auth drafts restore.
+    const rawNext = new URLSearchParams(window.location.search).get("next");
+    const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+    const redirectTo =
+      magicLinkRedirectTo(window.location.origin) +
+      (next === "/" ? "" : `?next=${encodeURIComponent(next)}`);
     const supabase = createClient();
     try {
       if (mode === "magic") {
         const { error } = await supabase.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo: magicLinkRedirectTo(window.location.origin) },
+          options: { emailRedirectTo: redirectTo },
         });
         if (error) throw error;
         setStatus("Check your email for the sign-in link.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.push("/");
+        router.push(next);
         router.refresh();
       }
     } catch (err) {

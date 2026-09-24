@@ -1,191 +1,119 @@
-"use client";
-
 /**
- * The Number — your finish line. Editable assumptions, projected date,
- * and what-if sliders that recompute the FIRE date LIVE on every input event.
+ * The Number — server wrapper.
+ *
+ * Loads the planner baseline: the signed-in user's saved FIRE settings when
+ * present, the Number setup state when they have none, and seeded demo
+ * settings for signed-out demo mode. All interactivity lives in
+ * WhatIfPlanner (client).
  */
-import { useMemo, useState } from "react";
+import { createServerSupabase } from "@/lib/supabase/server";
+import { demoSurplus, observedMonthlySurplusCents } from "@/lib/whatif";
+import { demoTransactions } from "@/lib/demo";
 import { demoFire } from "@/lib/demo";
-import {
-  formatUSD,
-  formatUSDCompact,
-  monthYear,
-  progressPct,
-  projectedFire,
-  targetNumberCents,
-} from "@/lib/fire";
-import TrajectoryRing from "../components/TrajectoryRing";
+import type { WhatIfInputs } from "@/lib/whatif";
+import WhatIfPlanner, { type PlannerInitial, type PlannerMode } from "./WhatIfPlanner";
 
-function Slider({
-  label,
-  value,
-  min,
-  max,
-  step,
-  display,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  display: string;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <label className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">{label}</label>
-        <span className="tnum text-[var(--type-body-size)] font-semibold">{display}</span>
-      </div>
-      <input
-        type="range"
-        className="whatif"
-        aria-label={label}
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-      />
-    </div>
-  );
+function demoBaseline(): WhatIfInputs {
+  return {
+    monthlySpendingCents: Math.round(demoFire.annual_spending_cents / 12),
+    portfolioCents: demoFire.portfolio_cents,
+    monthlyInvestmentCents: demoFire.monthly_savings_cents,
+    annualReturnPct: demoFire.expected_return_pct,
+    targetMode: "auto",
+    customTargetCents: null,
+    investDifference: false,
+  };
 }
 
-export default function NumberPage() {
-  const [annualSpending, setAnnualSpending] = useState(demoFire.annual_spending_cents);
-  const [portfolio, setPortfolio] = useState(demoFire.portfolio_cents);
-  const [monthlySavings, setMonthlySavings] = useState(demoFire.monthly_savings_cents);
-  const [expectedReturn, setExpectedReturn] = useState(demoFire.expected_return_pct);
+interface FireSettingsRow {
+  annual_spending_cents: number;
+  portfolio_cents: number;
+  monthly_savings_cents: number;
+  expected_return_pct: number | string;
+  target_number_cents: number | null;
+  target_mode: string | null;
+  settings_version: number | null;
+  updated_at: string;
+}
 
-  // Recompute on EVERY input event — the date moves as the thumb moves.
-  const target = useMemo(() => targetNumberCents(annualSpending), [annualSpending]);
-  const proj = useMemo(
-    () =>
-      projectedFire({
-        portfolioCents: portfolio,
-        monthlySavingsCents: monthlySavings,
-        annualReturnPct: expectedReturn,
-        targetCents: target,
-      }),
-    [portfolio, monthlySavings, expectedReturn, target]
-  );
-  const pct = progressPct(portfolio, target);
+function rowToInputs(row: FireSettingsRow): WhatIfInputs {
+  return {
+    monthlySpendingCents: Math.round(row.annual_spending_cents / 12),
+    portfolioCents: row.portfolio_cents,
+    monthlyInvestmentCents: row.monthly_savings_cents,
+    annualReturnPct: Number(row.expected_return_pct),
+    targetMode: row.target_mode === "custom" ? "custom" : "auto",
+    customTargetCents: row.target_number_cents,
+    investDifference: false,
+  };
+}
 
-  // Saved-plan comparison: the demo baseline vs the current what-if scenario
-  const saved = useMemo(
-    () =>
-      projectedFire({
-        portfolioCents: demoFire.portfolio_cents,
-        monthlySavingsCents: demoFire.monthly_savings_cents,
-        annualReturnPct: demoFire.expected_return_pct,
-        targetCents: targetNumberCents(demoFire.annual_spending_cents),
-      }),
-    []
-  );
-  const deltaMonths =
-    proj.reachable && saved.reachable ? saved.months - proj.months : null;
+export default async function NumberPage() {
+  let initial: PlannerInitial = {
+    baseline: demoBaseline(),
+    settingsVersion: 0,
+    savedAt: null,
+    mode: "demo",
+    observedSurplusCents: demoSurplus(
+      demoTransactions.map((t) => ({
+        amount_cents: t.amount_cents,
+        kind: t.kind,
+        posted_at: t.date,
+        pending: t.pending,
+      }))
+    ),
+  };
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
-          The Number
-        </h1>
-        <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
-          Your finish line — the amount that makes work optional.
-        </p>
-      </div>
+  try {
+    const supabase = createServerSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      <div className="flex flex-col items-center gap-3">
-        <TrajectoryRing pct={pct} />
-        <p className="tnum text-3xl font-bold text-[var(--text-hero-number)]">
-          {formatUSDCompact(target)}
-        </p>
-        <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
-          25× your annual spending · 4% rule
-        </p>
-      </div>
+    if (user) {
+      const { data: row } = await supabase
+        .from("fire_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-      <div className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
-        {proj.reachable ? (
-          <>
-            <p className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
-              Projected date
-            </p>
-            <p className="tnum mt-1 text-2xl font-bold text-[var(--text-hero-number)]">
-              {monthYear(proj.dateISO)}
-            </p>
-            <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
-              {proj.months} months away
-            </p>
-          </>
-        ) : (
-          <p className="text-[var(--type-body-size)]">
-            Not on track yet — even a small monthly increase moves the date.
-          </p>
-        )}
-        {deltaMonths !== null && deltaMonths !== 0 && (
-          <p
-            className={`mt-2 rounded-full px-3 py-1 text-[var(--type-caption-size)] font-semibold inline-block ${
-              deltaMonths > 0
-                ? "bg-[var(--accent-progress-soft)] text-[var(--accent-progress)]"
-                : "bg-[var(--signal-warning-soft)] text-[var(--signal-warning)]"
-            }`}
-          >
-            {deltaMonths > 0
-              ? `${deltaMonths} months sooner than your saved plan`
-              : `${Math.abs(deltaMonths)} months later than your saved plan`}
-          </p>
-        )}
-      </div>
+      // Observed monthly surplus from the user's own ledger (best effort).
+      let surplus: number | null = null;
+      try {
+        const { data: txns } = await supabase
+          .from("transactions")
+          .select("amount_cents,kind,posted_at,pending")
+          .eq("user_id", user.id)
+          .limit(2000);
+        if (txns && txns.length > 0) {
+          surplus = observedMonthlySurplusCents(txns);
+        }
+      } catch {
+        /* surplus stays null — feasibility note simply won't show */
+      }
 
-      <div className="rounded-xl bg-[var(--surface-card)] p-5 elev-1 space-y-5">
-        <h2 className="text-[var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
-          What if…
-        </h2>
-        <Slider
-          label="Annual spending"
-          value={annualSpending}
-          min={60_000_00}
-          max={240_000_00}
-          step={5_000_00}
-          display={formatUSD(annualSpending) + "/yr"}
-          onChange={setAnnualSpending}
-        />
-        <Slider
-          label="Monthly savings"
-          value={monthlySavings}
-          min={0}
-          max={15_000_00}
-          step={100_00}
-          display={formatUSD(monthlySavings) + "/mo"}
-          onChange={setMonthlySavings}
-        />
-        <Slider
-          label="Expected return"
-          value={expectedReturn}
-          min={0}
-          max={12}
-          step={0.25}
-          display={`${expectedReturn.toFixed(2)}%`}
-          onChange={setExpectedReturn}
-        />
-        <Slider
-          label="Current portfolio"
-          value={portfolio}
-          min={0}
-          max={1_000_000_00}
-          step={5_000_00}
-          display={formatUSD(portfolio)}
-          onChange={setPortfolio}
-        />
-      </div>
+      if (row) {
+        const typed = row as FireSettingsRow;
+        initial = {
+          baseline: rowToInputs(typed),
+          settingsVersion: typed.settings_version ?? 1,
+          savedAt: typed.updated_at,
+          mode: "saved" as PlannerMode,
+          observedSurplusCents: surplus,
+        };
+      } else {
+        initial = {
+          baseline: demoBaseline(),
+          settingsVersion: 0,
+          savedAt: null,
+          mode: "setup" as PlannerMode,
+          observedSurplusCents: surplus,
+        };
+      }
+    }
+  } catch {
+    /* fall back to demo baseline — the planner still works */
+  }
 
-      <p className="text-[var(--type-caption-size)] text-[var(--text-secondary)]">
-        Heard of FIRE? That's this. Drag a slider — the date moves with your thumb.
-      </p>
-    </div>
-  );
+  return <WhatIfPlanner initial={initial} />;
 }
