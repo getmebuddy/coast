@@ -14,7 +14,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { STATUS_COPY, type ActionState } from "@/lib/subscriptions";
+import { STATUS_COPY, formatScenarioProvenance, type ActionState } from "@/lib/subscriptions";
 import { TEMP_SCENARIO_KEY } from "@/app/number/WhatIfPlanner";
 import { ApiError, getJSON, patchJSON, postJSON } from "../client";
 import {
@@ -1187,8 +1187,11 @@ export default function SubscriptionDetailPage() {
                 </span>
               </p>
               <p className="mt-1 text-[var(--type-micro-size)] text-[var(--text-micro)]">
-                Temporary only · baseline v{handoff.handoff.baseline_version} · calc{" "}
-                {handoff.handoff.calc_version}
+                Temporary only ·{" "}
+                {formatScenarioProvenance(
+                  handoff.handoff.baseline_version,
+                  handoff.handoff.calc_version
+                )}
               </p>
               {handoff.baseline_note && (
                 <p className="mt-2 text-[var(--type-caption-size)] text-[var(--text-secondary)]">

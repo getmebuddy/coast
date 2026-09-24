@@ -31,6 +31,7 @@ import {
   type WhatIfInputs,
 } from "@/lib/whatif";
 import { trackPlannerEvent } from "@/lib/analytics";
+import { formatScenarioProvenance } from "@/lib/subscriptions";
 import { formatUSD, formatUSDCompact, monthYear, progressPct } from "@/lib/fire";
 import TrajectoryRing from "../components/TrajectoryRing";
 export type PlannerMode = "saved" | "setup" | "demo";
@@ -647,9 +648,10 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
           </p>
           {(tempScenario.baselineVersion || tempScenario.calcVersion) && (
             <p className="mt-1 text-[var(--type-micro-size)] text-[var(--text-micro)]">
-              {tempScenario.baselineVersion && `Baseline v${tempScenario.baselineVersion}`}
-              {tempScenario.baselineVersion && tempScenario.calcVersion && " · "}
-              {tempScenario.calcVersion && `Calc ${tempScenario.calcVersion}`}
+              {formatScenarioProvenance(
+                tempScenario.baselineVersion,
+                tempScenario.calcVersion
+              )}
             </p>
           )}
           <button

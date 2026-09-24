@@ -12,6 +12,7 @@ import {
   assertTransition,
   buildPlannerHandoff,
   consentBlocksSubmission,
+  formatScenarioProvenance,
   isConsentValid,
   isTerminalOutcome,
   matchMerchant,
@@ -631,6 +632,38 @@ describe("buildPlannerHandoff", () => {
     const h = buildPlannerHandoff(input);
     expect(h.note).toMatch(/could|under these assumptions/);
     expect(h.note).not.toMatch(/\bwill\b/);
+  });
+});
+
+// ---------- scenario provenance (plain language, no internal codes) ----------
+
+describe("formatScenarioProvenance", () => {
+  it("translates the no-saved-plan + subscription handoff case", () => {
+    expect(formatScenarioProvenance("none", "sac-1.0")).toBe(
+      "No saved plan yet · Subscription savings calculation"
+    );
+  });
+  it("names the saved plan version when one exists", () => {
+    expect(formatScenarioProvenance("3", "sac-1.0")).toBe(
+      "Compared against saved plan v3 · Subscription savings calculation"
+    );
+  });
+  it("never leaks internal codes", () => {
+    for (const out of [
+      formatScenarioProvenance("none", "sac-1.0"),
+      formatScenarioProvenance("2", "fire-monthly-v1"),
+    ]) {
+      expect(out).not.toMatch(/vnone/i);
+      expect(out).not.toMatch(/sac-1\.0/);
+      expect(out).not.toMatch(/\bcalc\b/i);
+    }
+  });
+  it("omits empty parts", () => {
+    expect(formatScenarioProvenance("", "sac-1.0")).toBe(
+      "Subscription savings calculation"
+    );
+    expect(formatScenarioProvenance("none", "")).toBe("No saved plan yet");
+    expect(formatScenarioProvenance("", "")).toBe("");
   });
 });
 

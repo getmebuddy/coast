@@ -646,6 +646,31 @@ export function buildPlannerHandoff(input: PlannerHandoffInput): PlannerHandoff 
 }
 
 // ---------------------------------------------------------------------------
+// Scenario provenance (plain language)
+// ---------------------------------------------------------------------------
+
+/**
+ * Plain-language provenance for a scenario: which baseline plan and which
+ * calculator produced it. Internal codes are translated so the line reads
+ * for a person, not a debugger: "none" -> "No saved plan yet",
+ * "sac-1.0" -> "Subscription savings calculation". Empty parts are omitted.
+ */
+export function formatScenarioProvenance(
+  baselineVersion: string,
+  calcVersion: string
+): string {
+  const parts: string[] = [];
+  if (baselineVersion === "none") parts.push("No saved plan yet");
+  else if (baselineVersion)
+    parts.push(`Compared against saved plan v${baselineVersion}`);
+  if (calcVersion === "sac-1.0") parts.push("Subscription savings calculation");
+  else if (calcVersion === "fire-monthly-v1")
+    parts.push("What-if planner calculation");
+  else if (calcVersion) parts.push(`Calculation ${calcVersion}`);
+  return parts.join(" · ");
+}
+
+// ---------------------------------------------------------------------------
 // Status copy (spec §11; §14 interaction/content tests)
 // ---------------------------------------------------------------------------
 
