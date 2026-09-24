@@ -557,12 +557,16 @@ describe("shouldReopenSeries", () => {
 
 describe("buildPlannerHandoff", () => {
   const input = {
-    savings: { monthly_cents: 3000, modeled_months: 12 as number | null },
+    savings: {
+      monthly_cents: 3000,
+      modeled_months: null as number | null,
+      permanent: true, // cancelled: savings recur indefinitely
+    },
     baseline: { monthly_investment_cents: 100000, version: "plan-v3" },
     calc_version: "fire-monthly-v1",
   };
 
-  it("adds modeled savings to a temp scenario and preserves versions", () => {
+  it("adds permanent (cancelled) savings to a temp scenario and preserves versions", () => {
     const h = buildPlannerHandoff(input);
     expect(h.temp_only).toBe(true);
     expect(h.scenario_monthly_investment_cents).toBe(103000);
@@ -570,16 +574,53 @@ describe("buildPlannerHandoff", () => {
     expect(h.calc_version).toBe("fire-monthly-v1");
     expect(h.number_impact_available).toBe(true);
   });
-  it("unknown promo duration: cash only, no Number impact, copy hedged", () => {
+  it("regression: permanent savings with null modeled_months are NOT treated as temporary", () => {
+    // modeled_months is null for permanent savings too — null alone must
+    // never suppress the Number impact.
     const h = buildPlannerHandoff({
       ...input,
-      savings: { monthly_cents: 3000, modeled_months: null },
+      savings: { monthly_cents: 1799, modeled_months: null, permanent: true },
+    });
+    expect(h.number_impact_available).toBe(true);
+    expect(h.scenario_monthly_investment_cents).toBe(
+      input.baseline.monthly_investment_cents + 1799
+    );
+  });
+  it("downgraded (permanent) savings get Number impact", () => {
+    const h = buildPlannerHandoff({
+      ...input,
+      savings: { monthly_cents: 1500, modeled_months: null, permanent: true },
+    });
+    expect(h.number_impact_available).toBe(true);
+  });
+  it("negotiated with known promo duration: cash only, engine cannot model temporary cash flows", () => {
+    const h = buildPlannerHandoff({
+      ...input,
+      savings: { monthly_cents: 3000, modeled_months: 12, permanent: false },
     });
     expect(h.number_impact_available).toBe(false);
     expect(h.scenario_monthly_investment_cents).toBe(
       input.baseline.monthly_investment_cents
     );
     expect(h.note).toMatch(/cash savings/i);
+  });
+  it("unknown promo duration: cash only, no Number impact, copy hedged", () => {
+    const h = buildPlannerHandoff({
+      ...input,
+      savings: { monthly_cents: 3000, modeled_months: null, permanent: false },
+    });
+    expect(h.number_impact_available).toBe(false);
+    expect(h.scenario_monthly_investment_cents).toBe(
+      input.baseline.monthly_investment_cents
+    );
+    expect(h.note).toMatch(/cash savings/i);
+  });
+  it("zero savings: cash only", () => {
+    const h = buildPlannerHandoff({
+      ...input,
+      savings: { monthly_cents: 0, modeled_months: null, permanent: true },
+    });
+    expect(h.number_impact_available).toBe(false);
   });
   it("never mutates the plan input", () => {
     const before = JSON.parse(JSON.stringify(input));

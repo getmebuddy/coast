@@ -581,7 +581,20 @@ export function shouldReopenSeries(
 // ---------------------------------------------------------------------------
 
 export interface PlannerHandoffInput {
-  savings: { monthly_cents: number; modeled_months: number | null };
+  savings: {
+    monthly_cents: number;
+    modeled_months: number | null;
+    /**
+     * True when the savings recur indefinitely (cancelled, downgraded) and
+     * can therefore be modeled as a permanent monthly contribution. False
+     * for duration-bounded or unknown-duration savings (negotiated, paused),
+     * which the current planner engine cannot model as temporary cash flows.
+     * Note: modeled_months is null for BOTH permanent savings and
+     * unknown-duration negotiated savings, so null alone must never be
+     * treated as "temporary" — that is exactly the bug this flag fixes.
+     */
+    permanent: boolean;
+  };
   baseline: { monthly_investment_cents: number; version: string };
   calc_version: string;
 }
@@ -601,17 +614,20 @@ export interface PlannerHandoff {
 }
 
 /**
- * Build a temporary What-If scenario input from verified savings (spec §7).
+ * Build a temporary What-If scenario input from savings (spec §7).
  *  - Never mutates the saved plan: returns a scenario input only. The caller
  *    must still require the existing "Save as plan" confirmation.
- *  - If the savings are temporary and the engine cannot model temporary cash
- *    flows (modeled_months null on a negotiated outcome), number_impact_available
- *    is false: show cash savings only, no Number impact.
+ *  - Number impact is available only for permanent savings (cancelled,
+ *    downgraded): they recur indefinitely and can be modeled as a permanent
+ *    monthly contribution. Duration-bounded or unknown-duration savings
+ *    (negotiated, paused) are shown as cash only, because the current engine
+ *    cannot model temporary cash flows. modeled_months being null does NOT
+ *    imply temporary — it is null for permanent savings too.
  *  - Copy uses "could" / "under these assumptions", never "will".
  */
 export function buildPlannerHandoff(input: PlannerHandoffInput): PlannerHandoff {
   const impactAvailable =
-    input.savings.modeled_months !== null && input.savings.monthly_cents > 0;
+    input.savings.permanent && input.savings.monthly_cents > 0;
   const scenario =
     impactAvailable
       ? input.baseline.monthly_investment_cents + input.savings.monthly_cents

@@ -37,7 +37,7 @@ export async function POST(
 
   const { data: savings } = await supabase
     .from("savings_outcomes")
-    .select("monthly_cents, modeled_months, verification")
+    .select("monthly_cents, modeled_months, verification, basis")
     .eq("request_id", request.id)
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -69,6 +69,14 @@ export async function POST(
     savings: {
       monthly_cents: savings.monthly_cents ?? 0,
       modeled_months: savings.modeled_months ?? null,
+      // modeled_months is null for BOTH permanent savings (cancelled,
+      // downgraded) and unknown-duration negotiated savings, so permanence
+      // comes from the recorded outcome type, never from the null.
+      permanent:
+        (savings.basis as { outcome?: string } | null)?.outcome ===
+          "cancelled" ||
+        (savings.basis as { outcome?: string } | null)?.outcome ===
+          "downgraded",
     },
     baseline,
     calc_version: "sac-1.0",
