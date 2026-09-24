@@ -176,6 +176,19 @@ async function syncOneItem(
  * the result. Reads ~13 months of posted outflows, detects, and upserts
  * into `recurring` on (user_id, merchant_normalized) — idempotent.
  * A user's explicit dismissal ("not a subscription") is preserved.
+ *
+ * Subscription Action Center preservation: the detector owns only the
+ * detector columns (amounts, cadence, dates, price flags). User/system-curated
+ * columns — merchant_key, billing_channel, lifecycle_state, user_correction,
+ * amount_model, confidence — are snapshotted before the upsert and re-applied
+ * so a refresh never clobbers them (spec FR-02/FR-03). next_expected_at is
+ * detector-owned only for active rows.
+ *
+ * Possible renewal (spec FR-15/FR-26): a series that was 'ended' with no user
+ * correction reopens as 'reopened' when the detector reports a newer charge
+ * (its next_charge_date advanced past the stored one; last_charge_date is not
+ * a stored column, so the advanced next date is the "newer charge" signal).
+ * Reopening appends nothing — no request, no event.
  */
 async function refreshRecurring(
   supabase: ReturnType<typeof createServiceSupabase>,
@@ -208,14 +221,69 @@ async function refreshRecurring(
 
   const { data: existing, error: existingError } = await supabase
     .from("recurring")
-    .select("merchant_normalized, dismissed")
+    .select(
+      "merchant_normalized, dismissed, merchant_key, billing_channel, " +
+        "lifecycle_state, user_correction, amount_model, confidence, " +
+        "next_expected_at, next_charge_date"
+    )
     .eq("user_id", userId);
   if (existingError) throw existingError;
-  const dismissedByMerchant = new Map(
-    (existing ?? []).map((r) => [r.merchant_normalized, r.dismissed] as const)
+  const existingRows = (existing ?? []) as Array<{
+    merchant_normalized: string;
+    dismissed: boolean;
+    merchant_key: string | null;
+    billing_channel: string | null;
+    lifecycle_state: string | null;
+    user_correction: string | null;
+    amount_model: unknown;
+    confidence: number | null;
+    next_expected_at: string | null;
+    next_charge_date: string | null;
+  }>;
+  const existingByMerchant = new Map(
+    existingRows.map((r) => [r.merchant_normalized, r] as const)
   );
+  const dismissedByMerchant = new Map(
+    existingRows.map((r) => [r.merchant_normalized, r.dismissed] as const)
+  );
+  const detectedByMerchant = new Map(detected.map((d) => [d.merchant, d]));
 
-  const rows = toRecurringUpsertRows(userId, detected, dismissedByMerchant, new Date().toISOString());
+  const nowISO = new Date().toISOString();
+  const rows = toRecurringUpsertRows(userId, detected, dismissedByMerchant, nowISO).map(
+    (row) => {
+      const prev = existingByMerchant.get(row.merchant_normalized);
+      if (!prev) return row;
+
+      // Possible renewal (FR-15/FR-26): an ended series with no user
+      // correction sees a newer charge → reopen for review.
+      const det = detectedByMerchant.get(row.merchant_normalized);
+      const newerCharge =
+        det != null &&
+        prev.next_charge_date != null &&
+        det.next_charge_date > prev.next_charge_date;
+      const lifecycle_state =
+        prev.lifecycle_state === "ended" &&
+        prev.user_correction == null &&
+        newerCharge
+          ? "reopened"
+          : (prev.lifecycle_state ?? "active");
+
+      return {
+        ...row,
+        merchant_key: prev.merchant_key ?? null,
+        billing_channel: prev.billing_channel ?? null,
+        lifecycle_state,
+        user_correction: prev.user_correction ?? null,
+        amount_model: prev.amount_model ?? null,
+        confidence: prev.confidence ?? null,
+        // next_expected_at is detector-owned only for active rows; preserved otherwise.
+        next_expected_at:
+          lifecycle_state === "active"
+            ? row.next_charge_date
+            : (prev.next_expected_at ?? null),
+      };
+    }
+  );
   if (rows.length > 0) {
     const { error: upsertError } = await supabase
       .from("recurring")

@@ -16,7 +16,8 @@ export type PlannerEventName =
   | "plan_saved"
   | "plan_save_failed"
   | "share_started"
-  | "feasibility_seen";
+  | "feasibility_seen"
+  | "temp_scenario_applied";
 
 const MONEY_KEY_PATTERN = /(cents|balance|income|spending|target|contribution|portfolio)/i;
 
@@ -36,5 +37,39 @@ export function trackPlannerEvent(name: PlannerEventName, props?: Record<string,
   if (process.env.NODE_ENV !== "production") {
     // eslint-disable-next-line no-console
     console.debug("[planner-analytics]", name, props ?? {});
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Subscription Action Center events (spec §12). Same invariant as the
+// planner: props carry buckets and labels only — NEVER exact amounts,
+// merchant account refs, transaction descriptions, or evidence.
+// ---------------------------------------------------------------------------
+
+/** Core Action Center events from spec §12. */
+export type ActionEventName =
+  | "action_center_viewed"
+  | "action_previewed"
+  | "action_started"
+  | "action_authorized"
+  | "action_submitted"
+  | "action_needs_user"
+  | "action_reported"
+  | "action_verified"
+  | "action_reopened"
+  | "planner_handoff"
+  | "plan_updated";
+
+/**
+ * Server-side bucketed event log for the Action Center. checkProps throws in
+ * dev if a prop key smells like a raw financial value — callers must pass
+ * buckets (route_type, confidence, outcome_type, savings_bucket, …) only.
+ */
+export function trackActionEvent(name: ActionEventName, props?: Record<string, string>): void {
+  checkProps(props);
+  // No provider wired: dev log only. Production drops the event.
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.debug("[action-analytics]", name, props ?? {});
   }
 }

@@ -46,6 +46,41 @@ export interface PlannerInitial {
 const DRAFT_KEY = "coast-whatif-draft-v1";
 const dollarsToCents = (d: number) => Math.round(d * 100);
 
+/**
+ * Subscription Action Center handoff: a temporary scenario written by the
+ * subscriptions detail page before navigating to /number. Applies on mount
+ * only, is labeled TEMPORARY, is never persisted as a draft, and never
+ * touches the saved plan — the existing "Save as plan" confirmation stays
+ * the only gate to persistence.
+ */
+export const TEMP_SCENARIO_KEY = "coast-whatif-temp-scenario-v1";
+
+export interface TempScenario {
+  monthlyInvestmentCents: number;
+  label: string;
+  note: string;
+  baselineVersion: string;
+  calcVersion: string;
+}
+
+function loadTempScenario(): TempScenario | null {
+  try {
+    const raw = localStorage.getItem(TEMP_SCENARIO_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<TempScenario>;
+    if (typeof parsed.monthlyInvestmentCents !== "number") return null;
+    return {
+      monthlyInvestmentCents: parsed.monthlyInvestmentCents,
+      label: typeof parsed.label === "string" ? parsed.label : "Subscription savings",
+      note: typeof parsed.note === "string" ? parsed.note : "",
+      baselineVersion: typeof parsed.baselineVersion === "string" ? parsed.baselineVersion : "",
+      calcVersion: typeof parsed.calcVersion === "string" ? parsed.calcVersion : "",
+    };
+  } catch {
+    return null;
+  }
+}
+
 function loadStoredDraft(): WhatIfInputs | null {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
@@ -167,6 +202,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
   const [toast, setToast] = useState<string | null>(null);
   const [announce, setAnnounce] = useState("");
   const [shared, setShared] = useState(false);
+  const [tempScenario, setTempScenario] = useState<TempScenario | null>(null);
 
   const heroRef = useRef<HTMLHeadingElement>(null);
   const confirmRef = useRef<HTMLHeadingElement>(null);
@@ -262,6 +298,8 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
 
   // ---------- draft persistence across navigation / sign-in round-trip ----------
   useEffect(() => {
+    // A temporary handoff scenario is never persisted as a draft.
+    if (tempScenario) return;
     if (mode === "saved" || setupStarted) {
       try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
@@ -269,7 +307,40 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
         /* storage unavailable */
       }
     }
-  }, [draft, mode, setupStarted]);
+  }, [draft, mode, setupStarted, tempScenario]);
+
+  // ---------- temporary handoff scenario (mount only) ----------
+  useEffect(() => {
+    const temp = loadTempScenario();
+    if (!temp) return;
+    const next = {
+      ...initial.baseline,
+      monthlyInvestmentCents: clampInput("monthlyInvestmentCents", temp.monthlyInvestmentCents),
+    };
+    if (validateInputs(next).length === 0) {
+      setTempScenario(temp);
+      setDraft(next);
+      setSetupStarted(true);
+      trackPlannerEvent("temp_scenario_applied", {});
+    } else {
+      try {
+        localStorage.removeItem(TEMP_SCENARIO_KEY);
+      } catch {
+        /* ignore */
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const discardTempScenario = () => {
+    try {
+      localStorage.removeItem(TEMP_SCENARIO_KEY);
+    } catch {
+      /* ignore */
+    }
+    setTempScenario(null);
+    setDraft(baseline);
+  };
 
   useEffect(() => {
     if (initial.mode === "saved") {
@@ -535,6 +606,7 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
                 setDraft(restoreOffer);
                 setRestoreOffer(null);
                 setSetupStarted(true);
+                discardTempScenario();
               }}
               className="min-h-[44px] flex-1 rounded-lg bg-[var(--accent-progress)] font-semibold text-white"
             >
@@ -555,6 +627,38 @@ export default function WhatIfPlanner({ initial }: { initial: PlannerInitial }) 
               Discard
             </button>
           </div>
+        </div>
+      )}
+
+      {/* ---- temporary handoff scenario (Subscription Action Center) ---- */}
+      {tempScenario && (
+        <div className="rounded-xl bg-[var(--accent-progress-soft)] p-5 elev-1" role="status">
+          <p className="text-[var(--type-body-size)] font-bold">
+            Temporary scenario — {tempScenario.label}
+          </p>
+          {tempScenario.note && (
+            <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+              {tempScenario.note}
+            </p>
+          )}
+          <p className="mt-1 text-[var(--type-caption-size)] text-[var(--text-secondary)]">
+            This is not saved. Your plan is unchanged — use &ldquo;Save as plan&rdquo; below only
+            if you want to keep it.
+          </p>
+          {(tempScenario.baselineVersion || tempScenario.calcVersion) && (
+            <p className="mt-1 text-[var(--type-micro-size)] text-[var(--text-micro)]">
+              {tempScenario.baselineVersion && `Baseline v${tempScenario.baselineVersion}`}
+              {tempScenario.baselineVersion && tempScenario.calcVersion && " · "}
+              {tempScenario.calcVersion && `Calc ${tempScenario.calcVersion}`}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={discardTempScenario}
+            className="mt-3 inline-flex min-h-[44px] items-center rounded-lg bg-[var(--surface-card)] px-4 font-semibold"
+          >
+            Discard temporary scenario
+          </button>
         </div>
       )}
 

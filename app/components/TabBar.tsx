@@ -7,6 +7,7 @@ const TABS = [
   { href: "/", label: "Home", icon: "⌂" },
   { href: "/brief", label: "Brief", icon: "☀" },
   { href: "/transactions", label: "Activity", icon: "⇄" },
+  { href: "/subscriptions", label: "Subs", icon: "↻" },
   { href: "/budgets", label: "Budgets", icon: "▤" },
   { href: "/number", label: "Number", icon: "◎" },
 ];
@@ -20,7 +21,7 @@ export default function TabBar() {
       className="fixed bottom-0 inset-x-0 z-40 border-t border-[var(--border-subtle)] bg-[var(--surface-card)]/95 backdrop-blur"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="mx-auto max-w-xl grid grid-cols-5">
+      <div className="mx-auto max-w-xl grid grid-cols-6">
         {TABS.map((t) => {
           const active = pathname === t.href;
           return (
