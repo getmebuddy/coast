@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { logPilotEvent } from "@/lib/analytics-server";
 import {
   CALCULATION_VERSION,
   diffInputs,
@@ -125,5 +126,12 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "db-write" }, { status: 500 });
   }
 
+  // Pilot analytics: a named save is a scenario (what_if_saved); an unnamed
+  // save is the core Number setup (number_completed). Non-fatal.
+  await logPilotEvent(
+    user.id,
+    name ? "what_if_saved" : "number_completed",
+    name ? { scenario: "named" } : { plan_kind: resolved.targetMode }
+  );
   return NextResponse.json({ settings: data });
 }

@@ -10,6 +10,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { trackPilotEvent } from "@/lib/analytics";
 
 declare global {
   interface Window {
@@ -115,6 +116,8 @@ export default function ConnectBank() {
         },
       });
       handler.open();
+      // Pilot analytics: user entered the Plaid Link flow.
+      trackPilotEvent("account_link_started", {});
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
       setStatus("error");

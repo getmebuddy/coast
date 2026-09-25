@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { encryptAccessToken, getPlaidClient, isPlaidConfigured } from "@/lib/plaid";
 import { createServerSupabase, createServiceSupabase } from "@/lib/supabase/server";
+import { logPilotEvent } from "@/lib/analytics-server";
 
 /**
  * POST /api/plaid/exchange — swap a Plaid public_token for an access token
@@ -102,6 +103,8 @@ export async function POST(req: Request) {
       .single();
 
     if (error) throw error;
+    // Pilot analytics: link succeeded. Non-fatal, after the real write.
+    await logPilotEvent(user.id, "account_link_succeeded", {});
     return NextResponse.json({ item });
   } catch (e) {
     // The client renders this as [exchange:502/<stage>[:<detail>]] — the
@@ -110,6 +113,19 @@ export async function POST(req: Request) {
     const detail = diagnosticDetail(e);
     const stageLabel = detail ? `${stage}:${detail}` : stage;
     console.error(`exchange failed at ${stage}`, e);
+    // Pilot analytics: link failed with the stage bucket. Best-effort —
+    // user may be null only if auth failed, in which case skip.
+    try {
+      const supabase = createServerSupabase();
+      const {
+        data: { user: failedUser },
+      } = await supabase.auth.getUser();
+      if (failedUser) {
+        await logPilotEvent(failedUser.id, "account_link_failed", { stage });
+      }
+    } catch {
+      /* ignore */
+    }
     return NextResponse.json(
       { error: "We couldn't finish connecting — your data is safe, try again.", stage: stageLabel },
       { status: 502 }

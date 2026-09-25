@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import type { Brief } from "@/lib/brief";
 import { formatUSD } from "@/lib/fire";
+import { trackPilotEvent } from "@/lib/analytics";
 import ShareCard from "../components/ShareCard";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -32,7 +33,11 @@ export default function BriefPage() {
         const res = await fetch("/api/brief", { cache: "no-store" });
         if (!res.ok) throw new Error("brief failed");
         const data = (await res.json()) as Brief;
-        if (!cancelled) setBrief(data);
+        if (!cancelled) {
+          setBrief(data);
+          // Pilot analytics: the Week-1 value event's first half.
+          trackPilotEvent("morning_brief_viewed", {});
+        }
       } catch {
         if (!cancelled) setError(true);
       }

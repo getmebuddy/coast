@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase, createServiceSupabase } from "@/lib/supabase/server";
+import { logPilotEvent } from "@/lib/analytics-server";
 import { safePostAuthRedirect } from "@/lib/auth";
 
 /**
@@ -29,6 +30,20 @@ export async function GET(request: Request) {
           await db
             .from("profiles")
             .upsert({ id: user.id }, { onConflict: "id", ignoreDuplicates: true });
+          // Pilot analytics: first-ever sign-in counts as signup_completed.
+          // Guarded so returning users don't re-fire it. Non-fatal.
+          try {
+            const { count } = await db
+              .from("pilot_events")
+              .select("id", { count: "exact", head: true })
+              .eq("user_id", user.id)
+              .eq("event_name", "signup_completed");
+            if (count === 0) {
+              await logPilotEvent(user.id, "signup_completed", {});
+            }
+          } catch (e) {
+            console.error("signup event failed (non-fatal)", e);
+          }
         }
       } catch (e) {
         console.error("profile backstop failed (non-fatal)", e);

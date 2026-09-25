@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { STATUS_COPY, type ActionState } from "@/lib/subscriptions";
+import { trackPilotEvent } from "@/lib/analytics";
 import { ApiError, getJSON } from "./client";
 import {
   cadencePer,
@@ -319,6 +320,11 @@ export default function SubscriptionsList() {
                       <Link
                         href={`/subscriptions/${item.id}`}
                         aria-label={active ? `Cancel ${name}` : `Review ${name}`}
+                        onClick={() =>
+                          trackPilotEvent("recurring_item_reviewed", {
+                            action: active ? "cancel_opened" : "review_opened",
+                          })
+                        }
                         className={`inline-flex min-h-[44px] shrink-0 items-center rounded-lg px-4 font-semibold ${
                           active
                             ? "bg-[var(--accent-progress)] text-white"
