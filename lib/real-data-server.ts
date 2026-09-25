@@ -65,7 +65,14 @@ export async function getViewer(): Promise<Viewer | null> {
     data: { user },
     error,
   } = await supabase.auth.getUser();
-  if (error) throw new Error(`auth-service: ${error.message}`);
+  if (error) {
+    // No session cookie -> signed out (labeled demo), not a service failure.
+    const msg = error.message ?? "";
+    if (error.name === "AuthSessionMissingError" || msg.toLowerCase().includes("session missing")) {
+      return null;
+    }
+    throw new Error(`auth-service: ${error.message}`);
+  }
   if (!user) return null;
   const { data: profile } = await supabase
     .from("profiles")
