@@ -25,6 +25,22 @@ function demoBaseline(): WhatIfInputs {
   };
 }
 
+/**
+ * Signed-in setup baseline: blank, visibly unsaved. Never prefill demo
+ * values for a signed-in user — they read as the user's own data.
+ */
+function emptyBaseline(): WhatIfInputs {
+  return {
+    monthlySpendingCents: 0,
+    portfolioCents: 0,
+    monthlyInvestmentCents: 0,
+    annualReturnPct: 7,
+    targetMode: "auto",
+    customTargetCents: null,
+    investDifference: false,
+  };
+}
+
 interface FireSettingsRow {
   annual_spending_cents: number;
   portfolio_cents: number;
@@ -103,7 +119,7 @@ export default async function NumberPage() {
         };
       } else {
         initial = {
-          baseline: demoBaseline(),
+          baseline: emptyBaseline(),
           settingsVersion: 0,
           savedAt: null,
           mode: "setup" as PlannerMode,
