@@ -17,12 +17,15 @@ import {
   detectOverlap,
   detectPossibleTrials,
   detectPriceHikes,
+  detectSpendAnomaly,
+  detectTrialEndings,
   detectWatchlist,
   matchRefunds,
   type ExpectedRefund,
   type RoutineFinding,
   type RoutineKey,
   type RoutineTxn,
+  type TrialEndingInput,
   type WatchlistInput,
 } from "./routines";
 import { logPilotEvent } from "./analytics-server";
@@ -277,7 +280,23 @@ export async function runRoutines(viewer: Viewer): Promise<RunSummary> {
   if (enabled.has("duplicate_charge")) put("duplicate_charge", detectDuplicates(txns));
   if (enabled.has("fee_sweep")) put("fee_sweep", detectFeeSweep(txns, nowISO));
   if (enabled.has("overlap")) put("overlap", detectOverlap(txns));
-  if (enabled.has("trial_watch")) put("trial_watch", detectPossibleTrials(txns));
+  if (enabled.has("trial_watch")) {
+    put("trial_watch", detectPossibleTrials(txns));
+    // Manual trial end dates from the recurring table (migration 011).
+    const { data: recurring } = await supabase
+      .from("recurring")
+      .select("merchant_normalized, trial_ends_on, last_amount_cents")
+      .eq("user_id", viewer.userId)
+      .not("trial_ends_on", "is", null);
+    const endings: TrialEndingInput[] = (recurring ?? [])
+      .filter((r) => r.trial_ends_on)
+      .map((r) => ({
+        merchant: r.merchant_normalized,
+        trial_ends_on: String(r.trial_ends_on).slice(0, 10),
+        last_amount_cents: r.last_amount_cents ?? undefined,
+      }));
+    put("trial_watch", detectTrialEndings(endings, nowISO));
+  }
 
   if (enabled.has("watchlist")) {
     const watchlists = await listWatchlists(viewer.userId);
@@ -291,6 +310,16 @@ export async function runRoutines(viewer: Viewer): Promise<RunSummary> {
         detectWatchlist(withCategories, watchlists, nowISO.slice(0, 7))
       );
     }
+  }
+
+  if (enabled.has("spend_anomaly")) {
+    const withCategories: RoutineTxn[] = [];
+    for (const t of ledger.txns) {
+      const eff = effectiveCategory(ledger, t);
+      if (eff.removed) continue;
+      withCategories.push({ ...toRoutineTxn(t), category: eff.category });
+    }
+    put("spend_anomaly", detectSpendAnomaly(withCategories, nowISO));
   }
 
   if (enabled.has("refund_watch")) {

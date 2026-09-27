@@ -22,7 +22,8 @@ export type RoutineKey =
   | "duplicate_charge"
   | "fee_sweep"
   | "overlap"
-  | "watchlist";
+  | "watchlist"
+  | "spend_anomaly";
 
 export interface RoutineRegistryEntry {
   key: RoutineKey;
@@ -38,6 +39,7 @@ export const ROUTINE_REGISTRY: RoutineRegistryEntry[] = [
   { key: "fee_sweep", name: "Fee sweep", description: "Rounds up bank, late, and foreign-transaction fees." },
   { key: "overlap", name: "Overlap check", description: "Finds subscriptions doing the same job." },
   { key: "watchlist", name: "Watchlist", description: "Tells you when spending with a merchant or category passes a monthly limit you set." },
+  { key: "spend_anomaly", name: "Unusual-spend watch", description: "Flags when a category's weekly spend looks out of character." },
 ];
 
 export interface RoutineTxn {
@@ -509,4 +511,123 @@ export function detectWatchlist(
     });
   }
   return findings;
+}
+
+// ---------------------------------------------------------------------------
+// Unusual-spend watch (R8) — per category, trailing-7-day spend vs the
+// trailing 4-week weekly average. Fires when the week is >= 2x the average
+// AND the absolute delta is >= $50, so small wobbles stay quiet. Needs at
+// least 5 weeks of ledger history (warmup) before it says anything.
+// ---------------------------------------------------------------------------
+
+const SPEND_ANOMALY_MULTIPLE = 2; // 2x
+const SPEND_ANOMALY_MIN_DELTA_CENTS = 5000; // $50
+const SPEND_ANOMALY_WARMUP_DAYS = 35; // 5 weeks
+
+function mondayOfWeekISO(iso: string): string {
+  const d = new Date(iso + "T00:00:00Z");
+  const daysSinceMonday = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - daysSinceMonday);
+  return d.toISOString().slice(0, 10);
+}
+
+export function detectSpendAnomaly(txns: RoutineTxn[], nowISO: string): RoutineFinding[] {
+  if (txns.length === 0) return [];
+  const oldest = txns.reduce((m, t) => (t.date < m ? t.date : m), txns[0].date);
+  if (oldest > addDaysISO(nowISO, -SPEND_ANOMALY_WARMUP_DAYS)) return [];
+
+  const weekStart = addDaysISO(nowISO, -6);
+  const baselineStart = addDaysISO(nowISO, -34);
+  const baselineEnd = addDaysISO(weekStart, -1);
+  const monday = mondayOfWeekISO(nowISO);
+
+  const byCategory = new Map<string, RoutineTxn[]>();
+  for (const t of postedOutflows(txns)) {
+    const cat = (t.category ?? "").trim();
+    if (!cat) continue;
+    const list = byCategory.get(cat) ?? [];
+    list.push(t);
+    byCategory.set(cat, list);
+  }
+
+  const out: RoutineFinding[] = [];
+  for (const [cat, charges] of byCategory) {
+    const weekTxns = charges.filter((t) => t.date >= weekStart && t.date <= nowISO);
+    if (weekTxns.length === 0) continue;
+    const weekSpend = weekTxns.reduce((s, t) => s + Math.abs(t.amount_cents), 0);
+    const baselineTotal = charges
+      .filter((t) => t.date >= baselineStart && t.date <= baselineEnd)
+      .reduce((s, t) => s + Math.abs(t.amount_cents), 0);
+    const avg = baselineTotal / 4;
+    const delta = Math.round(weekSpend - avg);
+    if (weekSpend < SPEND_ANOMALY_MULTIPLE * avg) continue;
+    if (delta < SPEND_ANOMALY_MIN_DELTA_CENTS) continue;
+    const usual =
+      avg > 0
+        ? `${(weekSpend / avg).toFixed(1)}x your usual ${formatUSD(Math.round(avg))} a week`
+        : "new spending in a category with no recent history";
+    out.push({
+      routine_key: "spend_anomaly",
+      kind: "spend_anomaly",
+      title: `Unusual spend: ${cat}`,
+      detail: `You spent ${formatUSD(weekSpend)} on ${cat} in the last 7 days — ${usual}. That is ${formatUSD(delta)} more than typical.`,
+      impact_cents: delta,
+      evidence: {
+        transactions: weekTxns.map(toEvidence),
+        category: cat,
+        week_spend_cents: weekSpend,
+        typical_week_cents: Math.round(avg),
+      },
+      dedupe_hash: `spend_anomaly:${cat}:${monday}`,
+    });
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Manual trial endings (ruling 14.8) — the user's own trial_ends_on date
+// from the recurring table beats the ledger heuristic. 0-3 days out fires;
+// past dates never fire. Honest about not knowing the plan price.
+// ---------------------------------------------------------------------------
+
+export interface TrialEndingInput {
+  merchant: string;
+  trial_ends_on: string; // YYYY-MM-DD
+  last_amount_cents?: number;
+}
+
+export function detectTrialEndings(
+  endings: TrialEndingInput[],
+  nowISO: string
+): RoutineFinding[] {
+  const out: RoutineFinding[] = [];
+  for (const e of endings) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(e.trial_ends_on)) continue;
+    const daysUntil = daysBetween(nowISO, e.trial_ends_on);
+    if (daysUntil < 0 || daysUntil > 3) continue;
+    const when =
+      daysUntil === 0
+        ? "ends today"
+        : daysUntil === 1
+          ? "ends tomorrow"
+          : `ends in ${daysUntil} days`;
+    const priceNote =
+      e.last_amount_cents != null && e.last_amount_cents > 0
+        ? `The last charge was ${formatUSD(e.last_amount_cents)}.`
+        : "We don't know the plan price — check what it converts to before the charge hits.";
+    out.push({
+      routine_key: "trial_watch",
+      kind: "trial_ending",
+      title: `Your ${e.merchant} trial ${when}`,
+      detail: `Your ${e.merchant} trial ${when} (${e.trial_ends_on}). ${priceNote}`,
+      impact_cents: e.last_amount_cents ?? 0,
+      evidence: {
+        transactions: [],
+        merchant: e.merchant,
+        trial_ends_on: e.trial_ends_on,
+      },
+      dedupe_hash: `trial_end:${e.merchant}:${e.trial_ends_on}`,
+    });
+  }
+  return out;
 }

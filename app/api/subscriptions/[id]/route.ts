@@ -18,6 +18,17 @@ import { STATUS_COPY } from "@/lib/subscriptions";
 
 const VALID_CORRECTIONS = ["not_recurring", "not_subscription", "duplicate"];
 
+/** Strict YYYY-MM-DD: format plus real calendar day (rejects 2026-13-45). */
+function isValidDateString(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const [y, m, d] = s.split("-").map(Number);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return (
+    dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d
+  );
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: { id: string } }
@@ -121,7 +132,7 @@ export async function PATCH(
   } catch {
     return fail("invalid_json", "Request body must be valid JSON.", 400);
   }
-  const { correction, lifecycle } = body ?? {};
+  const { correction, lifecycle, trial_ends_on } = body ?? {};
 
   if (
     correction !== undefined &&
@@ -141,10 +152,24 @@ export async function PATCH(
   ) {
     return fail("invalid_lifecycle", "lifecycle must be 'active' or 'kept'.", 400);
   }
-  if (correction === undefined && lifecycle === undefined) {
+  // Trial-end field (ruling 14.8): a strict YYYY-MM-DD string sets the date;
+  // null (or an empty string) clears it.
+  if (
+    trial_ends_on !== undefined &&
+    trial_ends_on !== null &&
+    !(typeof trial_ends_on === "string" &&
+      (trial_ends_on === "" || isValidDateString(trial_ends_on)))
+  ) {
+    return fail(
+      "invalid_trial_ends_on",
+      "trial_ends_on must be a date like 2026-10-15, or null to clear.",
+      400
+    );
+  }
+  if (correction === undefined && lifecycle === undefined && trial_ends_on === undefined) {
     return fail(
       "no_changes",
-      "Provide correction and/or lifecycle to update.",
+      "Provide correction, lifecycle, and/or trial_ends_on to update.",
       400
     );
   }
@@ -183,6 +208,11 @@ export async function PATCH(
       }
       patch.lifecycle_state = "active";
     }
+  }
+
+  // Trial end: a plain date, independent of lifecycle/correction.
+  if (trial_ends_on !== undefined) {
+    patch.trial_ends_on = trial_ends_on === "" ? null : trial_ends_on;
   }
 
   const { data: updated, error: updateError } = await supabase

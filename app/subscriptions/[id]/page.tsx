@@ -42,6 +42,16 @@ import {
 type OutcomeKind = "cancelled" | "paused" | "downgraded" | "kept" | "not_a_subscription";
 type EvidenceChoice = "merchant_showed" | "email_received" | "none";
 
+/**
+ * SeriesRow plus the nullable manual trial-end date from migration 011.
+ * (Typed locally so the shared SeriesRow interface stays untouched.)
+ */
+type SeriesWithTrial = SeriesRow & { trial_ends_on?: string | null };
+
+function trialEndsOnOf(s: SeriesRow): string | null {
+  return (s as SeriesWithTrial).trial_ends_on ?? null;
+}
+
 const OUTCOME_OPTIONS: { value: OutcomeKind; label: string }[] = [
   { value: "cancelled", label: "Cancelled" },
   { value: "paused", label: "Paused" },
@@ -146,6 +156,12 @@ export default function SubscriptionDetailPage() {
   // Series corrections
   const [patching, setPatching] = useState(false);
 
+  // Manual trial-end date (ruling 14.8)
+  const [trialDate, setTrialDate] = useState("");
+  const [trialSaving, setTrialSaving] = useState(false);
+  const [trialMsg, setTrialMsg] = useState<string | null>(null);
+  const [trialErr, setTrialErr] = useState<string | null>(null);
+
   // Planner handoff
   const [handoff, setHandoff] = useState<HandoffResult | null>(null);
   const [handoffLoading, setHandoffLoading] = useState(false);
@@ -177,6 +193,9 @@ export default function SubscriptionDetailPage() {
         getJSON<{ items: SubscriptionItem[] }>("/api/subscriptions").catch(() => null),
       ]);
       setDetail(d);
+      setTrialDate(trialEndsOnOf(d.series) ?? "");
+      setTrialMsg(null);
+      setTrialErr(null);
       setLastChargeDate(
         list?.items.find((i) => i.id === id)?.last_charge_date ?? null
       );
@@ -280,6 +299,7 @@ export default function SubscriptionDetailPage() {
     action?.latest_savings ?? detail.latest_savings ?? null;
   const unsupported =
     !detail.eligibility.eligible && detail.eligibility.reason === "unsupported";
+  const trialSet = trialEndsOnOf(series);
 
   // --- cancel initiation -------------------------------------------------
   const beginCancel = async () => {
@@ -374,6 +394,31 @@ export default function SubscriptionDetailPage() {
       setNotice(e instanceof Error ? e.message : "Could not update the subscription.");
     } finally {
       setPatching(false);
+    }
+  };
+
+  // --- trial end ------------------------------------------------------------
+  const saveTrial = async (value: string) => {
+    setTrialSaving(true);
+    setTrialMsg(null);
+    setTrialErr(null);
+    const trimmed = value.trim();
+    try {
+      // PATCH accepts YYYY-MM-DD to set, null (empty input) to clear; it
+      // validates strictly server-side as well.
+      await patchJSON<{ series: unknown }>(`/api/subscriptions/${id}`, {
+        trial_ends_on: trimmed === "" ? null : trimmed,
+      });
+      setTrialMsg(
+        trimmed === ""
+          ? "Trial end cleared."
+          : "Trial end saved — Coast will remind you before it converts."
+      );
+      await load();
+    } catch (e) {
+      setTrialErr(e instanceof Error ? e.message : "Could not save the trial end date.");
+    } finally {
+      setTrialSaving(false);
     }
   };
 
@@ -577,6 +622,63 @@ export default function SubscriptionDetailPage() {
             )}
           </Field>
         </dl>
+      </section>
+
+      {/* Trial end */}
+      <section aria-label="Trial end" className="rounded-xl bg-[var(--surface-card)] p-6 elev-1">
+        <h2 className="text-[length:var(--type-title-size)] font-bold">Free trial</h2>
+        <label
+          htmlFor="trial-ends-on"
+          className="mt-3 block text-[length:var(--type-caption-size)] font-semibold text-[var(--text-secondary)]"
+        >
+          Trial ends on <span className="font-normal">(optional)</span>
+        </label>
+        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+          Only set this if you&apos;re on a free or reduced-price trial — Coast will remind you
+          before it converts.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <input
+            id="trial-ends-on"
+            type="date"
+            value={trialDate}
+            onChange={(e) => setTrialDate(e.target.value)}
+            className="tnum min-h-[44px] rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 text-[length:var(--type-body-size)]"
+          />
+          <button
+            type="button"
+            onClick={() => saveTrial(trialDate)}
+            disabled={trialSaving}
+            className="inline-flex min-h-[44px] items-center rounded-lg bg-[var(--surface-secondary)] px-4 font-semibold disabled:opacity-50"
+          >
+            {trialSaving ? "Saving…" : "Save"}
+          </button>
+          {trialSet && (
+            <button
+              type="button"
+              onClick={() => saveTrial("")}
+              disabled={trialSaving}
+              className="inline-flex min-h-[44px] items-center px-2 text-[length:var(--type-caption-size)] font-semibold text-[var(--signal-critical)] underline disabled:opacity-50"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        {trialSet && (
+          <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+            Currently set to <span className="tnum font-semibold">{formatDate(trialSet)}</span>.
+          </p>
+        )}
+        {trialErr && (
+          <p role="alert" className="mt-2 text-[length:var(--type-caption-size)] font-semibold text-[var(--signal-critical)]">
+            {trialErr}
+          </p>
+        )}
+        {trialMsg && (
+          <p role="status" className="mt-2 text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)]">
+            {trialMsg}
+          </p>
+        )}
       </section>
 
       {/* Series decisions */}

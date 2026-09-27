@@ -101,7 +101,9 @@ export type PilotEventName =
   | "pricing_plan_selected"
   | "payment_completed"
   | "data_export_requested"
-  | "account_deleted";
+  | "account_deleted"
+  | "notification_sent"
+  | "notification_clicked";
 
 const PILOT_EVENTS: ReadonlySet<string> = new Set<string>([
   "signup_completed",
@@ -121,6 +123,8 @@ const PILOT_EVENTS: ReadonlySet<string> = new Set<string>([
   "payment_completed",
   "data_export_requested",
   "account_deleted",
+  "notification_sent",
+  "notification_clicked",
 ]);
 
 /** Key denylist for pilot props — buckets/labels only, never PII or money. */

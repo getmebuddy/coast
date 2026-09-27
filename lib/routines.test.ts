@@ -9,6 +9,8 @@ import {
   detectOverlap,
   detectPossibleTrials,
   detectPriceHikes,
+  detectSpendAnomaly,
+  detectTrialEndings,
   detectWatchlist,
   matchRefunds,
   type RoutineTxn,
@@ -291,5 +293,153 @@ describe("detectWatchlist", () => {
       txn({ id: "i1", merchant: "Blue Bottle", amount_cents: 50000, date: "2026-09-06", kind: "income" }),
     ];
     expect(detectWatchlist(txns, [coffee], "2026-09")).toHaveLength(0);
+  });
+});
+
+describe("detectSpendAnomaly", () => {
+  // now = 2026-09-27 (Sunday). Baseline weeks sit in 2026-08-24..2026-09-20,
+  // this week is 2026-09-21..2026-09-27, Monday of this week is 2026-09-21.
+  const NOW = "2026-09-27";
+  const dining = (id: string, cents: number, date: string, category = "Dining") =>
+    txn({ id, merchant: "Restaurant", amount_cents: -cents, date, category });
+
+  const baseline = [
+    dining("b1", 5000, "2026-08-25"),
+    dining("b2", 5000, "2026-09-01"),
+    dining("b3", 5000, "2026-09-08"),
+    dining("b4", 5000, "2026-09-15"),
+  ];
+  const warmupOld = dining("w0", 5000, "2026-08-20"); // pushes history past 5 weeks
+
+  it("fires when a week is >=2x the 4-week average and $50+ over", () => {
+    const txns = [
+      warmupOld,
+      ...baseline,
+      dining("s1", 8000, "2026-09-23"),
+      dining("s2", 4000, "2026-09-25"),
+    ];
+    const findings = detectSpendAnomaly(txns, NOW);
+    expect(findings).toHaveLength(1);
+    const f = findings[0];
+    expect(f.routine_key).toBe("spend_anomaly");
+    expect(f.kind).toBe("spend_anomaly");
+    expect(f.title).toBe("Unusual spend: Dining");
+    expect(f.detail).toContain("2.4x");
+    expect(f.detail).toContain("$70.00");
+    expect(f.impact_cents).toBe(7000);
+    expect(f.evidence.transactions).toHaveLength(2);
+    expect(f.dedupe_hash).toBe("spend_anomaly:Dining:2026-09-21");
+  });
+
+  it("stays quiet when the delta is under $50 even at 2x", () => {
+    const txns = [
+      dining("w0", 1000, "2026-08-20"),
+      dining("b1", 1000, "2026-08-25"),
+      dining("b2", 1000, "2026-09-01"),
+      dining("b3", 1000, "2026-09-08"),
+      dining("b4", 1000, "2026-09-15"),
+      dining("s1", 2000, "2026-09-23"), // 2x average but only $10 over
+    ];
+    expect(detectSpendAnomaly(txns, NOW)).toHaveLength(0);
+  });
+
+  it("stays quiet when the week is under 2x even with a large delta", () => {
+    const txns = [
+      dining("w0", 20000, "2026-08-20"),
+      dining("b1", 20000, "2026-08-25"),
+      dining("b2", 20000, "2026-09-01"),
+      dining("b3", 20000, "2026-09-08"),
+      dining("b4", 20000, "2026-09-15"),
+      dining("s1", 25000, "2026-09-23"), // 1.25x: $50 over but not 2x
+    ];
+    expect(detectSpendAnomaly(txns, NOW)).toHaveLength(0);
+  });
+
+  it("stays quiet with less than 5 weeks of history (warmup)", () => {
+    const txns = [
+      dining("b2", 5000, "2026-09-01"),
+      dining("b3", 5000, "2026-09-08"),
+      dining("b4", 5000, "2026-09-15"),
+      dining("s1", 12000, "2026-09-23"), // spike, but oldest txn is 26 days old
+    ];
+    expect(detectSpendAnomaly(txns, NOW)).toHaveLength(0);
+  });
+
+  it("produces the same findings across identical runs (dedupe stable)", () => {
+    const txns = [
+      warmupOld,
+      ...baseline,
+      dining("s1", 8000, "2026-09-23"),
+      dining("s2", 4000, "2026-09-25"),
+    ];
+    const first = detectSpendAnomaly(txns, NOW);
+    const second = detectSpendAnomaly(txns, NOW);
+    expect(first).toHaveLength(1);
+    expect(second).toHaveLength(1);
+    expect(second[0].dedupe_hash).toBe(first[0].dedupe_hash);
+    expect(second[0].detail).toBe(first[0].detail);
+  });
+
+  it("skips transactions with no category", () => {
+    const txns = [
+      warmupOld,
+      ...baseline,
+      txn({ id: "x1", merchant: "Unknown Shop", amount_cents: -12000, date: "2026-09-23" }),
+    ];
+    expect(detectSpendAnomaly(txns, NOW)).toHaveLength(0);
+  });
+});
+
+describe("detectTrialEndings", () => {
+  const NOW = "2026-09-27";
+
+  it("fires for a trial ending 2 days out", () => {
+    const findings = detectTrialEndings(
+      [{ merchant: "Acme Streaming", trial_ends_on: "2026-09-29", last_amount_cents: 1599 }],
+      NOW
+    );
+    expect(findings).toHaveLength(1);
+    const f = findings[0];
+    expect(f.routine_key).toBe("trial_watch");
+    expect(f.kind).toBe("trial_ending");
+    expect(f.title).toBe("Your Acme Streaming trial ends in 2 days");
+    expect(f.detail).toContain("2026-09-29");
+    expect(f.impact_cents).toBe(1599);
+    expect(f.dedupe_hash).toBe("trial_end:Acme Streaming:2026-09-29");
+  });
+
+  it("says 'ends today' and 'ends tomorrow' on day 0 and day 1", () => {
+    const today = detectTrialEndings(
+      [{ merchant: "Acme Streaming", trial_ends_on: NOW }],
+      NOW
+    );
+    expect(today[0].title).toBe("Your Acme Streaming trial ends today");
+    const tomorrow = detectTrialEndings(
+      [{ merchant: "Acme Streaming", trial_ends_on: "2026-09-28" }],
+      NOW
+    );
+    expect(tomorrow[0].title).toBe("Your Acme Streaming trial ends tomorrow");
+  });
+
+  it("stays quiet 4 days out and for past dates", () => {
+    expect(
+      detectTrialEndings([{ merchant: "Far App", trial_ends_on: "2026-10-01" }], NOW)
+    ).toHaveLength(0);
+    expect(
+      detectTrialEndings([{ merchant: "Past App", trial_ends_on: "2026-09-26" }], NOW)
+    ).toHaveLength(0);
+    expect(
+      detectTrialEndings([{ merchant: "Old App", trial_ends_on: "2026-08-01" }], NOW)
+    ).toHaveLength(0);
+  });
+
+  it("handles a missing plan price honestly", () => {
+    const findings = detectTrialEndings(
+      [{ merchant: "Mystery App", trial_ends_on: "2026-09-30" }],
+      NOW
+    );
+    expect(findings).toHaveLength(1);
+    expect(findings[0].impact_cents).toBe(0);
+    expect(findings[0].detail).toContain("We don't know the plan price");
   });
 });

@@ -835,6 +835,19 @@ export default function BriefPage() {
           </div>
         )}
         {signedIn && (
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+              Choose which Coast emails you get.
+            </p>
+            <Link
+              href="/settings/notifications"
+              className="inline-flex min-h-[44px] shrink-0 items-center text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)]"
+            >
+              Notification settings
+            </Link>
+          </div>
+        )}
+        {signedIn && (
           <div className="border-t border-[var(--border-subtle)] pt-3">
             <p className="text-[length:var(--type-body-size)] font-semibold">Waiting on money?</p>
             <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
