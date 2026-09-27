@@ -20,6 +20,7 @@ import { demoRecurring } from "@/lib/demo";
 import ShareCard from "../components/ShareCard";
 import DemoBanner from "../components/DemoBanner";
 import MerchantIcon from "../components/MerchantIcon";
+import RefreshAccountsButton from "../components/RefreshAccountsButton";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -556,11 +557,14 @@ export default function BriefPage() {
     <div className="space-y-5">
       {env.demo && <DemoBanner />}
 
-      <div>
-        <h1 className="text-[length:var(--type-title-size)] font-bold">{brief.greeting}.</h1>
-        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-          Here's your money, in about 30 seconds.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-[length:var(--type-title-size)] font-bold">{brief.greeting}.</h1>
+          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+            Here's your money, in about 30 seconds.
+          </p>
+        </div>
+        {signedIn && <RefreshAccountsButton onSynced={load} />}
       </div>
 
       <SetupActions missing={missing} />

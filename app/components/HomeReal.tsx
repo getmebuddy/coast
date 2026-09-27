@@ -10,6 +10,7 @@ import Link from "next/link";
 import TrajectoryRing from "./TrajectoryRing";
 import CountUp from "./CountUp";
 import ConnectBank from "./ConnectBank";
+import RefreshAccountsButton from "./RefreshAccountsButton";
 import { formatUSD } from "@/lib/fire";
 import { trackPilotEvent } from "@/lib/analytics";
 import type { DataEnvelope } from "@/lib/real-data";
@@ -209,13 +210,16 @@ export default function HomeReal({ initial }: { initial: DataEnvelope<HomeData> 
       {/* Connection status */}
       <Card label="Connected accounts">
         {connection.hasActiveItem ? (
-          <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-            {connection.institutionCount} institution{connection.institutionCount === 1 ? "" : "s"} connected
-            {connection.lastSyncAt
-              ? ` · last synced ${new Date(connection.lastSyncAt).toLocaleString()}`
-              : ""}
-            .
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+              {connection.institutionCount} institution{connection.institutionCount === 1 ? "" : "s"} connected
+              {connection.lastSyncAt
+                ? ` · last synced ${new Date(connection.lastSyncAt).toLocaleString()}`
+                : ""}
+              .
+            </p>
+            <RefreshAccountsButton onSynced={retry} />
+          </div>
         ) : (
           <div className="space-y-3">
             <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
