@@ -298,6 +298,8 @@ export interface BudgetCategoryRow {
   limitCents: number;
   spentCents: number;
   txnCount: number;
+  /** Pro-rata expected spend for this category by elapsed calendar days. */
+  expectedCents: number;
 }
 
 export interface BudgetMonthData {
@@ -367,13 +369,25 @@ export async function loadBudgetMonth(viewer: Viewer, now = new Date()): Promise
       spentTotal += out;
     }
 
+    const daysRemaining = daysRemainingInclusive(now, viewer.timezone);
+    const [my, mm] = month.split("-").map(Number);
+    const daysInMonth = new Date(Date.UTC(my, mm, 0)).getUTCDate();
+    const elapsedDays = Math.max(1, daysInMonth - daysRemaining + 1);
+
     const categories: BudgetCategoryRow[] = [];
     const unbudgetedCats: string[] = [];
     let unbudgetedSpent = 0;
     let unbudgetedCount = 0;
     for (const [cat, { spent, count }] of spentByCat) {
       if (categoryLimits.has(cat)) {
-        categories.push({ category: cat, limitCents: categoryLimits.get(cat)!, spentCents: spent, txnCount: count });
+        const limit = categoryLimits.get(cat)!;
+        categories.push({
+          category: cat,
+          limitCents: limit,
+          spentCents: spent,
+          txnCount: count,
+          expectedCents: Math.floor((limit * elapsedDays) / daysInMonth),
+        });
       } else {
         unbudgetedSpent += spent;
         unbudgetedCount += count;
@@ -381,14 +395,17 @@ export async function loadBudgetMonth(viewer: Viewer, now = new Date()): Promise
       }
     }
     for (const [cat, limit] of categoryLimits) {
-      if (!spentByCat.has(cat)) categories.push({ category: cat, limitCents: limit, spentCents: 0, txnCount: 0 });
+      if (!spentByCat.has(cat))
+        categories.push({
+          category: cat,
+          limitCents: limit,
+          spentCents: 0,
+          txnCount: 0,
+          expectedCents: Math.floor((limit * elapsedDays) / daysInMonth),
+        });
     }
     categories.sort((a, b) => b.spentCents - a.spentCents);
 
-    const daysRemaining = daysRemainingInclusive(now, viewer.timezone);
-    const [my, mm] = month.split("-").map(Number);
-    const daysInMonth = new Date(Date.UTC(my, mm, 0)).getUTCDate();
-    const elapsedDays = Math.max(1, daysInMonth - daysRemaining + 1);
     const expectedCents = ceiling != null ? Math.floor((ceiling * elapsedDays) / daysInMonth) : null;
     const data: BudgetMonthData = {
       month,
@@ -886,4 +903,194 @@ function emptyBrief(now: Date, tz: string): Brief {
     fireArrival: "",
     quiet: false,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Spending explorer (/spending)
+// ---------------------------------------------------------------------------
+
+import { buildSpendingData, type SpendingData, type SpendTxn } from "./spending";
+import { detectRecurring, nextChargeDate } from "./recurring";
+
+function emptySpending(todayISO: string): SpendingData {
+  return buildSpendingData([], todayISO, null);
+}
+
+/**
+ * All four spending ranges precomputed from the real ledger, with the
+ * finish-line monthly pace from the user's FIRE settings (null when unset).
+ */
+export async function loadSpending(viewer: Viewer, now = new Date()): Promise<DataEnvelope<SpendingData>> {
+  const today = localDay(now, viewer.timezone);
+  try {
+    const facts = await getViewFacts(viewer);
+    const pageMode = resolveViewMode(facts);
+    if (pageMode !== "real" && pageMode !== "partial") {
+      return {
+        mode: pageMode,
+        as_of: now.toISOString(),
+        timezone: viewer.timezone,
+        provenance: { spending: "missing" },
+        data: emptySpending(today),
+        missing: missingPrerequisites(facts),
+      };
+    }
+    const session = createServerSupabase();
+    const ledger = await loadLedger(viewer);
+    const { data: fire } = await session
+      .from("fire_settings")
+      .select("annual_spending_cents")
+      .eq("user_id", viewer.userId)
+      .maybeSingle();
+    const finishLineMonthlyCents =
+      fire?.annual_spending_cents != null ? Math.round(fire.annual_spending_cents / 12) : null;
+    const txns: SpendTxn[] = ledger.txns.map((t) => {
+      const eff = effectiveCategory(ledger, t);
+      return {
+        id: t.id,
+        date: t.posted_at.slice(0, 10),
+        merchant: t.merchant_normalized,
+        amount_cents: t.amount_cents,
+        kind: t.kind,
+        pending: t.pending,
+        category: eff.removed ? undefined : eff.category,
+      };
+    });
+    const data = buildSpendingData(txns, today, finishLineMonthlyCents);
+    const env: DataEnvelope<SpendingData> = {
+      mode: pageMode,
+      as_of: now.toISOString(),
+      timezone: viewer.timezone,
+      provenance: { spending: "real" },
+      data,
+      missing: missingPrerequisites(facts),
+    };
+    if (process.env.NODE_ENV !== "production") assertNoDemo(env, "spending");
+    else if (containsDemoProvenance(env)) return errorEnvelope<SpendingData>("spending", viewer.timezone, emptySpending(today));
+    return env;
+  } catch {
+    return errorEnvelope<SpendingData>("spending", viewer.timezone, emptySpending(today));
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Upcoming strip ("Coming up" on the Brief)
+// ---------------------------------------------------------------------------
+
+export interface UpcomingCharge {
+  merchant: string;
+  amountCents: number; // positive
+  date: string; // YYYY-MM-DD
+  cadence: string;
+  /** True when the date came from inference rather than a stated schedule. */
+  inferred: boolean;
+}
+
+export interface UpcomingPayday {
+  amountCents: number; // positive
+  date: string; // YYYY-MM-DD
+  cadence: string;
+}
+
+export interface UpcomingData {
+  charges: UpcomingCharge[];
+  payday: UpcomingPayday | null;
+}
+
+const UPCOMING_DAYS = 14;
+
+function addDaysISO(iso: string, n: number): string {
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function emptyUpcoming(): UpcomingData {
+  return { charges: [], payday: null };
+}
+
+/**
+ * Next 14 days of expected recurring charges (from the curated recurring
+ * table — user-dismissed items stay out) plus the next expected payday
+ * inferred from the ledger's recurring income pattern. Read-only.
+ */
+export async function loadUpcoming(viewer: Viewer, now = new Date()): Promise<DataEnvelope<UpcomingData>> {
+  try {
+    const facts = await getViewFacts(viewer);
+    const pageMode = resolveViewMode(facts);
+    if (pageMode !== "real" && pageMode !== "partial") {
+      return {
+        mode: pageMode,
+        as_of: now.toISOString(),
+        timezone: viewer.timezone,
+        provenance: { upcoming: "missing" },
+        data: emptyUpcoming(),
+        missing: missingPrerequisites(facts),
+      };
+    }
+    const session = createServerSupabase();
+    const today = localDay(now, viewer.timezone);
+    const horizon = addDaysISO(today, UPCOMING_DAYS);
+
+    const { data: rows, error } = await session
+      .from("recurring")
+      .select("merchant_normalized, last_amount_cents, cadence, next_charge_date")
+      .eq("user_id", viewer.userId)
+      .eq("dismissed", false);
+    if (error) throw new Error(`upcoming-read: ${error.message}`);
+
+    const charges: UpcomingCharge[] = (rows ?? [])
+      .filter(
+        (r) => r.next_charge_date && r.next_charge_date >= today && r.next_charge_date <= horizon
+      )
+      .map((r) => ({
+        merchant: r.merchant_normalized,
+        amountCents: Math.abs(r.last_amount_cents),
+        date: r.next_charge_date,
+        cadence: r.cadence,
+        inferred: true,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date) || b.amountCents - a.amountCents);
+
+    // Payday: the largest recurring income pattern in the ledger.
+    let payday: UpcomingPayday | null = null;
+    try {
+      const ledger = await loadLedger(viewer);
+      const incomeInputs = ledger.txns
+        .filter((t) => !t.pending && t.kind === "income" && t.amount_cents > 0)
+        .map((t) => ({
+          merchant: t.merchant_normalized,
+          amount_cents: t.amount_cents,
+          date: t.posted_at.slice(0, 10),
+          kind: t.kind,
+          pending: t.pending,
+        }));
+      const detected = detectRecurring(incomeInputs)
+        .filter((d) => d.cadence === "monthly" || d.cadence === "weekly")
+        .sort((a, b) => monthlyEquivalent(b.amount_cents_avg, b.cadence) - monthlyEquivalent(a.amount_cents_avg, a.cadence));
+      if (detected.length > 0) {
+        const top = detected[0];
+        const next = nextChargeDate(top.last_charge_date, top.cadence);
+        if (next >= today && next <= addDaysISO(today, 45)) {
+          payday = { amountCents: top.amount_cents_avg, date: next, cadence: top.cadence };
+        }
+      }
+    } catch {
+      // Payday inference is best-effort; charges still render.
+    }
+
+    const env: DataEnvelope<UpcomingData> = {
+      mode: pageMode,
+      as_of: now.toISOString(),
+      timezone: viewer.timezone,
+      provenance: { upcoming: "real" },
+      data: { charges, payday },
+      missing: missingPrerequisites(facts),
+    };
+    if (process.env.NODE_ENV !== "production") assertNoDemo(env, "upcoming");
+    else if (containsDemoProvenance(env)) return errorEnvelope<UpcomingData>("upcoming", viewer.timezone, emptyUpcoming());
+    return env;
+  } catch {
+    return errorEnvelope<UpcomingData>("upcoming", viewer.timezone, emptyUpcoming());
+  }
 }

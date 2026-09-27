@@ -16,6 +16,7 @@ import Link from "next/link";
 import type { Brief } from "@/lib/brief";
 import { formatUSD } from "@/lib/fire";
 import { ROUTINE_REGISTRY } from "@/lib/routines";
+import { demoRecurring } from "@/lib/demo";
 import ShareCard from "../components/ShareCard";
 import DemoBanner from "../components/DemoBanner";
 
@@ -80,6 +81,74 @@ interface RefundRow {
   expected_date: string;
   status: "pending" | "matched" | "shortfall";
   created_at: string;
+}
+
+interface UpcomingCharge {
+  merchant: string;
+  amountCents: number;
+  date: string;
+  cadence: string;
+  inferred: boolean;
+}
+
+interface UpcomingPayday {
+  amountCents: number;
+  date: string;
+  cadence: string;
+}
+
+interface UpcomingData {
+  charges: UpcomingCharge[];
+  payday: UpcomingPayday | null;
+}
+
+interface BudgetCategoryRow {
+  category: string;
+  limitCents: number;
+  spentCents: number;
+  txnCount: number;
+  expectedCents: number;
+}
+
+interface WatchlistRow {
+  id: string;
+  name: string;
+  target_kind: "merchant" | "category";
+  target: string;
+  threshold_cents: number;
+  created_at: string;
+}
+
+/** Signed-out demo upcoming strip, from the demo recurring charges. */
+function demoUpcoming(): UpcomingData {
+  const today = new Date().toISOString().slice(0, 10);
+  const d = new Date(today + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + 14);
+  const horizon = d.toISOString().slice(0, 10);
+  const charges = demoRecurring
+    .filter((r) => r.next_charge_date >= today && r.next_charge_date <= horizon)
+    .map((r) => ({
+      merchant: r.merchant,
+      amountCents: Math.abs(r.amount_cents_avg),
+      date: r.next_charge_date,
+      cadence: r.cadence,
+      inferred: true,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  return { charges, payday: null };
+}
+
+function shortDate(iso: string): string {
+  const d = new Date(iso + "T00:00:00Z");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+/** Rank categories for the compact Brief strip: over-limit, near-limit, ahead of pace, then the rest. */
+function paceRisk(c: BudgetCategoryRow): number {
+  if (c.spentCents > c.limitCents) return 3;
+  if (c.limitCents > 0 && c.spentCents / c.limitCents >= 0.8) return 2;
+  if (c.spentCents > c.expectedCents) return 1;
+  return 0;
 }
 
 const DEMO_FINDINGS: Finding[] = [
@@ -237,6 +306,14 @@ export default function BriefPage() {
   const [refundAmount, setRefundAmount] = useState("");
   const [refundDate, setRefundDate] = useState("");
   const [refundError, setRefundError] = useState("");
+  const [upcoming, setUpcoming] = useState<UpcomingData | null>(null);
+  const [budgetCats, setBudgetCats] = useState<BudgetCategoryRow[] | null>(null);
+  const [watchlists, setWatchlists] = useState<WatchlistRow[] | null>(null);
+  const [wlName, setWlName] = useState("");
+  const [wlKind, setWlKind] = useState<"merchant" | "category">("merchant");
+  const [wlTarget, setWlTarget] = useState("");
+  const [wlThreshold, setWlThreshold] = useState("");
+  const [wlError, setWlError] = useState("");
 
   async function load() {
     setError(false);
@@ -248,6 +325,9 @@ export default function BriefPage() {
       setEnv(data);
       if (!data.demo) {
         void loadRoutines();
+        void loadUpcoming();
+        void loadBudgetCats();
+        void loadWatchlists();
       }
     } catch {
       setError(true);
@@ -276,8 +356,82 @@ export default function BriefPage() {
     }
   }
 
-  async function actOnFinding(id: string, action: "resolve" | "dismiss" | "snooze") {
+  async function loadUpcoming() {
     try {
+      const res = await fetch("/api/upcoming", { cache: "no-store" });
+      if (res.ok) setUpcoming(((await res.json()) as { data: UpcomingData }).data);
+    } catch {
+      // Additive; the brief stands without it.
+    }
+  }
+
+  async function loadBudgetCats() {
+    try {
+      const res = await fetch("/api/budgets", { cache: "no-store" });
+      if (!res.ok) return;
+      const env2 = (await res.json()) as { data?: { categories?: BudgetCategoryRow[] } };
+      setBudgetCats(env2.data?.categories ?? []);
+    } catch {
+      // Additive; the brief stands without it.
+    }
+  }
+
+  async function loadWatchlists() {
+    try {
+      const res = await fetch("/api/routines/watchlists", { cache: "no-store" });
+      if (res.ok) setWatchlists(((await res.json()) as { watchlists: WatchlistRow[] }).watchlists);
+    } catch {
+      // Additive; the brief stands without it.
+    }
+  }
+
+  async function addWatchlist(e: React.FormEvent) {
+    e.preventDefault();
+    setWlError("");
+    if (!wlName.trim()) {
+      setWlError("Name your watchlist.");
+      return;
+    }
+    if (!wlTarget.trim()) {
+      setWlError(`Add the ${wlKind} to watch.`);
+      return;
+    }
+    const dollars = Number(wlThreshold);
+    if (!Number.isFinite(dollars) || dollars <= 0) {
+      setWlError("Add a monthly limit in dollars.");
+      return;
+    }
+    try {
+      const res = await fetch("/api/routines/watchlists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: wlName.trim(),
+          target_kind: wlKind,
+          target: wlTarget.trim(),
+          threshold_dollars: dollars,
+        }),
+      });
+      if (!res.ok) throw new Error("save failed");
+      setWlName("");
+      setWlTarget("");
+      setWlThreshold("");
+      await loadWatchlists();
+    } catch {
+      setWlError("Could not save that watchlist. Try again.");
+    }
+  }
+
+  async function removeWatchlist(id: string) {
+    try {
+      const res = await fetch(`/api/routines/watchlists/${id}`, { method: "DELETE" });
+      if (res.ok) await loadWatchlists();
+    } catch {
+      // non-fatal
+    }
+  }
+
+  async function actOnFinding(id: string, action: "resolve" | "dismiss" | "snooze") {    try {
       const res = await fetch(`/api/routines/findings/${id}/${action}`, {
         method: "POST",
         cache: "no-store",
@@ -394,6 +548,7 @@ export default function BriefPage() {
   const paceOver = brief.budgetSpentCents > brief.budgetExpectedCents;
   const signedIn = !env.demo;
   const attention = signedIn ? findings : DEMO_FINDINGS;
+  const up = signedIn ? upcoming : demoUpcoming();
 
   return (
     <div className="space-y-5">
@@ -461,22 +616,52 @@ export default function BriefPage() {
         </Section>
       )}
 
-      {brief.billsDue.length > 0 && (
-        <Section title="Bills due this week">
-          {brief.billsDue.map((b) => (
-            <div key={b.merchant} className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-[length:var(--type-body-size)]">{b.merchant}</p>
-                <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">due {b.dueDate}</p>
-              </div>
-              <span className="tnum font-semibold">{formatUSD(b.amountCents)}</span>
-            </div>
-          ))}
-          <p className="pt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-            {formatUSD(brief.billsDueTotalCents)} committed this week.
+      <Section title="Coming up">
+        {env.demo && (
+          <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+            Demo data. Sign in to see your own upcoming charges.
           </p>
-        </Section>
-      )}
+        )}
+        {signedIn && !upcoming ? (
+          <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+            Checking what's ahead…
+          </p>
+        ) : up && (up.charges.length > 0 || up.payday) ? (
+          <>
+            {up.charges.map((c) => (
+              <div key={`${c.merchant}-${c.date}`} className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[length:var(--type-body-size)]">{c.merchant}</p>
+                  <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+                    expected {shortDate(c.date)} · {c.cadence}
+                  </p>
+                </div>
+                <span className="tnum font-semibold">{formatUSD(c.amountCents)}</span>
+              </div>
+            ))}
+            {up.payday && (
+              <div className="flex items-center justify-between gap-3 border-t border-[var(--border-subtle)] pt-2.5">
+                <div>
+                  <p className="text-[length:var(--type-body-size)]">Payday</p>
+                  <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+                    expected {shortDate(up.payday.date)} · inferred from your income pattern
+                  </p>
+                </div>
+                <span className="tnum font-semibold text-[var(--accent-progress)]">
+                  +{formatUSD(up.payday.amountCents)}
+                </span>
+              </div>
+            )}
+            <p className="pt-1 text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+              Estimates from your past charges — dates and amounts can shift.
+            </p>
+          </>
+        ) : (
+          <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+            No recurring charges detected in the next 14 days.
+          </p>
+        )}
+      </Section>
 
       {!missing.includes("budget") && (
         <Section title={`${brief.budgetMonth} budget pace`}>
@@ -492,8 +677,76 @@ export default function BriefPage() {
               ? `Running ${formatUSD(brief.budgetSpentCents - brief.budgetExpectedCents)} ahead of pace — easy does it.`
               : `${formatUSD(brief.budgetExpectedCents - brief.budgetSpentCents)} under pace. Nicely done.`}
           </p>
+          {signedIn && budgetCats && budgetCats.length > 0 && (
+            <div className="mt-4 space-y-2.5 border-t border-[var(--border-subtle)] pt-3">
+              {budgetCats
+                .slice()
+                .sort((a, b) => paceRisk(b) - paceRisk(a))
+                .slice(0, 3)
+                .map((c) => {
+                  const pct = c.limitCents > 0 ? Math.min(100, (c.spentCents / c.limitCents) * 100) : 0;
+                  const over = c.spentCents > c.limitCents;
+                  const delta = c.spentCents - c.expectedCents;
+                  const label = over
+                    ? `${formatUSD(c.spentCents - c.limitCents)} over limit`
+                    : delta > 0
+                      ? `${formatUSD(delta)} ahead of pace`
+                      : `${formatUSD(-delta)} under pace`;
+                  return (
+                    <div key={c.category}>
+                      <div className="flex items-baseline justify-between gap-3">
+                        <p className="text-[length:var(--type-caption-size)] font-semibold">{c.category}</p>
+                        <p
+                          className={`text-[length:var(--type-micro-size)] ${
+                            over
+                              ? "text-[var(--signal-critical)]"
+                              : delta > 0
+                                ? "text-[var(--signal-warning)]"
+                                : "text-[var(--text-micro)]"
+                          }`}
+                        >
+                          {label}
+                        </p>
+                      </div>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--ring-track)]">
+                        <div
+                          className={`h-full rounded-full ${
+                            over
+                              ? "bg-[var(--signal-critical)]"
+                              : pct >= 80
+                                ? "bg-[var(--signal-warning)]"
+                                : "bg-[var(--accent-progress)]"
+                          }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              <Link
+                href="/budgets"
+                className="inline-block pt-1 text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)]"
+              >
+                All budgets →
+              </Link>
+            </div>
+          )}
         </Section>
       )}
+
+      <Link href="/spending" className="block rounded-xl bg-[var(--surface-card)] p-6 elev-1">
+        <p className="text-[length:var(--type-micro-size)] uppercase tracking-[0.14em] text-[var(--text-micro)]">
+          Spending
+        </p>
+        <p className="mt-2 text-[length:var(--type-body-size)] font-semibold">
+          {!missing.includes("budget")
+            ? `${formatUSD(brief.budgetSpentCents)} out this month — see where it went.`
+            : "See where your money went."}
+        </p>
+        <p className="mt-1 text-[length:var(--type-caption-size)] font-semibold text-[var(--accent-progress)]">
+          Open the spending explorer →
+        </p>
+      </Link>
 
       {brief.priceChanges.length > 0 && (
         <Section title="Subscription watch">
@@ -621,6 +874,88 @@ export default function BriefPage() {
                     >
                       {r.status === "matched" ? "received" : r.status === "shortfall" ? "short" : "watching"}
                     </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+        {signedIn && (
+          <div className="border-t border-[var(--border-subtle)] pt-3">
+            <p className="text-[length:var(--type-body-size)] font-semibold">Watchlists</p>
+            <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+              Pick a merchant or a category and a monthly limit. Coast tells you when spending crosses
+              it — nothing here ever moves money.
+            </p>
+            <form onSubmit={addWatchlist} className="mt-3 space-y-2">
+              <div className="flex gap-2">
+                <input
+                  value={wlName}
+                  onChange={(e) => setWlName(e.target.value)}
+                  placeholder="Name, e.g. Coffee"
+                  aria-label="Watchlist name"
+                  className="min-w-0 flex-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 py-2 text-sm"
+                />
+                <input
+                  value={wlThreshold}
+                  onChange={(e) => setWlThreshold(e.target.value)}
+                  placeholder="$ limit"
+                  aria-label="Monthly limit in dollars"
+                  inputMode="decimal"
+                  className="w-24 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="flex gap-2">
+                <input
+                  value={wlTarget}
+                  onChange={(e) => setWlTarget(e.target.value)}
+                  placeholder={wlKind === "merchant" ? "Merchant, e.g. Blue Bottle" : "Category, e.g. Dining"}
+                  aria-label="Merchant or category to watch"
+                  className="min-w-0 flex-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 py-2 text-sm"
+                />
+                <div role="group" aria-label="Watch target type" className="flex shrink-0 rounded-lg bg-[var(--surface-secondary)] p-0.5">
+                  {(["merchant", "category"] as const).map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      aria-pressed={wlKind === k}
+                      onClick={() => setWlKind(k)}
+                      className={`rounded-md px-2.5 py-1.5 text-[length:var(--type-micro-size)] font-semibold ${
+                        wlKind === k ? "bg-[var(--surface-card)] text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
+                      }`}
+                    >
+                      {k === "merchant" ? "Merchant" : "Category"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {wlError && (
+                <p className="text-[length:var(--type-caption-size)] text-[var(--signal-warning)]">{wlError}</p>
+              )}
+              <button
+                type="submit"
+                className="rounded-lg bg-[var(--accent-progress)] px-4 py-2 text-sm font-semibold text-white"
+              >
+                Add watchlist
+              </button>
+            </form>
+            {watchlists && watchlists.length > 0 && (
+              <ul className="mt-3 space-y-1.5">
+                {watchlists.map((w) => (
+                  <li
+                    key={w.id}
+                    className="flex items-center justify-between gap-3 text-[length:var(--type-caption-size)]"
+                  >
+                    <span>
+                      {w.name} · {w.target_kind === "merchant" ? w.target : `category ${w.target}`} ·{" "}
+                      {formatUSD(w.threshold_cents)}/mo
+                    </span>
+                    <button
+                      onClick={() => removeWatchlist(w.id)}
+                      className="shrink-0 text-[length:var(--type-micro-size)] font-semibold text-[var(--text-micro)]"
+                    >
+                      Remove
+                    </button>
                   </li>
                 ))}
               </ul>

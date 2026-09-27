@@ -9,8 +9,10 @@ import {
   detectOverlap,
   detectPossibleTrials,
   detectPriceHikes,
+  detectWatchlist,
   matchRefunds,
   type RoutineTxn,
+  type WatchlistInput,
 } from "./routines";
 
 function txn(partial: Partial<RoutineTxn> & { id: string }): RoutineTxn {
@@ -230,5 +232,64 @@ describe("matchRefunds", () => {
     expect(shortfalls).toHaveLength(0);
     expect(received).toHaveLength(1);
     expect(received[0].impact_cents).toBe(0);
+  });
+});
+
+describe("detectWatchlist", () => {
+  const coffee: WatchlistInput = {
+    id: "wl-1",
+    name: "Coffee shops",
+    target_kind: "merchant",
+    target: "blue bottle",
+    threshold_cents: 3000,
+  };
+
+  it("fires when month-to-date spend crosses the threshold", () => {
+    const txns = [
+      txn({ id: "c1", merchant: "Blue Bottle Coffee", amount_cents: -1800, date: "2026-09-05" }),
+      txn({ id: "c2", merchant: "Blue Bottle Coffee", amount_cents: -1500, date: "2026-09-20" }),
+    ];
+    const findings = detectWatchlist(txns, [coffee], "2026-09");
+    expect(findings).toHaveLength(1);
+    const f = findings[0];
+    expect(f.routine_key).toBe("watchlist");
+    expect(f.title).toBe("Watchlist: Coffee shops passed $30.00");
+    expect(f.detail).toContain("$33.00");
+    expect(f.detail).toContain("$3.00 over");
+    expect(f.impact_cents).toBe(3300);
+    expect(f.dedupe_hash).toBe("watchlist:wl-1:2026-09");
+    expect(f.evidence.transactions).toHaveLength(2);
+  });
+
+  it("stays quiet under the threshold and ignores other months", () => {
+    const txns = [
+      txn({ id: "c1", merchant: "Blue Bottle Coffee", amount_cents: -1800, date: "2026-09-05" }),
+      txn({ id: "c2", merchant: "Blue Bottle Coffee", amount_cents: -1500, date: "2026-08-20" }),
+    ];
+    expect(detectWatchlist(txns, [coffee], "2026-09")).toHaveLength(0);
+  });
+
+  it("matches categories exactly (case-insensitive) and ignores pending", () => {
+    const wl: WatchlistInput = {
+      id: "wl-2",
+      name: "Dining",
+      target_kind: "category",
+      target: "dining",
+      threshold_cents: 5000,
+    };
+    const txns = [
+      txn({ id: "d1", merchant: "Taco Spot", amount_cents: -3000, date: "2026-09-05", category: "Dining" }),
+      txn({ id: "d2", merchant: "Sushi Bar", amount_cents: -3000, date: "2026-09-06", category: "Dining", pending: true }),
+      txn({ id: "d3", merchant: "Grocery", amount_cents: -3000, date: "2026-09-07", category: "Groceries" }),
+    ];
+    expect(detectWatchlist(txns, [wl], "2026-09")).toHaveLength(0);
+  });
+
+  it("excludes transfers and income from merchant matching", () => {
+    const txns = [
+      txn({ id: "t1", merchant: "Blue Bottle", amount_cents: -40000, date: "2026-09-05", kind: "transfer" }),
+      txn({ id: "i1", merchant: "Blue Bottle", amount_cents: 50000, date: "2026-09-06", kind: "income" }),
+    ];
+    expect(detectWatchlist(txns, [coffee], "2026-09")).toHaveLength(0);
   });
 });

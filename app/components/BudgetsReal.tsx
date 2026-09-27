@@ -13,14 +13,24 @@ import type {
   ActivityRow,
 } from "@/lib/real-data-server";
 
-function PaceBar({ spent, limit }: { spent: number; limit: number }) {
+function PaceBar({
+  spent,
+  limit,
+  expected,
+}: {
+  spent: number;
+  limit: number;
+  expected?: number | null;
+}) {
   const pct = limit > 0 ? Math.min(100, (spent / limit) * 100) : 0;
   const over = spent > limit;
+  const near = !over && pct >= 80;
+  const paceDelta = expected != null ? spent - expected : null;
   return (
     <div className="mt-2">
       <div className="h-2 overflow-hidden rounded-full bg-[var(--ring-track)]">
         <div
-          className={`h-full rounded-full ${over ? "bg-[var(--signal-critical)]" : pct >= 80 ? "bg-[var(--signal-warning)]" : "bg-[var(--accent-progress)]"}`}
+          className={`h-full rounded-full ${over ? "bg-[var(--signal-critical)]" : near ? "bg-[var(--signal-warning)]" : "bg-[var(--accent-progress)]"}`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -28,6 +38,23 @@ function PaceBar({ spent, limit }: { spent: number; limit: number }) {
         <span className="tnum">{formatUSD(spent)}</span>
         <span className="tnum">{formatUSD(limit)}</span>
       </div>
+      {paceDelta != null && (
+        <p
+          className={`mt-1 text-[length:var(--type-micro-size)] font-semibold ${
+            over
+              ? "text-[var(--signal-critical)]"
+              : paceDelta > 0
+                ? "text-[var(--signal-warning)]"
+                : "text-[var(--accent-progress)]"
+          }`}
+        >
+          {over
+            ? `${formatUSD(spent - limit)} over limit`
+            : paceDelta > 0
+              ? `${formatUSD(paceDelta)} ahead of pace`
+              : `${formatUSD(-paceDelta)} under pace`}
+        </p>
+      )}
     </div>
   );
 }
@@ -283,7 +310,7 @@ export default function BudgetsReal() {
                 Edit
               </button>
             </div>
-            <PaceBar spent={d.spentCents} limit={d.ceilingCents!} />
+            <PaceBar spent={d.spentCents} limit={d.ceilingCents!} expected={d.expectedCents} />
             <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               {d.expectedCents != null && (
                 <>
@@ -313,7 +340,7 @@ export default function BudgetsReal() {
                     {c.txnCount} transactions
                   </p>
                 </div>
-                <PaceBar spent={c.spentCents} limit={c.limitCents} />
+                <PaceBar spent={c.spentCents} limit={c.limitCents} expected={c.expectedCents} />
               </button>
             ))}
             {(d.unbudgeted.spentCents > 0 || d.unbudgeted.txnCount > 0) && (

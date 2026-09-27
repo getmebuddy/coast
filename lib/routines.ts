@@ -21,7 +21,8 @@ export type RoutineKey =
   | "price_hike"
   | "duplicate_charge"
   | "fee_sweep"
-  | "overlap";
+  | "overlap"
+  | "watchlist";
 
 export interface RoutineRegistryEntry {
   key: RoutineKey;
@@ -36,6 +37,7 @@ export const ROUTINE_REGISTRY: RoutineRegistryEntry[] = [
   { key: "duplicate_charge", name: "Duplicate-charge check", description: "Catches the same charge appearing twice." },
   { key: "fee_sweep", name: "Fee sweep", description: "Rounds up bank, late, and foreign-transaction fees." },
   { key: "overlap", name: "Overlap check", description: "Finds subscriptions doing the same job." },
+  { key: "watchlist", name: "Watchlist", description: "Tells you when spending with a merchant or category passes a monthly limit you set." },
 ];
 
 export interface RoutineTxn {
@@ -45,6 +47,8 @@ export interface RoutineTxn {
   date: string; // YYYY-MM-DD posted date
   kind: string; // "income" | "expense" | "transfer" | "refund" | "fee"
   pending?: boolean;
+  /** Effective category (overrides/rules applied); set when the caller has it. */
+  category?: string;
 }
 
 export interface RoutineEvidenceTxn {
@@ -440,4 +444,69 @@ export function matchRefunds(
   }
 
   return { matched, shortfalls, received };
+}
+
+// ---------------------------------------------------------------------------
+// Watchlist (user-configured) — one notify-only finding per watchlist per
+// calendar month when month-to-date posted spending crosses the threshold.
+// ---------------------------------------------------------------------------
+
+export interface WatchlistInput {
+  id: string;
+  name: string;
+  target_kind: "merchant" | "category";
+  target: string;
+  threshold_cents: number;
+}
+
+function monthLabel(iso: string): string {
+  return new Date(iso + "-01T00:00:00Z").toLocaleString("en-US", {
+    month: "long",
+    timeZone: "UTC",
+  });
+}
+
+export function detectWatchlist(
+  txns: RoutineTxn[],
+  watchlists: WatchlistInput[],
+  monthISO: string // YYYY-MM
+): RoutineFinding[] {
+  const findings: RoutineFinding[] = [];
+  const mtd = txns.filter(
+    (t) =>
+      !t.pending &&
+      (t.kind === "expense" || t.kind === "fee") &&
+      t.amount_cents < 0 &&
+      t.date.startsWith(monthISO)
+  );
+  for (const w of watchlists) {
+    const needle = w.target.trim().toLowerCase();
+    if (!needle || w.threshold_cents <= 0) continue;
+    const matched = mtd.filter((t) =>
+      w.target_kind === "merchant"
+        ? t.merchant.toLowerCase().includes(needle) ||
+          needle.includes(t.merchant.toLowerCase())
+        : (t.category ?? "").trim().toLowerCase() === needle
+    );
+    const spent = matched.reduce((s, t) => s + Math.abs(t.amount_cents), 0);
+    if (spent < w.threshold_cents) continue;
+    const over = spent - w.threshold_cents;
+    const evidenceTxns = matched
+      .slice()
+      .sort((a, b) => Math.abs(b.amount_cents) - Math.abs(a.amount_cents))
+      .slice(0, 8)
+      .map(toEvidence);
+    findings.push({
+      routine_key: "watchlist",
+      kind: "watchlist",
+      title: `Watchlist: ${w.name} passed ${formatUSD(w.threshold_cents)}`,
+      detail:
+        `${formatUSD(spent)} with ${w.name} so far in ${monthLabel(monthISO)} — ` +
+        `${formatUSD(over)} over your ${formatUSD(w.threshold_cents)} limit.`,
+      impact_cents: spent,
+      evidence: { transactions: evidenceTxns, watchlist_id: w.id },
+      dedupe_hash: `watchlist:${w.id}:${monthISO}`,
+    });
+  }
+  return findings;
 }

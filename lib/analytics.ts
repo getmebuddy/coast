@@ -92,6 +92,7 @@ export type PilotEventName =
   | "number_completed"
   | "first_insight_viewed"
   | "morning_brief_viewed"
+  | "spending_viewed"
   | "what_if_saved"
   | "recurring_item_reviewed"
   | "equity_event_added"
@@ -110,6 +111,7 @@ const PILOT_EVENTS: ReadonlySet<string> = new Set<string>([
   "number_completed",
   "first_insight_viewed",
   "morning_brief_viewed",
+  "spending_viewed",
   "what_if_saved",
   "recurring_item_reviewed",
   "equity_event_added",

@@ -8,14 +8,16 @@ import { useMemo, useState } from "react";
 import { categoryDrilldown, demoBudgets, demoTransactions } from "@/lib/demo";
 import { formatUSD } from "@/lib/fire";
 
-function PaceBar({ spent, limit }: { spent: number; limit: number }) {
+function PaceBar({ spent, limit, expected }: { spent: number; limit: number; expected?: number }) {
   const pct = Math.min(100, (spent / limit) * 100);
   const over = spent > limit;
+  const near = !over && pct >= 80;
+  const paceDelta = expected != null ? spent - expected : null;
   return (
     <div className="mt-2">
       <div className="h-2 overflow-hidden rounded-full bg-[var(--ring-track)]">
         <div
-          className={`h-full rounded-full ${over ? "bg-[var(--signal-critical)]" : pct >= 80 ? "bg-[var(--signal-warning)]" : "bg-[var(--accent-progress)]"}`}
+          className={`h-full rounded-full ${over ? "bg-[var(--signal-critical)]" : near ? "bg-[var(--signal-warning)]" : "bg-[var(--accent-progress)]"}`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -23,6 +25,23 @@ function PaceBar({ spent, limit }: { spent: number; limit: number }) {
         <span className="tnum">{formatUSD(spent)}</span>
         <span className="tnum">{formatUSD(limit)}</span>
       </div>
+      {paceDelta != null && (
+        <p
+          className={`mt-1 text-[length:var(--type-micro-size)] font-semibold ${
+            over
+              ? "text-[var(--signal-critical)]"
+              : paceDelta > 0
+                ? "text-[var(--signal-warning)]"
+                : "text-[var(--accent-progress)]"
+          }`}
+        >
+          {over
+            ? `${formatUSD(spent - limit)} over limit`
+            : paceDelta > 0
+              ? `${formatUSD(paceDelta)} ahead of pace`
+              : `${formatUSD(-paceDelta)} under pace`}
+        </p>
+      )}
     </div>
   );
 }
@@ -34,15 +53,15 @@ export default function BudgetsDemo() {
   const y = now.getUTCFullYear();
   const m = now.getUTCMonth() + 1;
 
-  const rows = useMemo(
-    () =>
-      demoBudgets.map((b) => {
-        const txns = categoryDrilldown(demoTransactions, y, m, b.category as "__total__");
-        const spent = txns.reduce((s, t) => s + Math.abs(t.amount_cents), 0);
-        return { ...b, spent };
-      }),
-    [y, m]
-  );
+  const rows = useMemo(() => {
+    const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const elapsedDays = Math.max(1, Math.min(daysInMonth, now.getUTCDate()));
+    return demoBudgets.map((b) => {
+      const txns = categoryDrilldown(demoTransactions, y, m, b.category as "__total__");
+      const spent = txns.reduce((s, t) => s + Math.abs(t.amount_cents), 0);
+      return { ...b, spent, expected: Math.floor((b.limit_cents * elapsedDays) / daysInMonth) };
+    });
+  }, [y, m, now]);
 
   const drillTxns = useMemo(
     () => (drill ? categoryDrilldown(demoTransactions, y, m, drill as "__total__") : []),
@@ -104,7 +123,7 @@ export default function BudgetsDemo() {
                 </p>
                 <span aria-hidden className="text-[var(--text-micro)]">›</span>
               </div>
-              <PaceBar spent={b.spent} limit={b.limit_cents} />
+              <PaceBar spent={b.spent} limit={b.limit_cents} expected={b.expected} />
             </button>
           </li>
         ))}

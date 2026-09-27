@@ -9,6 +9,7 @@
 import "server-only";
 import { createServerSupabase } from "./supabase/server";
 import { loadLedger, type Viewer } from "./real-data-server";
+import { effectiveCategory, type Ledger } from "./real-data";
 import {
   ROUTINE_REGISTRY,
   detectDuplicates,
@@ -16,11 +17,13 @@ import {
   detectOverlap,
   detectPossibleTrials,
   detectPriceHikes,
+  detectWatchlist,
   matchRefunds,
   type ExpectedRefund,
   type RoutineFinding,
   type RoutineKey,
   type RoutineTxn,
+  type WatchlistInput,
 } from "./routines";
 import { logPilotEvent } from "./analytics-server";
 
@@ -124,6 +127,70 @@ export async function setRoutineEnabled(
   return { key: data.key, name: data.name, enabled: data.enabled };
 }
 
+export interface WatchlistRow {
+  id: string;
+  name: string;
+  target_kind: "merchant" | "category";
+  target: string;
+  threshold_cents: number;
+  created_at: string;
+}
+
+export interface NewWatchlist {
+  name: string;
+  target_kind: "merchant" | "category";
+  target: string;
+  threshold_cents: number;
+}
+
+/** All of the user's watchlists, newest first. */
+export async function listWatchlists(userId: string): Promise<WatchlistRow[]> {
+  const supabase = createServerSupabase();
+  const { data, error } = await supabase
+    .from("watchlists")
+    .select("id, name, target_kind, target, threshold_cents, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`watchlists-read: ${error.message}`);
+  return (data ?? []) as WatchlistRow[];
+}
+
+/** Create a watchlist. Throws on invalid input. */
+export async function addWatchlist(userId: string, input: NewWatchlist): Promise<WatchlistRow> {
+  const name = input.name.trim().slice(0, 60);
+  const target = input.target.trim().slice(0, 80);
+  if (!name) throw new Error("watchlist-invalid: name is required");
+  if (!target) throw new Error("watchlist-invalid: merchant or category is required");
+  if (input.target_kind !== "merchant" && input.target_kind !== "category")
+    throw new Error("watchlist-invalid: target_kind must be merchant or category");
+  if (!Number.isInteger(input.threshold_cents) || input.threshold_cents <= 0)
+    throw new Error("watchlist-invalid: threshold must be a positive number of cents");
+  const supabase = createServerSupabase();
+  const { data, error } = await supabase
+    .from("watchlists")
+    .insert({
+      user_id: userId,
+      name,
+      target_kind: input.target_kind,
+      target,
+      threshold_cents: input.threshold_cents,
+    })
+    .select("id, name, target_kind, target, threshold_cents, created_at")
+    .single();
+  if (error) throw new Error(`watchlists-write: ${error.message}`);
+  return data as WatchlistRow;
+}
+
+export async function deleteWatchlist(userId: string, id: string): Promise<void> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase
+    .from("watchlists")
+    .delete()
+    .eq("user_id", userId)
+    .eq("id", id);
+  if (error) throw new Error(`watchlists-delete: ${error.message}`);
+}
+
 async function upsertFindings(
   userId: string,
   findings: RoutineFinding[]
@@ -211,6 +278,20 @@ export async function runRoutines(viewer: Viewer): Promise<RunSummary> {
   if (enabled.has("fee_sweep")) put("fee_sweep", detectFeeSweep(txns, nowISO));
   if (enabled.has("overlap")) put("overlap", detectOverlap(txns));
   if (enabled.has("trial_watch")) put("trial_watch", detectPossibleTrials(txns));
+
+  if (enabled.has("watchlist")) {
+    const watchlists = await listWatchlists(viewer.userId);
+    if (watchlists.length > 0) {
+      const withCategories: RoutineTxn[] = ledger.txns.map((t) => ({
+        ...toRoutineTxn(t),
+        category: effectiveCategory(ledger, t).category,
+      }));
+      put(
+        "watchlist",
+        detectWatchlist(withCategories, watchlists, nowISO.slice(0, 7))
+      );
+    }
+  }
 
   if (enabled.has("refund_watch")) {
     const { data: pending } = await supabase
