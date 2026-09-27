@@ -20,6 +20,8 @@ export interface SpendTxn {
   id: string;
   date: string; // YYYY-MM-DD posted date
   merchant: string;
+  /** Plaid logo_url; null/undefined → letter avatar. */
+  logoUrl?: string | null;
   amount_cents: number; // signed; negative = money out
   kind: string; // "income" | "expense" | "transfer" | "refund" | "fee"
   pending?: boolean;
@@ -39,7 +41,7 @@ export interface SpendingCategoryRow {
   category: string;
   spendCents: number;
   txnCount: number;
-  top: Array<{ id: string; merchant: string; date: string; amountCents: number }>;
+  top: Array<{ id: string; merchant: string; logoUrl?: string | null; date: string; amountCents: number }>;
 }
 
 export interface SpendingPeriodData {
@@ -232,6 +234,7 @@ export function buildSpendingData(
           .map((t) => ({
             id: t.id,
             merchant: t.merchant,
+            logoUrl: t.logoUrl ?? null,
             date: t.date,
             amountCents: t.amount_cents,
           })),

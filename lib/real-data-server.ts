@@ -129,7 +129,7 @@ export async function loadLedger(viewer: Viewer, limit = ACTIVITY_SCAN_CEILING):
   const [txnsRes, acctsRes, overRes, rulesRes, splitsRes] = await Promise.all([
     supabase
       .from("transactions")
-      .select("id, posted_at, ingested_at, merchant_normalized, amount_cents, kind, pending, account_id")
+      .select("id, posted_at, ingested_at, merchant_normalized, amount_cents, kind, pending, account_id, logo_url")
       .eq("user_id", viewer.userId)
       .order("posted_at", { ascending: false })
       .order("ingested_at", { ascending: false })
@@ -164,6 +164,8 @@ export interface ActivityRow {
   id: string;
   postedAt: string;
   merchant: string;
+  /** Plaid logo_url; null/undefined → letter avatar. */
+  logoUrl?: string | null;
   amountCents: number;
   category: string;
   kind: TransactionKind;
@@ -185,6 +187,7 @@ function toActivityRow(ledger: Ledger, txn: LedgerTxn): ActivityRow {
     id: txn.id,
     postedAt: txn.posted_at,
     merchant: txn.merchant_normalized,
+    logoUrl: txn.logo_url ?? null,
     amountCents: txn.amount_cents,
     category,
     kind: txn.kind,
@@ -759,6 +762,7 @@ export async function loadRealBrief(viewer: Viewer, now = new Date()): Promise<D
     const newActivity: BriefActivity[] = fresh.map((t) => ({
       id: t.id,
       merchant: t.merchant_normalized,
+      logoUrl: t.logo_url ?? null,
       amountCents: t.amount_cents,
       kind: t.kind,
       pending: t.pending,
@@ -770,10 +774,19 @@ export async function loadRealBrief(viewer: Viewer, now = new Date()): Promise<D
 
     // Bills due this week.
     const active = (recurRes.data ?? []).filter((r) => !r.dismissed);
+    // First stored logo per merchant — the recurring table has no logos, so
+    // surface the ledger's (no clobber: we only read non-null stored values).
+    const logoByMerchant = new Map<string, string>();
+    for (const t of ledger.txns) {
+      if (t.logo_url && !logoByMerchant.has(t.merchant_normalized)) {
+        logoByMerchant.set(t.merchant_normalized, t.logo_url);
+      }
+    }
     const billsDue: BriefBill[] = active
       .filter((r) => r.next_charge_date && r.next_charge_date >= today && r.next_charge_date <= in7)
       .map((r) => ({
         merchant: r.merchant_normalized,
+        logoUrl: logoByMerchant.get(r.merchant_normalized) ?? null,
         amountCents: r.last_amount_cents,
         dueDate: r.next_charge_date!,
         priceChanged: r.price_changed,
@@ -793,6 +806,7 @@ export async function loadRealBrief(viewer: Viewer, now = new Date()): Promise<D
       .filter((r) => r.price_changed)
       .map((r) => ({
         merchant: r.merchant_normalized,
+        logoUrl: logoByMerchant.get(r.merchant_normalized) ?? null,
         amountCents: r.last_amount_cents,
         dueDate: r.next_charge_date ?? today,
         priceChanged: true,
@@ -950,6 +964,7 @@ export async function loadSpending(viewer: Viewer, now = new Date()): Promise<Da
         id: t.id,
         date: t.posted_at.slice(0, 10),
         merchant: t.merchant_normalized,
+        logoUrl: t.logo_url ?? null,
         amount_cents: t.amount_cents,
         kind: t.kind,
         pending: t.pending,
@@ -979,6 +994,8 @@ export async function loadSpending(viewer: Viewer, now = new Date()): Promise<Da
 
 export interface UpcomingCharge {
   merchant: string;
+  /** Plaid logo_url from the ledger; null → letter avatar. */
+  logoUrl?: string | null;
   amountCents: number; // positive
   date: string; // YYYY-MM-DD
   cadence: string;
@@ -1039,12 +1056,28 @@ export async function loadUpcoming(viewer: Viewer, now = new Date()): Promise<Da
       .eq("dismissed", false);
     if (error) throw new Error(`upcoming-read: ${error.message}`);
 
+    // First stored logo per merchant from the ledger (best-effort; the
+    // recurring table itself has no logos).
+    const upcomingLogos = new Map<string, string>();
+    let paydayLedger: Ledger | null = null;
+    try {
+      paydayLedger = await loadLedger(viewer);
+      for (const t of paydayLedger.txns) {
+        if (t.logo_url && !upcomingLogos.has(t.merchant_normalized)) {
+          upcomingLogos.set(t.merchant_normalized, t.logo_url);
+        }
+      }
+    } catch {
+      // Logo enrichment is best-effort; charges still render.
+    }
+
     const charges: UpcomingCharge[] = (rows ?? [])
       .filter(
         (r) => r.next_charge_date && r.next_charge_date >= today && r.next_charge_date <= horizon
       )
       .map((r) => ({
         merchant: r.merchant_normalized,
+        logoUrl: upcomingLogos.get(r.merchant_normalized) ?? null,
         amountCents: Math.abs(r.last_amount_cents),
         date: r.next_charge_date,
         cadence: r.cadence,
@@ -1055,7 +1088,7 @@ export async function loadUpcoming(viewer: Viewer, now = new Date()): Promise<Da
     // Payday: the largest recurring income pattern in the ledger.
     let payday: UpcomingPayday | null = null;
     try {
-      const ledger = await loadLedger(viewer);
+      const ledger = paydayLedger ?? (await loadLedger(viewer));
       const incomeInputs = ledger.txns
         .filter((t) => !t.pending && t.kind === "income" && t.amount_cents > 0)
         .map((t) => ({

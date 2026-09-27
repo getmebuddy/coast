@@ -106,6 +106,32 @@ export function toAccountUpsertRow(
 }
 
 /**
+ * Logo backfill rows for a sync payload: one row per transaction that
+ * carries a Plaid `logo_url`. Applied with a `logo_url IS NULL` guard, so a
+ * later sync that returns no logo can never clobber a stored one.
+ */
+export interface LogoBackfillRow {
+  user_id: string;
+  source: "plaid";
+  source_id: string;
+  logo_url: string;
+}
+
+export function buildLogoBackfillRows(
+  userId: string,
+  txns: Array<{ transaction_id: string; logo_url?: string | null }>
+): LogoBackfillRow[] {
+  return txns
+    .filter((t) => t.logo_url != null && t.logo_url !== "")
+    .map((t) => ({
+      user_id: userId,
+      source: "plaid" as const,
+      source_id: t.transaction_id,
+      logo_url: t.logo_url as string,
+    }));
+}
+
+/**
  * Access-token encryption at rest (AES-256-GCM, key derived from PLAID_SECRET).
  * For production, move this to Supabase Vault / a KMS key.
  *

@@ -19,6 +19,7 @@ import { ROUTINE_REGISTRY } from "@/lib/routines";
 import { demoRecurring } from "@/lib/demo";
 import ShareCard from "../components/ShareCard";
 import DemoBanner from "../components/DemoBanner";
+import MerchantIcon from "../components/MerchantIcon";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -85,6 +86,7 @@ interface RefundRow {
 
 interface UpcomingCharge {
   merchant: string;
+  logoUrl?: string | null;
   amountCents: number;
   date: string;
   cadence: string;
@@ -593,16 +595,19 @@ export default function BriefPage() {
         <Section title="New activity">
           {brief.newActivity.map((a) => (
             <div key={a.id} className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate text-[length:var(--type-body-size)]">
-                  {a.merchant}
-                  {a.pending && (
-                    <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
-                      pending
-                    </span>
-                  )}
-                </p>
-                <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)] capitalize">{a.kind}</p>
+              <div className="flex min-w-0 items-center gap-3">
+                <MerchantIcon logoUrl={a.logoUrl} merchantName={a.merchant} size={32} />
+                <div className="min-w-0">
+                  <p className="truncate text-[length:var(--type-body-size)]">
+                    {a.merchant}
+                    {a.pending && (
+                      <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
+                        pending
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)] capitalize">{a.kind}</p>
+                </div>
               </div>
               <span className={`tnum font-semibold ${a.amountCents < 0 ? "text-[var(--text-primary)]" : "text-[var(--accent-progress)]"}`}>
                 {formatUSD(a.amountCents)}
@@ -630,11 +635,14 @@ export default function BriefPage() {
           <>
             {up.charges.map((c) => (
               <div key={`${c.merchant}-${c.date}`} className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[length:var(--type-body-size)]">{c.merchant}</p>
-                  <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
-                    expected {shortDate(c.date)} · {c.cadence}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <MerchantIcon logoUrl={c.logoUrl} merchantName={c.merchant} size={32} />
+                  <div className="min-w-0">
+                    <p className="truncate text-[length:var(--type-body-size)]">{c.merchant}</p>
+                    <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+                      expected {shortDate(c.date)} · {c.cadence}
+                    </p>
+                  </div>
                 </div>
                 <span className="tnum font-semibold">{formatUSD(c.amountCents)}</span>
               </div>
@@ -752,12 +760,15 @@ export default function BriefPage() {
         <Section title="Subscription watch">
           {brief.priceChanges.map((p) => (
             <div key={p.merchant} className="flex items-center justify-between gap-3">
-              <p className="text-[length:var(--type-body-size)]">
-                {p.merchant}{" "}
-                <span className="tnum text-[var(--text-secondary)]">
-                  {p.prevAmountCents !== null ? formatUSD(p.prevAmountCents) : ""} → {formatUSD(p.amountCents)}
-                </span>
-              </p>
+              <div className="flex min-w-0 items-center gap-3">
+                <MerchantIcon logoUrl={p.logoUrl} merchantName={p.merchant} size={32} />
+                <p className="truncate text-[length:var(--type-body-size)]">
+                  {p.merchant}{" "}
+                  <span className="tnum text-[var(--text-secondary)]">
+                    {p.prevAmountCents !== null ? formatUSD(p.prevAmountCents) : ""} → {formatUSD(p.amountCents)}
+                  </span>
+                </p>
+              </div>
               <span className="rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
                 price up
               </span>
@@ -860,8 +871,11 @@ export default function BriefPage() {
                     key={r.id}
                     className="flex items-center justify-between text-[length:var(--type-caption-size)]"
                   >
-                    <span>
-                      {r.merchant} · {formatUSD(r.amount_cents)} · by {r.expected_date}
+                    <span className="flex min-w-0 items-center gap-2">
+                      <MerchantIcon merchantName={r.merchant} size={24} />
+                      <span className="truncate">
+                        {r.merchant} · {formatUSD(r.amount_cents)} · by {r.expected_date}
+                      </span>
                     </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[length:var(--type-micro-size)] font-semibold ${

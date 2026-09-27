@@ -215,6 +215,7 @@ function txn(id: string, merchant: string) {
     kind: "expense" as const,
     pending: false,
     account_id: null,
+    logo_url: null,
   };
 }
 

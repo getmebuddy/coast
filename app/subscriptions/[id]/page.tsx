@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { STATUS_COPY, formatScenarioProvenance, type ActionState } from "@/lib/subscriptions";
+import MerchantIcon from "@/app/components/MerchantIcon";
 import { TEMP_SCENARIO_KEY } from "@/app/number/WhatIfPlanner";
 import { ApiError, getJSON, patchJSON, postJSON } from "../client";
 import {
@@ -516,11 +517,14 @@ export default function SubscriptionDetailPage() {
         ← All subscriptions
       </Link>
 
-      <div>
-        <h1 className="text-[length:var(--type-title-size)] font-bold">{name}</h1>
-        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-          {billingChannelLabel(series.billing_channel)}
-        </p>
+      <div className="flex items-center gap-4">
+        <MerchantIcon logoUrl={series.logo_url} merchantName={name} size={48} />
+        <div>
+          <h1 className="text-[length:var(--type-title-size)] font-bold">{name}</h1>
+          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+            {billingChannelLabel(series.billing_channel)}
+          </p>
+        </div>
       </div>
 
       {notice && (

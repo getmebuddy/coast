@@ -19,6 +19,8 @@ import { progressPct, projectedFire, targetNumberCents, formatUSD, monthYear } f
 export interface BriefActivity {
   id: string;
   merchant: string;
+  /** Plaid logo_url; null/undefined → letter avatar. */
+  logoUrl?: string | null;
   amountCents: number;
   kind: DemoTransaction["kind"];
   pending: boolean;
@@ -26,6 +28,8 @@ export interface BriefActivity {
 
 export interface BriefBill {
   merchant: string;
+  /** Plaid logo_url; null/undefined → letter avatar. */
+  logoUrl?: string | null;
   amountCents: number;
   dueDate: string;
   priceChanged: boolean;

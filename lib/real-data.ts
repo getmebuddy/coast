@@ -231,6 +231,8 @@ export interface LedgerTxn {
   kind: TransactionKind;
   pending: boolean;
   account_id: string | null;
+  /** Plaid logo_url (nullable) — rendered by <MerchantIcon>, null → letter avatar. */
+  logo_url: string | null;
 }
 
 export interface Ledger {

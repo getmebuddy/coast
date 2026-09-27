@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { decryptAccessToken, encryptAccessToken, mapPlaidAccountType, toAccountUpsertRow } from "./plaid";
+import { buildLogoBackfillRows, decryptAccessToken, encryptAccessToken, mapPlaidAccountType, toAccountUpsertRow } from "./plaid";
 import { AccountSubtype, AccountType, type AccountBase } from "plaid";
 
 function meta(overrides: Partial<AccountBase> = {}): AccountBase {
@@ -138,5 +138,44 @@ describe("access token encryption", () => {
     expect(a).not.toBe(b);
     expect(decryptAccessToken(a)).toBe("same-token");
     expect(decryptAccessToken(b)).toBe("same-token");
+  });
+});
+
+// ---------- buildLogoBackfillRows ----------
+
+describe("buildLogoBackfillRows", () => {
+  it("maps non-null Plaid logos to backfill rows", () => {
+    const rows = buildLogoBackfillRows("user-1", [
+      { transaction_id: "tx-1", logo_url: "https://plaid.com/logo1.png" },
+      { transaction_id: "tx-2", logo_url: null },
+      { transaction_id: "tx-3" },
+      { transaction_id: "tx-4", logo_url: "" },
+    ]);
+    expect(rows).toEqual([
+      {
+        user_id: "user-1",
+        source: "plaid",
+        source_id: "tx-1",
+        logo_url: "https://plaid.com/logo1.png",
+      },
+    ]);
+  });
+
+  it("returns an empty array when nothing carries a logo", () => {
+    expect(buildLogoBackfillRows("user-1", [])).toEqual([]);
+    expect(
+      buildLogoBackfillRows("user-1", [{ transaction_id: "tx-1", logo_url: null }])
+    ).toEqual([]);
+  });
+
+  it("keeps every transaction's own logo (no cross-wiring)", () => {
+    const rows = buildLogoBackfillRows("user-1", [
+      { transaction_id: "tx-a", logo_url: "https://a.png" },
+      { transaction_id: "tx-b", logo_url: "https://b.png" },
+    ]);
+    expect(rows.map((r) => [r.source_id, r.logo_url])).toEqual([
+      ["tx-a", "https://a.png"],
+      ["tx-b", "https://b.png"],
+    ]);
   });
 });

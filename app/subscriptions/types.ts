@@ -25,6 +25,8 @@ export interface SubscriptionItem {
   cadence: string;
   monthly_cents: number;
   last_charge_date: string | null;
+  /** Plaid logo_url from the ledger's newest charge for this merchant. */
+  logo_url: string | null;
   next_charge_date: string | null;
   next_expected_at: string | null;
   price_changed: boolean;
@@ -57,6 +59,8 @@ export interface SeriesRow {
   amount_model: AmountModel | null;
   confidence: number | null;
   dismissed: boolean;
+  /** Plaid logo_url from the ledger (detail GET only; optional). */
+  logo_url?: string | null;
 }
 
 export interface RegistryInfo {

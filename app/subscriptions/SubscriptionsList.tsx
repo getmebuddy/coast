@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { STATUS_COPY, type ActionState } from "@/lib/subscriptions";
+import MerchantIcon from "@/app/components/MerchantIcon";
 import { trackPilotEvent } from "@/lib/analytics";
 import { ApiError, getJSON } from "./client";
 import {
@@ -259,13 +260,16 @@ export default function SubscriptionsList() {
                       className="rounded-xl bg-[var(--surface-card)] p-4 elev-1"
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="truncate text-[length:var(--type-body-size)] font-semibold">
-                            {name}
-                          </p>
-                          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-                            {statusCopyOf(request.status, STATUS_COPY)}
-                          </p>
+                        <div className="flex min-w-0 items-start gap-3">
+                          <MerchantIcon logoUrl={item.logo_url} merchantName={name} size={36} />
+                          <div className="min-w-0">
+                            <p className="truncate text-[length:var(--type-body-size)] font-semibold">
+                              {name}
+                            </p>
+                            <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+                              {statusCopyOf(request.status, STATUS_COPY)}
+                            </p>
+                          </div>
                         </div>
                         <Link
                           href={`/subscriptions/${item.id}`}
@@ -300,21 +304,24 @@ export default function SubscriptionsList() {
                     className="rounded-xl bg-[var(--surface-card)] p-4 elev-1"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-[length:var(--type-body-size)] font-semibold">
-                          {name}
-                        </p>
-                        <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-                          <span className="tnum font-semibold text-[var(--text-primary)]">
-                            ~{money(item.monthly_cents)}
-                            {cadencePer(item.cadence)}
-                          </span>
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          {item.price_changed && (
-                            <Badge glyph="▲" text="Price up" tone="warn" />
-                          )}
-                          {badge && <Badge glyph={badge.glyph} text={badge.text} tone="muted" />}
+                      <div className="flex min-w-0 items-start gap-3">
+                        <MerchantIcon logoUrl={item.logo_url} merchantName={name} size={36} />
+                        <div className="min-w-0">
+                          <p className="truncate text-[length:var(--type-body-size)] font-semibold">
+                            {name}
+                          </p>
+                          <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+                            <span className="tnum font-semibold text-[var(--text-primary)]">
+                              ~{money(item.monthly_cents)}
+                              {cadencePer(item.cadence)}
+                            </span>
+                          </p>
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {item.price_changed && (
+                              <Badge glyph="▲" text="Price up" tone="warn" />
+                            )}
+                            {badge && <Badge glyph={badge.glyph} text={badge.text} tone="muted" />}
+                          </div>
                         </div>
                       </div>
                       <Link

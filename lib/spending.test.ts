@@ -111,3 +111,35 @@ describe("buildSpendingData", () => {
     expect(qs[0].key).toBe("2025-Q4");
   });
 });
+
+describe("merchant logos", () => {
+  it("carries logoUrl through category drill-down top rows", () => {
+    const txns = [
+      txn({
+        id: "with-logo",
+        merchant: "Netflix",
+        date: "2026-09-10",
+        amount_cents: -1799,
+        kind: "expense",
+        category: "Entertainment",
+        logoUrl: "https://plaid.com/netflix.png",
+      }),
+      txn({
+        id: "no-logo",
+        merchant: "Corner Store",
+        date: "2026-09-11",
+        amount_cents: -500,
+        kind: "expense",
+        category: "Entertainment",
+        logoUrl: null,
+      }),
+    ];
+    const d = buildSpendingData(txns, TODAY, null);
+    const cat = d.ranges.month.categories.find((c) => c.category === "Entertainment")!;
+    expect(cat.top[0]).toMatchObject({
+      merchant: "Netflix",
+      logoUrl: "https://plaid.com/netflix.png",
+    });
+    expect(cat.top[1]).toMatchObject({ merchant: "Corner Store", logoUrl: null });
+  });
+});

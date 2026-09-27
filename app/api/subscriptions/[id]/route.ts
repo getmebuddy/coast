@@ -34,6 +34,19 @@ export async function GET(
   if (error) return fail("db-read", "Could not load the subscription.", 500);
   if (!series) return fail("not_found", "Subscription not found.", 404);
 
+  // Header logo: newest stored logo for this merchant from the ledger.
+  // Read-only enrichment of a non-null stored value — never writes, so it
+  // can never clobber a logo.
+  const { data: logoRow } = await supabase
+    .from("transactions")
+    .select("logo_url")
+    .eq("user_id", user.id)
+    .eq("merchant_normalized", series.merchant_normalized)
+    .not("logo_url", "is", null)
+    .order("posted_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const resolved = await resolveRegistryRoute(supabase, series);
   const registry = resolved.record;
 
@@ -87,7 +100,7 @@ export async function GET(
   }
 
   return ok({
-    series,
+    series: { ...series, logo_url: logoRow?.logo_url ?? null },
     registry,
     open_requests: openRequests ?? [],
     latest_savings: latestSavings,

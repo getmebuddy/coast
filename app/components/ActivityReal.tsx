@@ -7,6 +7,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import ConnectBank from "./ConnectBank";
+import MerchantIcon from "./MerchantIcon";
 import { formatUSD } from "@/lib/fire";
 import type { DataEnvelope } from "@/lib/real-data";
 import type { ActivityData, ActivityRow } from "@/lib/real-data-server";
@@ -31,19 +32,22 @@ function formatDate(iso: string): string {
 function Row({ row }: { row: ActivityRow }) {
   return (
     <li className="flex items-center justify-between gap-3 px-4 py-3">
-      <div className="min-w-0">
-        <p className="truncate text-[length:var(--type-body-size)]">
-          {row.merchant}
-          {row.pending && (
-            <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
-              pending
-            </span>
-          )}
-        </p>
-        <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
-          {formatDate(row.postedAt)} · {row.category} · {KIND_LABEL[row.kind] ?? row.kind}
-          {row.accountName ? ` · ${row.accountName}` : ""}
-        </p>
+      <div className="flex min-w-0 items-center gap-3">
+        <MerchantIcon logoUrl={row.logoUrl} merchantName={row.merchant} size={32} />
+        <div className="min-w-0">
+          <p className="truncate text-[length:var(--type-body-size)]">
+            {row.merchant}
+            {row.pending && (
+              <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
+                pending
+              </span>
+            )}
+          </p>
+          <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+            {formatDate(row.postedAt)} · {row.category} · {KIND_LABEL[row.kind] ?? row.kind}
+            {row.accountName ? ` · ${row.accountName}` : ""}
+          </p>
+        </div>
       </div>
       <span
         className={`tnum shrink-0 font-semibold ${

@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { formatUSD } from "@/lib/fire";
+import MerchantIcon from "./MerchantIcon";
 import type { DataEnvelope } from "@/lib/real-data";
 import type {
   BudgetMonthData,
@@ -181,9 +182,12 @@ function Drilldown({ category, onBack }: { category: string; onBack: () => void 
           <ul className="divide-y divide-[var(--border-subtle)] rounded-xl bg-[var(--surface-card)] elev-1">
             {data.rows.map((t: ActivityRow) => (
               <li key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-[length:var(--type-body-size)]">{t.merchant}</p>
-                  <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">{t.postedAt}</p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <MerchantIcon logoUrl={t.logoUrl} merchantName={t.merchant} size={32} />
+                  <div className="min-w-0">
+                    <p className="truncate text-[length:var(--type-body-size)]">{t.merchant}</p>
+                    <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">{t.postedAt}</p>
+                  </div>
                 </div>
                 <span className="tnum shrink-0 font-semibold">{formatUSD(t.amountCents)}</span>
               </li>

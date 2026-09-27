@@ -7,6 +7,7 @@
 import { useMemo, useState } from "react";
 import { categoryDrilldown, demoBudgets, demoTransactions } from "@/lib/demo";
 import { formatUSD } from "@/lib/fire";
+import MerchantIcon from "./MerchantIcon";
 
 function PaceBar({ spent, limit, expected }: { spent: number; limit: number; expected?: number }) {
   const pct = Math.min(100, (spent / limit) * 100);
@@ -88,11 +89,14 @@ export default function BudgetsDemo() {
         <ul className="divide-y divide-[var(--border-subtle)] rounded-xl bg-[var(--surface-card)] elev-1">
           {drillTxns.map((t) => (
             <li key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
-              <div className="min-w-0">
-                <p className="truncate text-[length:var(--type-body-size)]">{t.merchant}</p>
-                <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
-                  {t.date} · {t.category}
-                </p>
+              <div className="flex min-w-0 items-center gap-3">
+                <MerchantIcon merchantName={t.merchant} size={32} />
+                <div className="min-w-0">
+                  <p className="truncate text-[length:var(--type-body-size)]">{t.merchant}</p>
+                  <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+                    {t.date} · {t.category}
+                  </p>
+                </div>
               </div>
               <span className="tnum shrink-0 font-semibold">{formatUSD(t.amount_cents)}</span>
             </li>

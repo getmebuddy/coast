@@ -57,10 +57,11 @@ export async function GET() {
     ...new Set(list.map((r) => r.merchant_normalized)),
   ] as string[];
   const lastChargeByMerchant = new Map<string, string>();
+  const logoByMerchant = new Map<string, string>();
   if (merchants.length > 0) {
     const { data: txns } = await supabase
       .from("transactions")
-      .select("merchant_normalized, posted_at")
+      .select("merchant_normalized, posted_at, logo_url")
       .eq("user_id", user.id)
       .in("merchant_normalized", merchants)
       .lt("amount_cents", 0)
@@ -70,6 +71,11 @@ export async function GET() {
     for (const t of (txns ?? []) as any[]) {
       if (!lastChargeByMerchant.has(t.merchant_normalized)) {
         lastChargeByMerchant.set(t.merchant_normalized, t.posted_at);
+      }
+      // First stored logo per merchant (ordered newest-first). We only read
+      // non-null stored values, so nothing here can clobber a logo.
+      if (t.logo_url && !logoByMerchant.has(t.merchant_normalized)) {
+        logoByMerchant.set(t.merchant_normalized, t.logo_url);
       }
     }
   }
@@ -96,6 +102,7 @@ export async function GET() {
         ),
         last_charge_date:
           lastChargeByMerchant.get(r.merchant_normalized) ?? null,
+        logo_url: logoByMerchant.get(r.merchant_normalized) ?? null,
         next_charge_date: r.next_charge_date,
         next_expected_at: r.next_expected_at,
         price_changed: r.price_changed,

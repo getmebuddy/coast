@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { RemovedTransaction, Transaction } from "plaid";
-import { decryptAccessToken, getPlaidClient, isPlaidConfigured, toAccountUpsertRow } from "@/lib/plaid";
+import { decryptAccessToken, getPlaidClient, isPlaidConfigured, toAccountUpsertRow, buildLogoBackfillRows } from "@/lib/plaid";
 import { detectRecurring, toRecurringUpsertRows } from "@/lib/recurring";
 import { classifyTransaction, normalizeMerchant } from "@/lib/ledger";
 import { createServerSupabase, createServiceSupabase } from "@/lib/supabase/server";
@@ -37,6 +37,8 @@ type UpsertRow = {
   merchant_normalized: string;
   kind: string;
   pending: boolean;
+  /** Plaid logo_url (100x100 PNG). Captured here; the DB write is guarded. */
+  logo_url: string | null;
 };
 
 async function syncOneItem(
@@ -122,21 +124,44 @@ async function syncOneItem(
       merchant_normalized: normalized,
       kind,
       pending: t.pending,
+      logo_url: t.logo_url ?? null,
     };
   };
 
   // IDEMPOTENT upsert: conflicts on (user_id, source, source_id) update nothing
   // new (immutable ledger — pending flag transitions are the one exception,
   // since pending->posted is a state change, not history).
+  //
+  // logo_url is deliberately EXCLUDED from this batch upsert: a sync that
+  // returns no logo for a transaction must never clobber a logo stored
+  // earlier. Logos are applied by the guarded backfill pass below, which
+  // only ever writes onto rows whose logo_url is still NULL.
   const rows = added.concat(modified).map(toRow);
   let inserted = 0;
   if (rows.length > 0) {
+    const persisted = rows.map(({ logo_url: _logo, ...rest }) => rest);
     const { data, error } = await supabase
       .from("transactions")
-      .upsert(rows, { onConflict: "user_id,source,source_id", ignoreDuplicates: false })
+      .upsert(persisted, { onConflict: "user_id,source,source_id", ignoreDuplicates: false })
       .select("id");
     if (error) throw error;
     inserted = data?.length ?? 0;
+
+    // Logo backfill: fill NULL logos from this payload only. Existing
+    // non-null logos are never touched (no clobber), so a merchant that
+    // Plaid stops returning a logo for keeps the last good one.
+    const logoRows = buildLogoBackfillRows(userId, added.concat(modified));
+    await Promise.all(
+      logoRows.map((l) =>
+        supabase
+          .from("transactions")
+          .update({ logo_url: l.logo_url })
+          .eq("user_id", l.user_id)
+          .eq("source", l.source)
+          .eq("source_id", l.source_id)
+          .is("logo_url", null)
+      )
+    );
   }
 
   // Removals: ledger is immutable, so flag them via a companion override note.

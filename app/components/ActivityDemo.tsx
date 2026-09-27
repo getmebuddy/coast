@@ -7,6 +7,7 @@
 import { useMemo, useState } from "react";
 import { demoTransactions } from "@/lib/demo";
 import { formatUSD } from "@/lib/fire";
+import MerchantIcon from "./MerchantIcon";
 
 const KIND_LABEL: Record<string, string> = {
   income: "income",
@@ -69,18 +70,21 @@ export default function ActivityDemo() {
       <ul className="divide-y divide-[var(--border-subtle)] rounded-xl bg-[var(--surface-card)] elev-1">
         {rows.map((t) => (
           <li key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
-            <div className="min-w-0">
-              <p className="truncate text-[length:var(--type-body-size)]">
-                {t.merchant}
-                {t.pending && (
-                  <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
-                    pending
-                  </span>
-                )}
-              </p>
-              <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
-                {t.date} · {t.category} · {KIND_LABEL[t.kind]}
-              </p>
+            <div className="flex min-w-0 items-center gap-3">
+              <MerchantIcon merchantName={t.merchant} size={32} />
+              <div className="min-w-0">
+                <p className="truncate text-[length:var(--type-body-size)]">
+                  {t.merchant}
+                  {t.pending && (
+                    <span className="ml-2 rounded-full bg-[var(--signal-warning-soft)] px-2 py-0.5 text-[length:var(--type-micro-size)] text-[var(--signal-warning)]">
+                      pending
+                    </span>
+                  )}
+                </p>
+                <p className="text-[length:var(--type-micro-size)] text-[var(--text-micro)]">
+                  {t.date} · {t.category} · {KIND_LABEL[t.kind]}
+                </p>
+              </div>
             </div>
             <span
               className={`tnum shrink-0 font-semibold ${
