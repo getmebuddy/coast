@@ -37,6 +37,8 @@ interface BriefEnvelope {
   mode: string;
   demo?: boolean;
   support_code?: string;
+  /** Newest last_sync_at across active Plaid items; drives sync-if-stale. */
+  lastSyncAt?: string | null;
   data: { brief: Brief; missing: string[] };
   missing: string[];
 }
@@ -564,7 +566,12 @@ export default function BriefPage() {
             Here's your money, in about 30 seconds.
           </p>
         </div>
-        {signedIn && <RefreshAccountsButton onSynced={load} />}
+        {signedIn && (
+          <RefreshAccountsButton
+            onSynced={load}
+            autoSync={{ lastSyncAt: env.lastSyncAt ?? null, enabled: true }}
+          />
+        )}
       </div>
 
       <SetupActions missing={missing} />

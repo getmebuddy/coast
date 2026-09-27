@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildBrief } from "@/lib/brief";
 import { getViewer, loadRealBrief } from "@/lib/real-data-server";
+import { createServiceSupabase } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,25 @@ export async function GET() {
       );
     }
     const env = await loadRealBrief(viewer, now);
-    return NextResponse.json(env, { headers: NO_STORE });
+    // Freshness signal for sync-if-stale: newest last_sync_at across
+    // the user's active Plaid items. Best-effort; null means unknown.
+    let lastSyncAt: string | null = null;
+    try {
+      const service = createServiceSupabase();
+      const { data: items } = await service
+        .from("plaid_items")
+        .select("last_sync_at")
+        .eq("user_id", viewer.userId)
+        .eq("status", "active");
+      const stamps = (items ?? [])
+        .map((i) => i.last_sync_at as string | null)
+        .filter((s): s is string => !!s)
+        .sort();
+      lastSyncAt = stamps.length > 0 ? stamps[stamps.length - 1] : null;
+    } catch {
+      lastSyncAt = null;
+    }
+    return NextResponse.json({ ...env, lastSyncAt }, { headers: NO_STORE });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "unknown";
     if (msg.startsWith("auth-service:")) {

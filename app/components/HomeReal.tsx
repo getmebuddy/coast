@@ -218,7 +218,10 @@ export default function HomeReal({ initial }: { initial: DataEnvelope<HomeData> 
                 : ""}
               .
             </p>
-            <RefreshAccountsButton onSynced={retry} />
+            <RefreshAccountsButton
+              onSynced={retry}
+              autoSync={{ lastSyncAt: connection.lastSyncAt, enabled: connection.hasActiveItem }}
+            />
           </div>
         ) : (
           <div className="space-y-3">
