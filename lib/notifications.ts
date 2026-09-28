@@ -240,6 +240,15 @@ export function formatDollars(cents: number): string {
 /** The lead kinds that can win the digest subject line, in priority order. */
 export type DigestLeadKind = "charge_tomorrow" | "fee" | "price_hike";
 
+/** Email row emphasis: green for money back, warm red for costs, ink for neutral. */
+export type EmailTone = "positive" | "negative" | "neutral";
+
+export interface EmailStat {
+  value: string;
+  label: string;
+  tone?: EmailTone;
+}
+
 export interface EmailSection {
   /** Notification type id this section belongs to (for prefs gating). */
   type: string;
@@ -250,6 +259,11 @@ export interface EmailSection {
   amountCents?: number;
   /** Fee copy only: "your Chase account"; defaults to "your account". */
   accountLabel?: string;
+  /** Right-side email stat override; defaults to the formatted amountCents. */
+  stat?: string;
+  tone?: EmailTone;
+  /** Optional stat strip rendered above this section's email card. */
+  stats?: EmailStat[];
   headline: string;
   body: string;
   ctaLabel: string;

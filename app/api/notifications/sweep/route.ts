@@ -104,10 +104,10 @@ const REASON_LINES: Record<string, string> = {
 };
 
 const INTROS: Record<string, string> = {
-  attention_digest: "Here's what needs your attention this morning.",
-  charge_tomorrow: "Heads up — this bills tomorrow.",
-  fee_alert: "A fee showed up on your account.",
-  trial_converting: "This trial is about to become a paid subscription.",
+  attention_digest: "here's what needs your attention this morning.",
+  charge_tomorrow: "heads up — this bills tomorrow.",
+  fee_alert: "a fee showed up on your account.",
+  trial_converting: "this trial is about to become a paid subscription.",
 };
 
 /** Mirror of listOpenFindings' filters, on the service client (no session in cron). */
@@ -130,12 +130,16 @@ async function loadOpenFindings(db: Db, userId: string): Promise<SweepFinding[]>
 function findingSection(f: SweepFinding): EmailSection {
   if (f.routine_key === "price_hike") {
     const nowCents = f.evidence?.now_amount_cents ?? Math.abs(f.impact_cents);
+    const prevCents = f.evidence?.prev_amount_cents;
     const merchant = f.evidence?.merchant ?? f.title.replace(/ raised its price$/, "");
+    const delta = prevCents != null && nowCents > prevCents ? nowCents - prevCents : null;
     return {
       type: "price_hike",
       leadKind: "price_hike",
       merchant,
       amountCents: nowCents,
+      stat: delta != null ? `+${formatDollars(delta)}` : formatDollars(nowCents),
+      tone: "negative",
       headline: `${merchant} raised its price to ${formatDollars(nowCents)}`,
       body: f.detail,
       ctaLabel: "Review subscription",
@@ -151,6 +155,7 @@ function findingSection(f: SweepFinding): EmailSection {
       leadKind: null,
       merchant,
       amountCents: amt,
+      tone: "positive",
       headline: `Refund landed: ${formatDollars(amt)}${merchant ? ` from ${merchant}` : ""}`,
       body: f.detail,
       ctaLabel: "View activity",
@@ -250,6 +255,7 @@ async function budgetPaceSections(
       leadKind: null,
       merchant: category,
       amountCents: spent,
+      tone: "negative",
       headline: `${category}: ${formatDollars(spent)} of ${formatDollars(limit_cents)}`,
       body:
         spent >= limit_cents
@@ -297,6 +303,10 @@ async function fridayRecapSection(
     type: "friday_recap",
     leadKind: null,
     amountCents: total,
+    stats: [
+      { value: formatDollars(total), label: "spent" },
+      { value: `${rows.length}`, label: rows.length === 1 ? "purchase" : "purchases" },
+    ],
     headline: `Your week: ${formatDollars(total)} across ${rows.length} purchase${rows.length === 1 ? "" : "s"}`,
     body:
       `You spent ${formatDollars(total)} across ${rows.length} purchase${rows.length === 1 ? "" : "s"} this week. ` +
@@ -525,6 +535,7 @@ async function sweepUser(
       leadKind: "fee",
       amountCents: total,
       accountLabel,
+      tone: "negative",
       headline: `A ${formatDollars(total)} fee hit ${accountLabel}`,
       body: feeFinding.detail,
       ctaLabel: "Open Morning Brief",
@@ -611,13 +622,36 @@ async function sweepUser(
   }
 
   let sent = 0;
+  // Personalized greeting, best-effort from the auth record's metadata.
+  const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
+  const fullName =
+    typeof meta.full_name === "string"
+      ? meta.full_name
+      : typeof meta.name === "string"
+        ? meta.name
+        : "";
+  const firstName = fullName.trim().split(/\s+/)[0] ?? "";
+  const greeting = firstName ? `Hi ${firstName},` : "Hi there,";
   for (const em of send) {
     // The log id is minted BEFORE sending so click tokens can reference it.
     const logId = randomUUID();
     const sections = await Promise.all(
       em.sections.map(async (s) => ({
-        headline: s.headline,
-        body: s.body,
+        type: s.type,
+        rows: [
+          {
+            title: s.headline,
+            body: s.body,
+            stat: s.stat ?? (s.amountCents != null ? formatDollars(s.amountCents) : ""),
+            tone: s.tone ?? "neutral",
+            iconSeed: s.merchant ?? s.headline,
+          },
+        ],
+        stats: s.stats?.map((st) => ({
+          value: st.value,
+          label: st.label,
+          tone: st.tone ?? "neutral",
+        })),
         ctaLabel: s.ctaLabel,
         ctaUrl: `${APP_URL}/api/notifications/click?token=${await buildClickToken(logId, s.ctaTarget, cronSecret)}`,
       }))
@@ -625,7 +659,8 @@ async function sweepUser(
     const primary = sections[0];
     const built = buildNotificationEmail({
       subject: em.subject,
-      preheader: primary?.headline ?? em.subject,
+      preheader: primary?.rows[0]?.title ?? em.subject,
+      greeting,
       intro: INTROS[em.type] ?? INTROS.attention_digest,
       sections,
       primaryCta: { label: primary?.ctaLabel ?? "Open Coast", url: primary?.ctaUrl ?? APP_URL },
