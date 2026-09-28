@@ -7,6 +7,7 @@ import {
   localMonthStart,
   localDay,
   daysRemainingInclusive,
+  defaultBudgetMonth,
   validTimezone,
   containsDemoProvenance,
   assertNoDemoProvenance,
@@ -135,6 +136,49 @@ describe("timezone helpers", () => {
     const d = new Date("2026-03-08T08:30:00Z");
     expect(localDay(d, "America/Chicago")).toBe("2026-03-08");
     expect(localMonthKey(d, "America/Chicago")).toBe("2026-03");
+  });
+});
+
+describe("defaultBudgetMonth (smart default budget month)", () => {
+  const CHI = "America/Chicago";
+
+  it("last day of the month with no budget -> first of next month", () => {
+    // Sep 30 -> 1 day remaining -> October.
+    expect(defaultBudgetMonth(new Date("2026-09-30T12:00:00-05:00"), CHI, false)).toBe("2026-10-01");
+  });
+
+  it("6 days remaining with no budget -> next month", () => {
+    // Sep 25 -> 6 days remaining (< 7) -> October.
+    expect(defaultBudgetMonth(new Date("2026-09-25T12:00:00-05:00"), CHI, false)).toBe("2026-10-01");
+  });
+
+  it("exactly 7 days remaining -> current month (boundary: fewer than 7)", () => {
+    // Sep 24 -> 7 days remaining -> stays September.
+    expect(defaultBudgetMonth(new Date("2026-09-24T12:00:00-05:00"), CHI, false)).toBe("2026-09-01");
+  });
+
+  it("plenty of month left -> current month", () => {
+    expect(defaultBudgetMonth(new Date("2026-09-01T12:00:00-05:00"), CHI, false)).toBe("2026-09-01");
+    expect(defaultBudgetMonth(new Date("2026-09-10T12:00:00-05:00"), CHI, false)).toBe("2026-09-01");
+  });
+
+  it("rolls December into January of the next year", () => {
+    // Dec 28 -> 4 days remaining -> 2027-01-01.
+    expect(defaultBudgetMonth(new Date("2026-12-28T12:00:00-06:00"), CHI, false)).toBe("2027-01-01");
+  });
+
+  it("existing current-month budget keeps the current month late in the month", () => {
+    // Sep 28 with a September budget -> pacing for the remaining days still matters.
+    expect(defaultBudgetMonth(new Date("2026-09-28T12:00:00-05:00"), CHI, true)).toBe("2026-09-01");
+  });
+
+  it("is timezone-correct at a month boundary", () => {
+    // 2026-10-01 03:00 UTC is still Sep 30 in Chicago -> next month (October).
+    expect(defaultBudgetMonth(new Date("2026-10-01T03:00:00Z"), CHI, false)).toBe("2026-10-01");
+    // Same instant is already Oct 1 in UTC -> October has 31 days left -> current month.
+    expect(defaultBudgetMonth(new Date("2026-10-01T03:00:00Z"), "UTC", false)).toBe("2026-10-01");
+    // 2026-10-25 in Auckland: 7 days left -> current month.
+    expect(defaultBudgetMonth(new Date("2026-10-25T12:00:00+13:00"), "Pacific/Auckland", false)).toBe("2026-10-01");
   });
 });
 

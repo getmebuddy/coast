@@ -35,6 +35,7 @@ import {
   localMonthStart,
   localDay,
   daysRemainingInclusive,
+  defaultBudgetMonth,
   localHour,
   budgetLeftPerDay,
   supportCode,
@@ -319,9 +320,37 @@ export interface BudgetMonthData {
   perDayCents: number | null;
 }
 
+/**
+ * Resolve the budget month to display ("YYYY-MM-01").
+ *
+ * Applies the smart-default rule from defaultBudgetMonth: late in a month
+ * with no budget rows yet, the surface targets next month instead of asking
+ * the user to budget days that are already gone. An explicit month argument
+ * bypasses the rule entirely (used for future month navigation).
+ */
+async function resolveBudgetMonth(
+  viewer: Viewer,
+  now: Date,
+  explicitMonth?: string
+): Promise<string> {
+  const currentMonth = localMonthStart(now, viewer.timezone);
+  if (explicitMonth) return explicitMonth;
+  const supabase = createServerSupabase();
+  const { data, error } = await supabase
+    .from("budgets")
+    .select("month")
+    .eq("user_id", viewer.userId)
+    .eq("month", currentMonth)
+    .limit(1);
+  if (error) throw new Error(`budget-read: ${error.message}`);
+  return defaultBudgetMonth(now, viewer.timezone, (data ?? []).length > 0);
+}
+
 export async function loadBudgetMonth(viewer: Viewer, now = new Date()): Promise<DataEnvelope<BudgetMonthData>> {
-  const month = localMonthStart(now, viewer.timezone);
+  const currentMonth = localMonthStart(now, viewer.timezone);
+  let month = currentMonth; // fallback if month resolution itself fails
   try {
+    month = await resolveBudgetMonth(viewer, now);
     const facts = await getViewFacts(viewer);
     const pageMode = resolveViewMode(facts);
     if (pageMode !== "real" && pageMode !== "partial") {
@@ -372,10 +401,13 @@ export async function loadBudgetMonth(viewer: Viewer, now = new Date()): Promise
       spentTotal += out;
     }
 
-    const daysRemaining = daysRemainingInclusive(now, viewer.timezone);
     const [my, mm] = month.split("-").map(Number);
     const daysInMonth = new Date(Date.UTC(my, mm, 0)).getUTCDate();
-    const elapsedDays = Math.max(1, daysInMonth - daysRemaining + 1);
+    // A resolved future month hasn't started: pace it over the full month
+    // instead of deriving elapsed days from the current (nearly-over) month.
+    const resolvedIsFuture = month > currentMonth;
+    const daysRemaining = resolvedIsFuture ? daysInMonth : daysRemainingInclusive(now, viewer.timezone);
+    const elapsedDays = resolvedIsFuture ? 0 : Math.max(1, daysInMonth - daysRemaining + 1);
 
     const categories: BudgetCategoryRow[] = [];
     const unbudgetedCats: string[] = [];
@@ -474,7 +506,7 @@ export async function loadBudgetDrilldown(
   category: string,
   now = new Date()
 ): Promise<DataEnvelope<BudgetDrilldownData>> {
-  const month = localMonthStart(now, viewer.timezone);
+  const month = await resolveBudgetMonth(viewer, now);
   const monthPrefix = month.slice(0, 7);
   try {
     const ledger = await loadLedger(viewer);

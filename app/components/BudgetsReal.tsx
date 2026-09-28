@@ -316,7 +316,7 @@ export default function BudgetsReal() {
             </div>
             <PaceBar spent={d.spentCents} limit={d.ceilingCents!} expected={d.expectedCents} />
             <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-              {d.expectedCents != null && (
+              {d.expectedCents != null && d.elapsedDays > 0 && (
                 <>
                   Expected by day {d.elapsedDays}: {formatUSD(d.expectedCents)} ·{" "}
                 </>

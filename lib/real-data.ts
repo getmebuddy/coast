@@ -157,6 +157,26 @@ export function daysRemainingInclusive(now: Date, tz: string): number {
   return Math.max(1, daysInMonth - dayOfMonth + 1);
 }
 
+/**
+ * Smart default budget month ("YYYY-MM-01") for the budgets surface.
+ *
+ * Setting a budget for a nearly-over month is useless: when the user has no
+ * budget rows for the current local month and fewer than 7 days remain in it
+ * (inclusive), default to the first of next month so a late-month signup is
+ * prompted to "Set your October budget", not September's. When the user
+ * already has a budget for the current month, keep it — pacing for the
+ * remaining days still matters.
+ */
+export function defaultBudgetMonth(now: Date, tz: string, hasCurrentMonthBudget: boolean): string {
+  if (!hasCurrentMonthBudget && daysRemainingInclusive(now, tz) < 7) {
+    const [y, m] = localMonthKey(now, tz).split("-").map(Number);
+    const ny = m === 12 ? y + 1 : y;
+    const nm = m === 12 ? 1 : m + 1;
+    return `${ny}-${String(nm).padStart(2, "0")}-01`;
+  }
+  return localMonthStart(now, tz);
+}
+
 /** Local hour (0-23) for greetings. */
 export function localHour(now: Date, tz: string): number {
   return Number(
