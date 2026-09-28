@@ -29,6 +29,12 @@ import {
   sendEmail,
 } from "@/lib/email-templates";
 import {
+  composePushPayload,
+  deliverPush,
+  isPushableType,
+  vapidConfigured,
+} from "@/lib/push";
+import {
   daysRemainingInclusive,
   effectiveCategory,
   localMonthStart,
@@ -69,6 +75,15 @@ import { TOTAL_CATEGORY } from "@/lib/real-data-server";
  *
  * Log-only until RESEND_API_KEY + NOTIFICATIONS_FROM exist: without them
  * sendEmail() returns skipped_no_provider and rows are logged as such.
+ *
+ * WEB PUSH: urgent types (charge_tomorrow, price_hike, fee_alert,
+ * trial_converting) also attempt a web push to the user's subscribed
+ * browsers — after the email loop, inside its own try/catch so push
+ * failures never break the email path. Inert until VAPID_PRIVATE_KEY +
+ * NEXT_PUBLIC_VAPID_PUBLIC_KEY exist and the user opts in via
+ * Settings → Notifications. The sweep-window gate is the quiet-hours
+ * enforcement for pushes too: no push is ever attempted outside the
+ * user's 06:45–07:00 local window.
  */
 
 type Db = ReturnType<typeof createServiceSupabase>;
@@ -367,6 +382,123 @@ async function insertLogRow(
     throw new Error(`sweep log-write: ${error.message}`);
   }
   return "inserted";
+}
+
+/**
+ * Web-push candidates for this sweep. Urgent standalone emails push as-is;
+ * price-hike findings (which fold into the digest) push on their own row.
+ * Everything is pre-gated on the user's prefs by the caller — this only
+ * filters to pushable types.
+ */
+function pushCandidates(
+  urgents: ComposedEmail[],
+  digestSections: EmailSection[],
+  dateKey: string,
+  enabled: (type: string) => boolean
+): Array<{
+  type: string;
+  title: string;
+  body: string;
+  url: string;
+  tag: string;
+  dedupeKey: string;
+}> {
+  const out: Array<{
+    type: string;
+    title: string;
+    body: string;
+    url: string;
+    tag: string;
+    dedupeKey: string;
+  }> = [];
+  for (const em of urgents) {
+    if (!isPushableType(em.type) || !enabled(em.type)) continue;
+    const s = em.sections[0];
+    if (!s) continue;
+    out.push({
+      type: em.type,
+      title: em.subject,
+      body: s.body,
+      url: s.ctaTarget,
+      tag: em.dedupeKey,
+      dedupeKey: `push:${em.dedupeKey}`,
+    });
+  }
+  for (const s of digestSections) {
+    if (s.type !== "price_hike" || !enabled("price_hike")) continue;
+    const tag = `push:${dateKey}:price_hike:${s.merchant ?? "x"}`;
+    out.push({
+      type: "price_hike",
+      title: s.headline,
+      body: s.body,
+      url: s.ctaTarget,
+      tag,
+      dedupeKey: tag,
+    });
+  }
+  return out;
+}
+
+/**
+ * Attempt pushes for the urgent candidates. Each candidate gets a
+ * notification_log row (channel 'push', dedupe_key `push:…`) so a double
+ * sweep can't double-push; expired browser subscriptions are deleted by
+ * deliverPush. Never throws — the email path must not depend on this.
+ */
+async function deliverUrgentPushes(
+  db: Db,
+  userId: string,
+  candidates: Array<{
+    type: string;
+    title: string;
+    body: string;
+    url: string;
+    tag: string;
+    dedupeKey: string;
+  }>
+): Promise<void> {
+  if (candidates.length === 0 || !vapidConfigured()) return;
+  for (const c of candidates) {
+    try {
+      const logId = randomUUID();
+      const written = await insertLogRow(db, {
+        id: logId,
+        user_id: userId,
+        type: c.type,
+        channel: "push",
+        dedupe_key: c.dedupeKey,
+        subject: c.title,
+        status: "queued",
+      });
+      if (written === "duplicate") continue; // already pushed — skip
+
+      const payload = composePushPayload({
+        title: c.title,
+        body: c.body,
+        url: c.url,
+        tag: c.tag,
+      });
+      const result = await deliverPush(db, userId, payload);
+
+      const finalStatus = result.sent > 0 ? "sent" : "failed";
+      const { error: updErr } = await db
+        .from("notification_log")
+        .update({ status: finalStatus })
+        .eq("id", logId);
+      if (updErr) {
+        console.warn(`[notifications] push log update failed for ${userId}`, updErr.message);
+      }
+      if (result.sent > 0) {
+        await logPilotEvent(userId, "notification_sent", {
+          type: c.type,
+          channel: "push",
+        });
+      }
+    } catch (e) {
+      // One bad candidate must not kill the rest — or the email path.
+      console.warn(`[notifications] push candidate failed for ${userId} (${c.type})`, e);
+    }
+  }
 }
 
 async function sweepUser(
@@ -701,6 +833,19 @@ async function sweepUser(
       // Buckets/labels only — never money or PII.
       await logPilotEvent(userId, "notification_sent", { type: em.type, channel: "email" });
     }
+  }
+
+  // Web push for the urgent types — after emails, in its own failure domain.
+  // Inert until the VAPID keys exist and the user has opted in; failures
+  // here never affect the email results above.
+  try {
+    await deliverUrgentPushes(
+      db,
+      userId,
+      pushCandidates(urgents, digestSections, dateKey, enabled)
+    );
+  } catch (e) {
+    console.warn(`[notifications] push sweep failed for ${userId}`, e);
   }
 
   return { sent, deferred: defer.length, skipped: null };

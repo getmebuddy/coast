@@ -52,6 +52,199 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return json.data as T;
 }
 
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = window.atob(base64);
+  const out = new Uint8Array(new ArrayBuffer(raw.length));
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+type PushState =
+  | "checking"
+  | "unsupported"
+  | "not_configured"
+  | "denied"
+  | "off"
+  | "on"
+  | "working";
+
+/**
+ * Push notifications opt-in. Per-device: subscribing here enables pushes on
+ * this browser only. Which kinds may push is still governed by the per-type
+ * toggles below — and only the urgent kinds (charge tomorrow, price hikes,
+ * fees, trials) ever push. The digest and recap stay email-only.
+ */
+function PushSection() {
+  const [state, setState] = useState<PushState>("checking");
+  const [error, setError] = useState<string | null>(null);
+
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+
+  const refresh = async () => {
+    setError(null);
+    if (
+      typeof window === "undefined" ||
+      !("serviceWorker" in navigator) ||
+      !("PushManager" in window) ||
+      !("Notification" in window)
+    ) {
+      setState("unsupported");
+      return;
+    }
+    if (!publicKey) {
+      setState("not_configured");
+      return;
+    }
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      const sub = await reg?.pushManager.getSubscription().catch(() => null);
+      if (sub) {
+        setState("on");
+      } else if (Notification.permission === "denied") {
+        setState("denied");
+      } else {
+        setState("off");
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not check push status.");
+      setState("off");
+    }
+  };
+
+  useEffect(() => {
+    void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const enable = async () => {
+    setState("working");
+    setError(null);
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        setState("denied");
+        return;
+      }
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+      const res = await fetch("/api/notifications/push/subscribe", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sub.toJSON()),
+      });
+      if (!res.ok) {
+        // Don't leave a dangling browser subscription the server doesn't know.
+        await sub.unsubscribe().catch(() => {});
+        throw new Error(`Server refused the subscription (HTTP ${res.status}).`);
+      }
+      setState("on");
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "Could not turn on push notifications."
+      );
+      setState("off");
+    }
+  };
+
+  const disable = async () => {
+    setState("working");
+    setError(null);
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      const sub = await reg?.pushManager.getSubscription().catch(() => null);
+      if (sub) {
+        const endpoint = sub.endpoint;
+        await sub.unsubscribe().catch(() => {});
+        await fetch("/api/notifications/push/subscribe", {
+          method: "DELETE",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint }),
+        }).catch(() => {});
+      }
+      setState("off");
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "Could not turn off push notifications."
+      );
+      setState("on");
+    }
+  };
+
+  return (
+    <section
+      aria-label="Push notifications"
+      className="rounded-xl bg-[var(--surface-card)] p-6 elev-1"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[length:var(--type-body-size)] font-semibold">
+            Push notifications
+          </p>
+          <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+            {state === "on"
+              ? "On for this device — urgent alerts (charges, price hikes, fees, trials) will buzz your lock screen."
+              : "Get urgent alerts on this device's lock screen. Only the urgent kinds ever push; the digest stays email."}
+          </p>
+        </div>
+        {state === "on" ? (
+          <button
+            type="button"
+            onClick={() => void disable()}
+            disabled={false}
+            className="inline-flex min-h-[44px] shrink-0 items-center rounded-lg bg-[var(--surface-secondary)] px-4 font-semibold"
+          >
+            Turn off
+          </button>
+        ) : state === "off" ? (
+          <button
+            type="button"
+            onClick={() => void enable()}
+            className="inline-flex min-h-[44px] shrink-0 items-center rounded-lg bg-[var(--accent-progress)] px-4 font-semibold text-white"
+          >
+            Turn on
+          </button>
+        ) : null}
+      </div>
+
+      {state === "working" && (
+        <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+          Setting that up…
+        </p>
+      )}
+      {state === "unsupported" && (
+        <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+          This browser doesn&apos;t support push notifications. Try Chrome, Edge,
+          or Safari.
+        </p>
+      )}
+      {state === "not_configured" && (
+        <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+          Push isn&apos;t set up on the server yet — check back soon.
+        </p>
+      )}
+      {state === "denied" && (
+        <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
+          You blocked notifications for Coast in this browser. To re-enable: open
+          your browser&apos;s site settings for this page, set Notifications to
+          Allow, then come back and turn it on here.
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="mt-2 text-[length:var(--type-caption-size)] text-[var(--signal-critical)]">
+          {error}
+        </p>
+      )}
+    </section>
+  );
+}
+
 const PHASE_BADGES: { phase: NotificationPhase; badge: string; blurb: string | null }[] = [
   { phase: 1, badge: "Phase 1 — live", blurb: null },
   {
@@ -237,10 +430,12 @@ export default function NotificationSettingsPage() {
       <div>
         <h1 className="text-[length:var(--type-title-size)] font-bold">Notification settings</h1>
         <p className="mt-1 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-          Decide which emails Coast sends you. Coast only watches and tells — nothing here
-          moves money or contacts anyone.
+          Decide which emails and push alerts Coast sends you. Coast only watches
+          and tells — nothing here moves money or contacts anyone.
         </p>
       </div>
+
+      <PushSection />
 
       {saveError && (
         <div role="alert" className="rounded-xl bg-[var(--signal-critical-soft)] p-4 elev-1">
@@ -252,12 +447,12 @@ export default function NotificationSettingsPage() {
 
       {/* Global pause */}
       <section
-        aria-label="Pause all emails"
+        aria-label="Pause all notifications"
         className="rounded-xl bg-[var(--surface-card)] p-6 elev-1"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[length:var(--type-body-size)] font-semibold">Pause all Coast emails</p>
+            <p className="text-[length:var(--type-body-size)] font-semibold">Pause all Coast notifications</p>
             <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
               You can re-enable anytime here.
             </p>
@@ -265,13 +460,13 @@ export default function NotificationSettingsPage() {
           <Switch
             checked={unsubscribedAll}
             onToggle={setPaused}
-            label="Pause all Coast emails"
+            label="Pause all Coast notifications"
           />
         </div>
         {unsubscribedAll && (
           <p className="mt-2 text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-            Paused — you won&apos;t get any Coast emails while this is on, including types
-            you&apos;ve left enabled below.
+            Paused — you won&apos;t get any Coast emails or push alerts while this is
+            on, including types you&apos;ve left enabled below.
           </p>
         )}
       </section>
