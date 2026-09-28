@@ -1,1 +1,0 @@
-{"crons":[{"path":"/api/notifications/sweep","schedule":"*/15 * * * *"}]}

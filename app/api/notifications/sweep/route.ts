@@ -42,14 +42,20 @@ import { TOTAL_CATEGORY } from "@/lib/real-data-server";
 /**
  * GET or POST /api/notifications/sweep — the morning notification sweep.
  *
- * NEVER user-callable: requires `Authorization: Bearer ${CRON_SECRET}`.
- * GET exists because Vercel Cron issues GET requests; POST for external
- * schedulers. NOTE: Vercel Cron cannot attach custom headers, so a
- * Vercel-cron invocation will 401 — the working scheduler is the GitHub
- * Actions workflow (.github/workflows/notification-sweep.yml), which
- * POSTs with the secret from repo secrets.
- * Intended cadence: every 15 min; each user is swept only inside their own
- * 06:45–07:00 local window.
+ * NEVER user-callable: requires `Authorization: Bearer ${CRON_SECRET}`
+ * compared against process.env.CRON_SECRET. Fail closed: 503 when the
+ * secret is not configured, 401 on mismatch. No Vercel Cron signature
+ * path — Vercel Cron cannot attach custom headers, and the Hobby plan
+ * caps cron at once/day anyway, so there is deliberately NO vercel.json
+ * cron entry.
+ *
+ * OPERATOR SETUP (external scheduler, e.g. cron-job.org):
+ *  1. Set CRON_SECRET as a Vercel environment variable (production).
+ *  2. In cron-job.org create a job hitting
+ *     GET|POST https://<app>/api/notifications/sweep every 15 minutes,
+ *     with request header `Authorization: Bearer <same CRON_SECRET value>`.
+ * Each user is swept only inside their own 06:45–07:00 local window; the
+ * 15-minute cadence just guarantees the window is hit.
  *
  * QUIET HOURS: the sweep-window gate IS the quiet-hours enforcement — no
  * email is ever composed or sent for a user outside their 06:45–07:00
@@ -666,9 +672,9 @@ async function sweepUser(
 }
 
 /**
- * The sweep entrypoint. Accepts GET (Vercel Cron issues GET) and POST
- * (external schedulers) — both require the bearer token. There is no
- * unauthenticated path: without CRON_SECRET configured the route fails
+ * The sweep entrypoint. Accepts GET and POST (external schedulers such as
+ * cron-job.org can use either) — both require the bearer token. There is
+ * no unauthenticated path: without CRON_SECRET configured the route fails
  * closed with 503.
  */
 async function handleSweep(req: Request) {
