@@ -26,12 +26,15 @@ import {
   isoWeekKey,
   localWeekday,
   milestoneKey,
+  NOTIFICATION_TYPES,
   recapKey,
   refundKey,
   selectDigestSubject,
   startOfLocalDayUtc,
   todayKey,
+  toNotificationCenterItem,
   trialKey,
+  notificationDeepLink,
   verifyClickToken,
   verifyUnsubscribeToken,
   type ComposedEmail,
@@ -399,5 +402,60 @@ describe("unsubscribe tokens", () => {
     expect(await verifyUnsubscribeToken("not-a-token", SECRET)).toBeNull();
     expect(await verifyUnsubscribeToken("", SECRET)).toBeNull();
     await expect(buildUnsubscribeToken("not-a-uuid", SECRET)).rejects.toThrow();
+  });
+});
+
+describe("notificationDeepLink", () => {
+  it("maps every catalog type to an exact in-app surface", () => {
+    expect(notificationDeepLink("attention_digest")).toBe("/brief");
+    expect(notificationDeepLink("charge_tomorrow")).toBe("/subscriptions");
+    expect(notificationDeepLink("price_hike")).toBe("/subscriptions");
+    expect(notificationDeepLink("budget_pace")).toBe("/spending");
+    expect(notificationDeepLink("fee_alert")).toBe("/transactions");
+    expect(notificationDeepLink("refund_landed")).toBe("/transactions");
+    expect(notificationDeepLink("friday_recap")).toBe("/brief");
+    expect(notificationDeepLink("unusual_spend")).toBe("/spending");
+    expect(notificationDeepLink("trial_converting")).toBe("/subscriptions");
+    expect(notificationDeepLink("number_milestone")).toBe("/number");
+  });
+
+  it("covers every type in NOTIFICATION_TYPES (no drift)", () => {
+    for (const t of NOTIFICATION_TYPES) {
+      expect(notificationDeepLink(t.id)).toMatch(/^\/(brief|subscriptions|spending|transactions|number)$/);
+    }
+  });
+
+  it("falls back to /brief for unknown types", () => {
+    expect(notificationDeepLink("something_new")).toBe("/brief");
+    expect(notificationDeepLink("")).toBe("/brief");
+  });
+});
+
+describe("toNotificationCenterItem", () => {
+  const row = {
+    id: "row-1",
+    type: "price_hike",
+    subject: "Hulu went up $2",
+    channel: "email",
+    sent_at: "2026-09-28T12:00:00Z",
+    read_at: null,
+  };
+
+  it("enriches with the catalog name, deep link, and unread flag", () => {
+    const item = toNotificationCenterItem(row);
+    expect(item.typeName).toBe("Price-hike alerts");
+    expect(item.href).toBe("/subscriptions");
+    expect(item.unread).toBe(true);
+  });
+
+  it("marks rows with read_at set as read", () => {
+    const item = toNotificationCenterItem({ ...row, read_at: "2026-09-28T13:00:00Z" });
+    expect(item.unread).toBe(false);
+  });
+
+  it("falls back to the raw type id for unknown types", () => {
+    const item = toNotificationCenterItem({ ...row, type: "future_type" });
+    expect(item.typeName).toBe("future_type");
+    expect(item.href).toBe("/brief");
   });
 });

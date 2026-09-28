@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import Link from "next/link";
 import "./globals.css";
 import TabBar from "./components/TabBar";
 import { ThemeToggle } from "./components/Theme";
+import NotificationBell from "./components/NotificationBell";
 
 export const metadata: Metadata = {
   title: "Coast — your number, your trajectory",
@@ -28,7 +30,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <span className="text-[length:var(--type-title-size)] font-bold tracking-tight text-[var(--text-hero-number)]">
               Coast
             </span>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <Link
+                href="/settings"
+                aria-label="Settings"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] text-lg transition-transform active:scale-95"
+              >
+                <span aria-hidden>⚙</span>
+              </Link>
+              <ThemeToggle />
+            </div>
           </div>
         </header>
         <main className="mx-auto max-w-xl px-4 pb-28 pt-6">{children}</main>

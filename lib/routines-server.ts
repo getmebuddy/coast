@@ -402,7 +402,7 @@ export async function actOnFinding(
   const supabase = createServerSupabase();
   const { data: row, error: readError } = await supabase
     .from("routine_findings")
-    .select("id, routine_key, kind, title, detail, impact_cents, evidence, status, snoozed_until, created_at")
+    .select("id, routine_key, kind, title, detail, impact_cents, evidence, status, snoozed_until, created_at, dedupe_hash")
     .eq("id", findingId)
     .eq("user_id", userId)
     .maybeSingle();
@@ -435,6 +435,25 @@ export async function actOnFinding(
     routine: String(row.routine_key),
     outcome: action,
   }).catch(() => {});
+
+  // Mark matching notification-center rows read. Notification dedupe keys for
+  // finding-backed types end with `:<finding dedupe_hash>` (fee:, hike:,
+  // refund:, anomaly:), so a suffix match links the action to its alerts.
+  // Limitation: charge_tomorrow keys embed the recurring id + date rather
+  // than the finding hash, so those rows are NOT auto-marked read here —
+  // the user clears them from the notification center itself.
+  const dedupeHash = (row as { dedupe_hash?: unknown }).dedupe_hash;
+  if (typeof dedupeHash === "string" && dedupeHash.length > 0) {
+    supabase
+      .from("notification_log")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", userId)
+      .is("read_at", null)
+      .like("dedupe_key", `%:${dedupeHash}`)
+      .then(({ error: markError }) => {
+        if (markError) console.warn("notification mark-read failed", markError.message);
+      });
+  }
   return updated as FindingRow;
 }
 

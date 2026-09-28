@@ -399,6 +399,72 @@ export const budgetKey = (category: string, month: string): string =>
 export const hikeKey = (findingDedupeHash: string): string => `hike:${findingDedupeHash}`;
 
 // ---------------------------------------------------------------------------
+// In-app deep links.
+//
+// Single map from notification type -> the exact surface the row opens.
+// Used by the notification center (bell) and the /notifications archive so a
+// tap lands on the finding, never the homepage. Unknown types fall back to
+// /brief, the surface that always exists for signed-in users.
+export function notificationDeepLink(type: string): string {
+  switch (type) {
+    case "attention_digest":
+      return "/brief";
+    case "charge_tomorrow":
+      return "/subscriptions";
+    case "price_hike":
+      return "/subscriptions";
+    case "budget_pace":
+      return "/spending";
+    case "fee_alert":
+      return "/transactions";
+    case "refund_landed":
+      return "/transactions";
+    case "friday_recap":
+      return "/brief";
+    case "unusual_spend":
+      return "/spending";
+    case "trial_converting":
+      return "/subscriptions";
+    case "number_milestone":
+      return "/number";
+    default:
+      return "/brief";
+  }
+}
+
+/** Raw notification_log row as read by the notification center. */
+export interface NotificationLogRow {
+  id: string;
+  type: string;
+  subject: string;
+  channel: string;
+  sent_at: string;
+  read_at: string | null;
+}
+
+/** notification_log row enriched for the in-app notification center. */
+export interface NotificationCenterItem extends NotificationLogRow {
+  typeName: string;
+  href: string;
+  unread: boolean;
+}
+
+/**
+ * Enrich a notification_log row for display: human type name, exact deep
+ * link, and unread flag (read_at NULL = unread). Pure — unit-tested.
+ */
+export function toNotificationCenterItem(row: NotificationLogRow): NotificationCenterItem {
+  const typeName =
+    NOTIFICATION_TYPES.find((t) => t.id === row.type)?.name ?? row.type;
+  return {
+    ...row,
+    typeName,
+    href: notificationDeepLink(row.type),
+    unread: row.read_at == null,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Click-tracking tokens.
 //
 // token = base64url(`${logId}|${targetPath}|${hmac}`),
