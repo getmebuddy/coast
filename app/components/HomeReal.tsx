@@ -41,7 +41,7 @@ export default function HomeReal({ initial }: { initial: DataEnvelope<HomeData> 
   const [retrying, setRetrying] = useState(false);
   const insightFired = useRef(false);
 
-  const { mode, data, missing } = env;
+  const { mode, data } = env;
 
   // First successfully rendered real insight -> first_insight_viewed (labels only).
   useEffect(() => {
@@ -232,12 +232,6 @@ export default function HomeReal({ initial }: { initial: DataEnvelope<HomeData> 
           </div>
         )}
       </Card>
-
-      {missing.length > 0 && mode === "partial" && (
-        <p className="text-[length:var(--type-caption-size)] text-[var(--text-secondary)]">
-          Still to set up: {missing.join(", ")}.
-        </p>
-      )}
     </div>
   );
 }
