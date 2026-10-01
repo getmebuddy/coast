@@ -8,7 +8,7 @@
  */
 import "server-only";
 import { createServerSupabase } from "./supabase/server";
-import { loadLedger, type Viewer } from "./real-data-server";
+import { loadLedger, type Viewer, type DbClient } from "./real-data-server";
 import { effectiveCategory, type Ledger } from "./real-data";
 import {
   ROUTINE_REGISTRY,
@@ -376,8 +376,8 @@ export async function runRoutines(viewer: Viewer): Promise<RunSummary> {
 }
 
 /** Open findings, ranked by money impact then recency. Snoozed items return when due. */
-export async function listOpenFindings(userId: string): Promise<FindingRow[]> {
-  const supabase = createServerSupabase();
+export async function listOpenFindings(userId: string, db: DbClient | null = null): Promise<FindingRow[]> {
+  const supabase = db ?? createServerSupabase();
   const today = new Date().toISOString().slice(0, 10);
   const { data, error } = await supabase
     .from("routine_findings")

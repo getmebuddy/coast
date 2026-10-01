@@ -59,6 +59,15 @@ export interface Viewer {
   realDataEnabled: boolean;
 }
 
+/**
+ * Database client accepted by the data loaders. Defaults to the
+ * session-scoped client; server-side callers with their own authorization
+ * (e.g. the MCP connector, which resolves the user from an OAuth token)
+ * may pass the service-role client instead. Every loader filters by
+ * viewer.userId, so bypassing RLS is safe.
+ */
+export type DbClient = ReturnType<typeof createServerSupabase>;
+
 /** Authenticated viewer or null (no session). Throws on auth-service error. */
 export async function getViewer(): Promise<Viewer | null> {
   const supabase = createServerSupabase();
@@ -88,8 +97,8 @@ export async function getViewer(): Promise<Viewer | null> {
   };
 }
 
-export async function getViewFacts(viewer: Viewer): Promise<ViewFacts> {
-  const session = createServerSupabase();
+export async function getViewFacts(viewer: Viewer, db: DbClient | null = null): Promise<ViewFacts> {
+  const session = db ?? createServerSupabase();
   const service = createServiceSupabase();
   const { data: items } = await service
     .from("plaid_items")
@@ -125,8 +134,8 @@ export async function getViewFacts(viewer: Viewer): Promise<ViewFacts> {
 // Ledger loading (shared by Activity, Budgets, Home, Brief)
 // ---------------------------------------------------------------------------
 
-export async function loadLedger(viewer: Viewer, limit = ACTIVITY_SCAN_CEILING): Promise<Ledger> {
-  const supabase = createServerSupabase();
+export async function loadLedger(viewer: Viewer, limit = ACTIVITY_SCAN_CEILING, db: DbClient | null = null): Promise<Ledger> {
+  const supabase = db ?? createServerSupabase();
   const [txnsRes, acctsRes, overRes, rulesRes, splitsRes] = await Promise.all([
     supabase
       .from("transactions")
@@ -331,11 +340,12 @@ export interface BudgetMonthData {
 async function resolveBudgetMonth(
   viewer: Viewer,
   now: Date,
-  explicitMonth?: string
+  explicitMonth?: string,
+  db: DbClient | null = null
 ): Promise<string> {
   const currentMonth = localMonthStart(now, viewer.timezone);
   if (explicitMonth) return explicitMonth;
-  const supabase = createServerSupabase();
+  const supabase = db ?? createServerSupabase();
   const { data, error } = await supabase
     .from("budgets")
     .select("month")
@@ -346,12 +356,12 @@ async function resolveBudgetMonth(
   return defaultBudgetMonth(now, viewer.timezone, (data ?? []).length > 0);
 }
 
-export async function loadBudgetMonth(viewer: Viewer, now = new Date()): Promise<DataEnvelope<BudgetMonthData>> {
+export async function loadBudgetMonth(viewer: Viewer, now = new Date(), db: DbClient | null = null): Promise<DataEnvelope<BudgetMonthData>> {
   const currentMonth = localMonthStart(now, viewer.timezone);
   let month = currentMonth; // fallback if month resolution itself fails
   try {
-    month = await resolveBudgetMonth(viewer, now);
-    const facts = await getViewFacts(viewer);
+    month = await resolveBudgetMonth(viewer, now, undefined, db);
+    const facts = await getViewFacts(viewer, db);
     const pageMode = resolveViewMode(facts);
     if (pageMode !== "real" && pageMode !== "partial") {
       return {
@@ -363,7 +373,7 @@ export async function loadBudgetMonth(viewer: Viewer, now = new Date()): Promise
         missing: missingPrerequisites(facts),
       };
     }
-    const supabase = createServerSupabase();
+    const supabase = db ?? createServerSupabase();
     const { data: limits, error } = await supabase
       .from("budgets")
       .select("category, limit_cents")
@@ -371,7 +381,7 @@ export async function loadBudgetMonth(viewer: Viewer, now = new Date()): Promise
       .eq("month", month);
     if (error) throw new Error(`budget-read: ${error.message}`);
 
-    const ledger = await loadLedger(viewer);
+    const ledger = await loadLedger(viewer, ACTIVITY_SCAN_CEILING, db);
     const monthPrefix = month.slice(0, 7);
     const ceiling = limits?.find((l) => l.category === TOTAL_CATEGORY)?.limit_cents ?? null;
     const categoryLimits = new Map((limits ?? []).filter((l) => l.category !== TOTAL_CATEGORY).map((l) => [l.category, l.limit_cents]));
@@ -966,10 +976,10 @@ function emptySpending(todayISO: string): SpendingData {
  * All four spending ranges precomputed from the real ledger, with the
  * finish-line monthly pace from the user's FIRE settings (null when unset).
  */
-export async function loadSpending(viewer: Viewer, now = new Date()): Promise<DataEnvelope<SpendingData>> {
+export async function loadSpending(viewer: Viewer, now = new Date(), db: DbClient | null = null): Promise<DataEnvelope<SpendingData>> {
   const today = localDay(now, viewer.timezone);
   try {
-    const facts = await getViewFacts(viewer);
+    const facts = await getViewFacts(viewer, db);
     const pageMode = resolveViewMode(facts);
     if (pageMode !== "real" && pageMode !== "partial") {
       return {
@@ -981,8 +991,8 @@ export async function loadSpending(viewer: Viewer, now = new Date()): Promise<Da
         missing: missingPrerequisites(facts),
       };
     }
-    const session = createServerSupabase();
-    const ledger = await loadLedger(viewer);
+    const session = db ?? createServerSupabase();
+    const ledger = await loadLedger(viewer, ACTIVITY_SCAN_CEILING, db);
     const { data: fire } = await session
       .from("fire_settings")
       .select("annual_spending_cents")
