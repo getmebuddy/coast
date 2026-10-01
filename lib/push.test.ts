@@ -121,8 +121,14 @@ describe("composePushPayload", () => {
 });
 
 describe("isPushableType", () => {
-  it("allows the four urgent standalone types", () => {
-    for (const t of ["charge_tomorrow", "price_hike", "fee_alert", "trial_converting"]) {
+  it("allows the four urgent standalone types plus the monthly report teaser", () => {
+    for (const t of [
+      "charge_tomorrow",
+      "price_hike",
+      "fee_alert",
+      "trial_converting",
+      "monthly_spending_report",
+    ]) {
       expect(isPushableType(t)).toBe(true);
     }
   });

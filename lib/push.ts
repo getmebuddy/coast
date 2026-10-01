@@ -6,10 +6,11 @@
  * its own PushManager work client-side and never imports this module.
  *
  * Push is for URGENT types only — the standalone "worth interrupting"
- * kinds: charge_tomorrow, price_hike, fee_alert, trial_converting. Digest,
- * Friday recap, milestones, and refund-landed stay email-only (spec: send
- * only notifications genuinely worth opening; pushes interrupt, so the
- * bar is higher).
+ * kinds: charge_tomorrow, price_hike, fee_alert, trial_converting — plus the
+ * monthly spending report's teaser, the one digest exception (it points at
+ * the in-app report, not the email, and fires at most once a month).
+ * Everything else stays email-only (spec: send only notifications genuinely
+ * worth opening; pushes interrupt, so the bar is higher).
  *
  * Copy follows the approved phone designs: title = the money or the
  * count, body = one plain-English line under ~110 chars, deep link to the
@@ -48,6 +49,7 @@ export const PUSHABLE_TYPES = new Set([
   "price_hike",
   "fee_alert",
   "trial_converting",
+  "monthly_spending_report",
 ]);
 
 export function isPushableType(typeId: string): boolean {

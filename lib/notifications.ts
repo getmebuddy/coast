@@ -10,6 +10,7 @@
  */
 
 import { validTimezone } from "./real-data";
+import { finishLineLine, netIncomeLine, type MonthSummary } from "./spending";
 
 export type NotificationClass = "digest" | "urgent";
 export type NotificationPhase = 1 | 2 | 3;
@@ -78,6 +79,14 @@ export const NOTIFICATION_TYPES: NotificationType[] = [
     id: "friday_recap",
     name: "Friday recap",
     description: "A short Friday summary of your week in money.",
+    phase: 1,
+    class: "digest",
+    defaultOn: true,
+  },
+  {
+    id: "monthly_spending_report",
+    name: "Monthly spending report",
+    description: "A monthly report of your income, spending, and finish-line pace.",
     phase: 1,
     class: "digest",
     defaultOn: true,
@@ -168,6 +177,22 @@ export function todayKey(timezone: string, now: Date): string {
   }).formatToParts(now);
   const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
   return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+/** True when the user's local date is the 1st of the month. */
+export function isFirstOfMonth(timezone: string, now: Date): boolean {
+  return todayKey(timezone, now).endsWith("-01");
+}
+
+/**
+ * YYYY-MM of the just-ended month in the user's timezone — the month the
+ * monthly spending report covers. Pure.
+ */
+export function previousMonthKey(timezone: string, now: Date): string {
+  const [y, m] = todayKey(timezone, now).split("-").map(Number);
+  const pm = m === 1 ? 12 : m - 1;
+  const py = m === 1 ? y - 1 : y;
+  return `${py}-${String(pm).padStart(2, "0")}`;
 }
 
 /**
@@ -385,6 +410,9 @@ export const trialKey = (merchant: string, trialEndsOn: string): string =>
   `trial:${merchant}:${trialEndsOn}`;
 /** One Friday recap per ISO week. */
 export const recapKey = (userId: string, isoWeek: string): string => `recap:${userId}:${isoWeek}`;
+/** One monthly spending report per calendar month. */
+export const spendingReportKey = (userId: string, monthKey: string): string =>
+  `spending_report:${userId}:${monthKey}`;
 /** One milestone email per progress band (Phase 3 — defined, not yet sent). */
 export const milestoneKey = (userId: string, band: string): string =>
   `milestone:${userId}:${band}`;
@@ -421,6 +449,8 @@ export function notificationDeepLink(type: string): string {
       return "/transactions";
     case "friday_recap":
       return "/brief";
+    case "monthly_spending_report":
+      return "/spending";
     case "unusual_spend":
       return "/spending";
     case "trial_converting":
@@ -597,4 +627,99 @@ export async function verifyUnsubscribeToken(
   }
   if (diff !== 0) return null;
   return payload.slice("unsub:".length);
+}
+
+// ---------------------------------------------------------------------------
+// Monthly spending report (pure composition)
+// ---------------------------------------------------------------------------
+
+/** Subject for the monthly spending report email. Pure. */
+export function monthlyReportSubject(summary: MonthSummary): string {
+  return `Your ${summary.monthLabel} spending report`;
+}
+
+/**
+ * The monthly spending report as email sections. The lead section carries
+ * the stat strip (Income | Total spend | Net); every section shares one
+ * card heading so they render as a single card with one primary CTA.
+ * Pure — the sweep supplies the summary and the FIRE pace.
+ */
+export function monthlyReportSections(
+  summary: MonthSummary,
+  finishLineMonthlyCents: number | null
+): EmailSection[] {
+  const comparison =
+    netIncomeLine(summary.incomeCents, summary.spendCents) ??
+    `No income landed in ${summary.monthLabel} — spending only.`;
+  const cta = { ctaLabel: "See your spending", ctaTarget: "/spending" };
+  const sections: EmailSection[] = [
+    {
+      type: "monthly_spending_report",
+      leadKind: null,
+      amountCents: summary.netCents,
+      stat: formatDollars(summary.netCents),
+      tone: summary.netCents < 0 ? "negative" : "positive",
+      stats: [
+        { value: formatDollars(summary.incomeCents), label: "income" },
+        { value: formatDollars(summary.spendCents), label: "spent" },
+        {
+          value: formatDollars(summary.netCents),
+          label: "net",
+          tone: summary.netCents < 0 ? "negative" : "positive",
+        },
+      ],
+      headline: "Net income",
+      body: comparison,
+      ...cta,
+    },
+  ];
+  if (finishLineMonthlyCents != null) {
+    const delta = summary.spendCents - finishLineMonthlyCents;
+    sections.push({
+      type: "monthly_spending_report",
+      leadKind: null,
+      tone: delta > 0 ? "negative" : "positive",
+      stat:
+        delta === 0
+          ? "on pace"
+          : `${formatDollars(Math.abs(delta))} ${delta > 0 ? "over" : "under"}`,
+      headline: "Finish-line pace",
+      body: finishLineLine(summary.spendCents, finishLineMonthlyCents),
+      ...cta,
+    });
+  }
+  for (const c of summary.categories.slice(0, 5)) {
+    sections.push({
+      type: "monthly_spending_report",
+      leadKind: null,
+      merchant: c.category,
+      amountCents: c.spendCents,
+      tone: "neutral",
+      headline: c.category,
+      body: `${c.txnCount} transaction${c.txnCount === 1 ? "" : "s"} in ${summary.monthLabel}`,
+      ...cta,
+    });
+  }
+  if (summary.biggestTxn) {
+    const b = summary.biggestTxn;
+    sections.push({
+      type: "monthly_spending_report",
+      leadKind: null,
+      merchant: b.merchant,
+      amountCents: b.amountCents,
+      tone: "neutral",
+      headline: b.merchant,
+      body: `Your biggest single purchase in ${summary.monthLabel} (${b.date}).`,
+      ...cta,
+    });
+  }
+  return sections;
+}
+
+/** Push teaser copy for the monthly report. Pure. */
+export function monthlyReportPush(summary: MonthSummary): { title: string; body: string } {
+  return {
+    title: `Your ${summary.monthLabel} report is ready`,
+    body: `You spent ${formatDollars(summary.spendCents)} in ${summary.monthLabel} — see where it went.`,
+  };
 }

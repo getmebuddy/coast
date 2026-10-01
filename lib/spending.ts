@@ -28,6 +28,12 @@ export interface SpendTxn {
   category?: string;
 }
 
+export interface BucketCategoryTotal {
+  category: string;
+  spendCents: number;
+  txnCount: number;
+}
+
 export interface SpendingBucket {
   key: string; // e.g. "2026-W39", "2026-09", "2026-Q3", "2026"
   label: string; // e.g. "Sep 21", "Sep", "Q3 ’26", "2026"
@@ -35,6 +41,8 @@ export interface SpendingBucket {
   end: string; // YYYY-MM-DD inclusive
   incomeCents: number;
   spendCents: number;
+  /** Per-category totals for this bucket (no top transactions — see buildCategoriesForWindow). */
+  categoryTotals: BucketCategoryTotal[];
 }
 
 export interface SpendingCategoryRow {
@@ -186,6 +194,197 @@ function specsFor(range: SpendingRange, today: string): BucketSpec[] {
 const UNCATEGORIZED = "Uncategorized";
 
 /**
+ * Category breakdown for an arbitrary [start, end] window — the same shape
+ * the explorer shows for the current period. Top transactions capped at 6,
+ * biggest first. Pure.
+ */
+export function buildCategoriesForWindow(
+  txns: SpendTxn[],
+  start: string,
+  end: string
+): SpendingCategoryRow[] {
+  const byCat = new Map<string, { spent: number; count: number; rows: SpendTxn[] }>();
+  for (const t of txns) {
+    if (!isPosted(t) || !isSpendingKind(t.kind)) continue;
+    if (t.date < start || t.date > end) continue;
+    const cat = (t.category ?? "").trim() || UNCATEGORIZED;
+    const cur = byCat.get(cat) ?? { spent: 0, count: 0, rows: [] };
+    cur.spent += Math.abs(t.amount_cents);
+    cur.count += 1;
+    cur.rows.push(t);
+    byCat.set(cat, cur);
+  }
+  return [...byCat.entries()]
+    .map(([category, v]) => ({
+      category,
+      spendCents: v.spent,
+      txnCount: v.count,
+      top: v.rows
+        .sort((a, b) => Math.abs(b.amount_cents) - Math.abs(a.amount_cents))
+        .slice(0, 6)
+        .map((t) => ({
+          id: t.id,
+          merchant: t.merchant,
+          logoUrl: t.logoUrl ?? null,
+          date: t.date,
+          amountCents: t.amount_cents,
+        })),
+    }))
+    .sort((a, b) => b.spendCents - a.spendCents);
+}
+
+/** Totals-only variant for buckets (no top transactions — keeps payloads small). */
+function buildCategoryTotalsForWindow(
+  txns: SpendTxn[],
+  start: string,
+  end: string
+): BucketCategoryTotal[] {
+  return buildCategoriesForWindow(txns, start, end).map((c) => ({
+    category: c.category,
+    spendCents: c.spendCents,
+    txnCount: c.txnCount,
+  }));
+}
+
+/**
+ * Find a bucket by key across all ranges ("2026-09", "2026-Q3", "2026",
+ * "W2026-09-01"). Returns the range and bucket, or null. Pure.
+ */
+export function findBucket(
+  data: SpendingData,
+  key: string
+): { range: SpendingRange; bucket: SpendingBucket } | null {
+  if (!/^[A-Za-z0-9-]+$/.test(key) || key.length > 24) return null;
+  for (const range of SPENDING_RANGES) {
+    const bucket = data.ranges[range].buckets.find((b) => b.key === key);
+    if (bucket) return { range, bucket };
+  }
+  return null;
+}
+
+/**
+ * "You spent 37% more than you earned." / "You kept 22% of what you earned."
+ * Null when there is no income to compare against (or nothing moved at all).
+ * Pure.
+ */
+export function netIncomeLine(incomeCents: number, spendCents: number): string | null {
+  if (incomeCents <= 0 || (incomeCents === 0 && spendCents === 0)) return null;
+  const net = incomeCents - spendCents;
+  if (net < 0) {
+    const pct = Math.round((spendCents / incomeCents) * 100 - 100);
+    return `You spent ${pct}% more than you earned.`;
+  }
+  const pct = Math.round((net / incomeCents) * 100);
+  return `You kept ${pct}% of what you earned.`;
+}
+
+/**
+ * "Your finish-line pace is $10,000/mo — you spent $6,040, $3,960 under."
+ * Pure.
+ */
+export function finishLineLine(spendCents: number, paceCents: number): string {
+  const delta = spendCents - paceCents;
+  const pace = `$${Math.round(paceCents / 100).toLocaleString("en-US")}/mo`;
+  const spent = `$${Math.round(spendCents / 100).toLocaleString("en-US")}`;
+  if (delta === 0) return `Your finish-line pace is ${pace} — you spent ${spent}, right on pace.`;
+  const over = `$${Math.round(Math.abs(delta) / 100).toLocaleString("en-US")} ${delta > 0 ? "over" : "under"}`;
+  return `Your finish-line pace is ${pace} — you spent ${spent}, ${over}.`;
+}
+
+export interface DonutSegment {
+  category: string;
+  spendCents: number;
+  /** Share of total spend, 0–100. */
+  pct: number;
+  /** 1-based index into the --chart-N palette; 0 = "Other". */
+  colorIndex: number;
+}
+
+/**
+ * Donut data: the top `limit` categories plus an "Other" rollup.
+ * Percentages are of totalSpendCents and sum to ~100. Pure.
+ */
+export function buildDonutData(
+  categories: Pick<SpendingCategoryRow, "category" | "spendCents">[],
+  totalSpendCents: number,
+  limit = 8
+): DonutSegment[] {
+  if (totalSpendCents <= 0 || categories.length === 0) return [];
+  const top = categories.slice(0, limit);
+  const rest = categories.slice(limit);
+  const restTotal = rest.reduce((s, c) => s + c.spendCents, 0);
+  const segs: DonutSegment[] = top.map((c, i) => ({
+    category: c.category,
+    spendCents: c.spendCents,
+    pct: (c.spendCents / totalSpendCents) * 100,
+    colorIndex: i + 1,
+  }));
+  if (restTotal > 0) {
+    segs.push({
+      category: "Other",
+      spendCents: restTotal,
+      pct: (restTotal / totalSpendCents) * 100,
+      colorIndex: 0,
+    });
+  }
+  return segs;
+}
+
+export interface MonthSummary {
+  monthKey: string; // YYYY-MM
+  monthLabel: string; // "September"
+  incomeCents: number;
+  spendCents: number;
+  netCents: number;
+  /** Posted income+spending transactions in the month. */
+  txnCount: number;
+  categories: SpendingCategoryRow[];
+  biggestTxn: { merchant: string; date: string; amountCents: number } | null;
+}
+
+/**
+ * Everything the monthly spending report needs, for one YYYY-MM.
+ * Pure — the caller resolves categories (effectiveCategory) beforehand.
+ */
+export function summarizeMonth(txns: SpendTxn[], monthKey: string): MonthSummary {
+  const start = `${monthKey}-01`;
+  const [y, m] = monthKey.split("-").map(Number);
+  const next = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, "0")}-01`;
+  let incomeCents = 0;
+  let spendCents = 0;
+  let txnCount = 0;
+  let biggest: SpendTxn | null = null;
+  for (const t of txns) {
+    if (!isPosted(t)) continue;
+    if (t.date < start || t.date >= next) continue;
+    if (t.kind === "income" && t.amount_cents > 0) {
+      incomeCents += t.amount_cents;
+      txnCount++;
+    } else if (isSpendingKind(t.kind)) {
+      spendCents += Math.abs(t.amount_cents);
+      txnCount++;
+      if (!biggest || Math.abs(t.amount_cents) > Math.abs(biggest.amount_cents)) biggest = t;
+    }
+  }
+  const monthLabel = new Date(`${start}T12:00:00Z`).toLocaleString("en-US", {
+    month: "long",
+    timeZone: "UTC",
+  });
+  return {
+    monthKey,
+    monthLabel,
+    incomeCents,
+    spendCents,
+    netCents: incomeCents - spendCents,
+    txnCount,
+    categories: buildCategoriesForWindow(txns, start, addDays(next, -1)),
+    biggestTxn: biggest
+      ? { merchant: biggest.merchant, date: biggest.date, amountCents: Math.abs(biggest.amount_cents) }
+      : null,
+  };
+}
+
+/**
  * Build every range's buckets, category breakdown, and net income from a
  * transaction list. The category breakdown and totals describe the latest
  * bucket's full period (the current week/month/quarter/year so far).
@@ -208,38 +407,16 @@ export function buildSpendingData(
         if (t.kind === "income" && t.amount_cents > 0) incomeCents += t.amount_cents;
         else if (isSpendingKind(t.kind)) spendCents += Math.abs(t.amount_cents);
       }
-      return { ...s, incomeCents, spendCents };
+      return {
+        ...s,
+        incomeCents,
+        spendCents,
+        categoryTotals: buildCategoryTotalsForWindow(txns, s.start, s.end),
+      };
     });
 
     const latest = specs[specs.length - 1];
-    const byCat = new Map<string, { spent: number; count: number; rows: SpendTxn[] }>();
-    for (const t of txns) {
-      if (!isPosted(t) || !isSpendingKind(t.kind)) continue;
-      if (t.date < latest.start || t.date > latest.end) continue;
-      const cat = (t.category ?? "").trim() || UNCATEGORIZED;
-      const cur = byCat.get(cat) ?? { spent: 0, count: 0, rows: [] };
-      cur.spent += Math.abs(t.amount_cents);
-      cur.count += 1;
-      cur.rows.push(t);
-      byCat.set(cat, cur);
-    }
-    const categories: SpendingCategoryRow[] = [...byCat.entries()]
-      .map(([category, v]) => ({
-        category,
-        spendCents: v.spent,
-        txnCount: v.count,
-        top: v.rows
-          .sort((a, b) => Math.abs(b.amount_cents) - Math.abs(a.amount_cents))
-          .slice(0, 6)
-          .map((t) => ({
-            id: t.id,
-            merchant: t.merchant,
-            logoUrl: t.logoUrl ?? null,
-            date: t.date,
-            amountCents: t.amount_cents,
-          })),
-      }))
-      .sort((a, b) => b.spendCents - a.spendCents);
+    const categories = buildCategoriesForWindow(txns, latest.start, latest.end);
 
     const totalSpendCents = categories.reduce((s, c) => s + c.spendCents, 0);
     const totalIncomeCents = buckets[buckets.length - 1].incomeCents;

@@ -21,15 +21,21 @@ import {
   foldUrgentIntoDigest,
   formatDollars,
   hikeKey,
+  isFirstOfMonth,
   isNotificationEnabled,
   isSweepWindow,
   isoWeekKey,
   localWeekday,
   milestoneKey,
+  monthlyReportPush,
+  monthlyReportSections,
+  monthlyReportSubject,
   NOTIFICATION_TYPES,
+  previousMonthKey,
   recapKey,
   refundKey,
   selectDigestSubject,
+  spendingReportKey,
   startOfLocalDayUtc,
   todayKey,
   toNotificationCenterItem,
@@ -457,5 +463,129 @@ describe("toNotificationCenterItem", () => {
     const item = toNotificationCenterItem({ ...row, type: "future_type" });
     expect(item.typeName).toBe("future_type");
     expect(item.href).toBe("/brief");
+  });
+});
+
+describe("monthly_spending_report", () => {
+  const summary = {
+    monthKey: "2026-08",
+    monthLabel: "August",
+    incomeCents: 500000,
+    spendCents: 320000,
+    netCents: 180000,
+    txnCount: 42,
+    categories: [
+      { category: "Groceries", spendCents: 80000, txnCount: 12, top: [] },
+      { category: "Dining", spendCents: 60000, txnCount: 9, top: [] },
+      { category: "Transport", spendCents: 50000, txnCount: 8, top: [] },
+      { category: "Shopping", spendCents: 40000, txnCount: 5, top: [] },
+      { category: "Utilities", spendCents: 30000, txnCount: 4, top: [] },
+      { category: "Other-stuff", spendCents: 60000, txnCount: 4, top: [] },
+    ],
+    biggestTxn: { merchant: "Whole Foods", date: "2026-08-14", amountCents: 18432 },
+  };
+
+  it("is registered in the catalog as a phase-1 digest, default on", () => {
+    const t = NOTIFICATION_TYPES.find((x) => x.id === "monthly_spending_report")!;
+    expect(t).toMatchObject({
+      name: "Monthly spending report",
+      phase: 1,
+      class: "digest",
+      defaultOn: true,
+    });
+    expect(notificationDeepLink("monthly_spending_report")).toBe("/spending");
+  });
+
+  it("is gated by prefs like every other type", () => {
+    expect(isNotificationEnabled({ prefs: {}, unsubscribed_all: false }, "monthly_spending_report")).toBe(true);
+    expect(
+      isNotificationEnabled(
+        { prefs: { monthly_spending_report: false }, unsubscribed_all: false },
+        "monthly_spending_report"
+      )
+    ).toBe(false);
+    expect(
+      isNotificationEnabled({ prefs: {}, unsubscribed_all: true }, "monthly_spending_report")
+    ).toBe(false);
+  });
+
+  it("dedupes one report per calendar month", () => {
+    expect(spendingReportKey("u1", "2026-08")).toBe("spending_report:u1:2026-08");
+    expect(spendingReportKey("u1", "2026-09")).not.toBe(spendingReportKey("u1", "2026-08"));
+  });
+
+  it("detects the 1st and the just-ended month across a year boundary", () => {
+    // 2026-10-01 12:00 UTC = 07:00 CDT — inside the sweep window on the 1st
+    const first = new Date("2026-10-01T12:00:00Z");
+    expect(isFirstOfMonth(CHI, first)).toBe(true);
+    expect(previousMonthKey(CHI, first)).toBe("2026-09");
+    expect(isFirstOfMonth(CHI, new Date("2026-10-02T12:00:00Z"))).toBe(false);
+    // January 1st rolls back to December of the prior year
+    const jan1 = new Date("2026-01-01T13:00:00Z"); // 07:00 CST
+    expect(isFirstOfMonth(CHI, jan1)).toBe(true);
+    expect(previousMonthKey(CHI, jan1)).toBe("2025-12");
+  });
+
+  it("builds the subject from the month label", () => {
+    expect(monthlyReportSubject(summary)).toBe("Your August spending report");
+  });
+
+  it("composes the stat strip, comparison, finish-line, top-5, and biggest txn", () => {
+    const sections = monthlyReportSections(summary, 1000000);
+    expect(sections[0].type).toBe("monthly_spending_report");
+    expect(sections[0].stats).toEqual([
+      { value: "$5000", label: "income" },
+      { value: "$3200", label: "spent" },
+      { value: "$1800", label: "net", tone: "positive" },
+    ]);
+    expect(sections[0].body).toBe("You kept 36% of what you earned.");
+    expect(sections[0].ctaLabel).toBe("See your spending");
+    expect(sections[0].ctaTarget).toBe("/spending");
+
+    const pace = sections[1];
+    expect(pace.headline).toBe("Finish-line pace");
+    expect(pace.body).toBe(
+      "Your finish-line pace is $10,000/mo — you spent $3,200, $6,800 under."
+    );
+
+    const cats = sections.slice(2, 7);
+    expect(cats.map((s) => s.headline)).toEqual([
+      "Groceries",
+      "Dining",
+      "Transport",
+      "Shopping",
+      "Utilities",
+    ]);
+    expect(cats.every((s) => s.ctaTarget === "/spending")).toBe(true);
+
+    const biggest = sections[7];
+    expect(biggest.headline).toBe("Whole Foods");
+    expect(biggest.body).toContain("2026-08-14");
+    expect(sections).toHaveLength(8);
+  });
+
+  it("omits the finish-line row when FIRE settings are missing", () => {
+    const sections = monthlyReportSections(summary, null);
+    expect(sections.some((s) => s.headline === "Finish-line pace")).toBe(false);
+  });
+
+  it("tones a negative net as negative and says so", () => {
+    const neg = { ...summary, spendCents: 600000, netCents: -100000 };
+    const sections = monthlyReportSections(neg, null);
+    expect(sections[0].tone).toBe("negative");
+    expect(sections[0].body).toBe("You spent 20% more than you earned.");
+  });
+
+  it("falls back gracefully when no income landed", () => {
+    const noIncome = { ...summary, incomeCents: 0, netCents: -320000 };
+    const sections = monthlyReportSections(noIncome, null);
+    expect(sections[0].body).toBe("No income landed in August — spending only.");
+  });
+
+  it("builds a short push teaser pointing at /spending", () => {
+    const push = monthlyReportPush(summary);
+    expect(push.title).toBe("Your August report is ready");
+    expect(push.body.length).toBeLessThanOrEqual(110);
+    expect(push.body).toContain("$3200");
   });
 });

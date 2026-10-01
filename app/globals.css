@@ -49,6 +49,16 @@
   --skeleton: #E8E5DE;
   --ring-track: #E7E4DC;
 
+  /* categorical palette — donut charts, per-category color. 8 hues + gray "Other". */
+  --chart-1: #2E7D5B;
+  --chart-2: #3A6EA8;
+  --chart-3: #B7791F;
+  --chart-4: #7A5C9E;
+  --chart-5: #B34A5E;
+  --chart-6: #2E8B9A;
+  --chart-7: #C26A2E;
+  --chart-8: #6B7F3E;
+
   color-scheme: light;
 }
 
@@ -71,6 +81,16 @@
   --border-subtle: #2C2C28;
   --skeleton: #242422;
   --ring-track: #2A2A26;
+
+  /* categorical palette — brighter variants for dark surfaces. */
+  --chart-1: #4CC38A;
+  --chart-2: #6FA8DC;
+  --chart-3: #E0A63F;
+  --chart-4: #B48ED6;
+  --chart-5: #E07A8B;
+  --chart-6: #5BC0CE;
+  --chart-7: #F0935C;
+  --chart-8: #A3B86B;
 
   color-scheme: dark;
 }

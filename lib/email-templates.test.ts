@@ -225,3 +225,40 @@ describe("buildNotificationEmail (v2 design)", () => {
     expect(html).toContain("sneak peek text");
   });
 });
+
+describe("monthly_spending_report card", () => {
+  it("renders under the Monthly spending report heading with the stat strip", () => {
+    const { html, text } = build({
+      subject: "Your August spending report",
+      primaryCta: { label: "See your spending", url: "https://example.com/click/9" },
+      sections: [
+        section({
+          type: "monthly_spending_report",
+          rows: [
+            {
+              title: "Net income",
+              body: "You kept 36% of what you earned.",
+              stat: "$1800",
+              tone: "positive",
+              iconSeed: "net",
+            },
+          ],
+          stats: [
+            { value: "$5000", label: "income" },
+            { value: "$3200", label: "spent" },
+            { value: "$1800", label: "net", tone: "positive" },
+          ],
+          ctaLabel: "See your spending",
+          ctaUrl: "https://example.com/click/9",
+        }),
+      ],
+    });
+    expect(html).toContain("Monthly spending report");
+    expect(html).toContain("Your August spending report");
+    expect(html).toContain("$5000");
+    expect(html).toContain("You kept 36% of what you earned.");
+    expect(html).toContain("See your spending");
+    expect(text).toContain("Monthly spending report");
+    expect(text).toContain("See your spending: https://example.com/click/9");
+  });
+});

@@ -965,7 +965,7 @@ function emptyBrief(now: Date, tz: string): Brief {
 // Spending explorer (/spending)
 // ---------------------------------------------------------------------------
 
-import { buildSpendingData, type SpendingData, type SpendTxn } from "./spending";
+import { buildSpendingData, buildCategoriesForWindow, findBucket, type SpendingData, type SpendTxn, type SpendingBucket, type SpendingCategoryRow } from "./spending";
 import { detectRecurring, nextChargeDate } from "./recurring";
 
 function emptySpending(todayISO: string): SpendingData {
@@ -1000,19 +1000,7 @@ export async function loadSpending(viewer: Viewer, now = new Date(), db: DbClien
       .maybeSingle();
     const finishLineMonthlyCents =
       fire?.annual_spending_cents != null ? Math.round(fire.annual_spending_cents / 12) : null;
-    const txns: SpendTxn[] = ledger.txns.map((t) => {
-      const eff = effectiveCategory(ledger, t);
-      return {
-        id: t.id,
-        date: t.posted_at.slice(0, 10),
-        merchant: t.merchant_normalized,
-        logoUrl: t.logo_url ?? null,
-        amount_cents: t.amount_cents,
-        kind: t.kind,
-        pending: t.pending,
-        category: eff.removed ? undefined : eff.category,
-      };
-    });
+    const txns = spendTxnsFromLedger(ledger);
     const data = buildSpendingData(txns, today, finishLineMonthlyCents);
     const env: DataEnvelope<SpendingData> = {
       mode: pageMode,
@@ -1027,6 +1015,75 @@ export async function loadSpending(viewer: Viewer, now = new Date(), db: DbClien
     return env;
   } catch {
     return errorEnvelope<SpendingData>("spending", viewer.timezone, emptySpending(today));
+  }
+}
+
+/**
+ * Ledger rows → SpendTxn[] with effective categories resolved (overrides,
+ * rules, splits applied; removed transactions uncategorized). Shared by
+ * loadSpending and loadSpendingBucket so both see identical data.
+ */
+function spendTxnsFromLedger(ledger: Ledger): SpendTxn[] {
+  return ledger.txns.map((t) => {
+    const eff = effectiveCategory(ledger, t);
+    return {
+      id: t.id,
+      date: t.posted_at.slice(0, 10),
+      merchant: t.merchant_normalized,
+      logoUrl: t.logo_url ?? null,
+      amount_cents: t.amount_cents,
+      kind: t.kind,
+      pending: t.pending,
+      category: eff.removed ? undefined : eff.category,
+    };
+  });
+}
+
+export interface SpendingBucketDetail {
+  bucket: SpendingBucket;
+  range: string;
+  categories: SpendingCategoryRow[];
+}
+
+/**
+ * Category drill-down for one historical bucket (?bucket=<key> on
+ * /api/spending). Same auth/provenance rules as loadSpending; null when the
+ * viewer has no real data or the key matches no bucket.
+ */
+export async function loadSpendingBucket(
+  viewer: Viewer,
+  bucketKey: string,
+  now = new Date(),
+  db: DbClient | null = null
+): Promise<DataEnvelope<SpendingBucketDetail> | null> {
+  const today = localDay(now, viewer.timezone);
+  try {
+    const facts = await getViewFacts(viewer, db);
+    const pageMode = resolveViewMode(facts);
+    if (pageMode !== "real" && pageMode !== "partial") return null;
+    const ledger = await loadLedger(viewer, ACTIVITY_SCAN_CEILING, db);
+    const txns = spendTxnsFromLedger(ledger);
+    const data = buildSpendingData(txns, today, null);
+    const found = findBucket(data, bucketKey);
+    if (!found) return null;
+    const detail: SpendingBucketDetail = {
+      bucket: found.bucket,
+      range: found.range,
+      categories: buildCategoriesForWindow(txns, found.bucket.start, found.bucket.end),
+    };
+    const env: DataEnvelope<SpendingBucketDetail> = {
+      mode: pageMode,
+      as_of: now.toISOString(),
+      timezone: viewer.timezone,
+      provenance: { spending: "real" },
+      data: detail,
+      missing: missingPrerequisites(facts),
+    };
+    if (process.env.NODE_ENV !== "production") assertNoDemo(env, "spending");
+    else if (containsDemoProvenance(env)) return null;
+    return env;
+  } catch {
+    return null;
   }
 }
 

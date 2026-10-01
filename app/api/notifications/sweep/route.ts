@@ -12,10 +12,16 @@ import {
   feeKey,
   foldUrgentIntoDigest,
   formatDollars,
+  isFirstOfMonth,
   isNotificationEnabled,
   isSweepWindow,
   localWeekday,
+  monthlyReportPush,
+  monthlyReportSections,
+  monthlyReportSubject,
+  previousMonthKey,
   selectDigestSubject,
+  spendingReportKey,
   startOfLocalDayUtc,
   todayKey,
   trialKey,
@@ -42,6 +48,7 @@ import {
   type Ledger,
   type LedgerTxn,
 } from "@/lib/real-data";
+import { summarizeMonth, type MonthSummary, type SpendTxn } from "@/lib/spending";
 import { isSpending } from "@/lib/ledger";
 import { TOTAL_CATEGORY } from "@/lib/real-data-server";
 
@@ -79,9 +86,11 @@ import { TOTAL_CATEGORY } from "@/lib/real-data-server";
  * WEB PUSH: urgent types (charge_tomorrow, price_hike, fee_alert,
  * trial_converting) also attempt a web push to the user's subscribed
  * browsers — after the email loop, inside its own try/catch so push
- * failures never break the email path. Inert until VAPID_PRIVATE_KEY +
- * NEXT_PUBLIC_VAPID_PUBLIC_KEY exist and the user opts in via
- * Settings → Notifications. The sweep-window gate is the quiet-hours
+ * failures never break the email path. The monthly spending report sends a
+ * push teaser too, but only when its email was actually generated (never
+ * when silenced by prefs, cap, or an empty month). Inert until
+ * VAPID_PRIVATE_KEY + NEXT_PUBLIC_VAPID_PUBLIC_KEY exist and the user opts
+ * in via Settings → Notifications. The sweep-window gate is the quiet-hours
  * enforcement for pushes too: no push is ever attempted outside the
  * user's 06:45–07:00 local window.
  */
@@ -116,6 +125,8 @@ const REASON_LINES: Record<string, string> = {
     "You're getting this because fee alerts are on in your Coast notification settings.",
   trial_converting:
     "You're getting this because trial alerts are on in your Coast notification settings.",
+  monthly_spending_report:
+    "You're getting this because monthly spending reports are on in your Coast notification settings.",
 };
 
 const INTROS: Record<string, string> = {
@@ -123,6 +134,7 @@ const INTROS: Record<string, string> = {
   charge_tomorrow: "heads up — this bills tomorrow.",
   fee_alert: "a fee showed up on your account.",
   trial_converting: "this trial is about to become a paid subscription.",
+  monthly_spending_report: "here's how your money moved last month.",
 };
 
 /** Mirror of listOpenFindings' filters, on the service client (no session in cron). */
@@ -188,6 +200,90 @@ function findingSection(f: SweepFinding): EmailSection {
 }
 
 /**
+ * Load the ledger (transactions + overrides + rules + splits) for one
+ * calendar month ("YYYY-MM"). Shared by budget-pace and the monthly
+ * spending report so both see identical categorization.
+ */
+async function loadLedgerForMonth(db: Db, userId: string, monthKey: string): Promise<Ledger> {
+  const [y, m] = monthKey.split("-").map(Number);
+  const nextMonth = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, "0")}`;
+  const [txnsRes, overRes, rulesRes, splitsRes] = await Promise.all([
+    db
+      .from("transactions")
+      .select("id, posted_at, merchant_normalized, amount_cents, kind, pending")
+      .eq("user_id", userId)
+      .gte("posted_at", `${monthKey}-01`)
+      .lt("posted_at", `${nextMonth}-01`)
+      .eq("pending", false)
+      .lt("amount_cents", 0)
+      .limit(5000),
+    db.from("transaction_overrides").select("transaction_id, category").eq("user_id", userId),
+    db.from("category_rules").select("match_pattern, category").eq("user_id", userId),
+    db.from("splits").select("transaction_id, category, amount_cents").eq("user_id", userId),
+  ]);
+  if (txnsRes.error) throw new Error(`sweep ledger-read: ${txnsRes.error.message}`);
+  const ledger: Ledger = {
+    txns: (txnsRes.data ?? []) as LedgerTxn[],
+    accountNames: new Map(),
+    overrides: new Map((overRes.data ?? []).map((o) => [o.transaction_id, o.category])),
+    rules: (rulesRes.data ?? []).map((r) => ({
+      matchPattern: r.match_pattern,
+      category: r.category,
+    })),
+    splits: new Map<string, Array<{ category: string; amount_cents: number }>>(),
+  };
+  for (const s of splitsRes.data ?? []) {
+    const arr = ledger.splits.get(s.transaction_id) ?? [];
+    arr.push({ category: s.category, amount_cents: s.amount_cents });
+    ledger.splits.set(s.transaction_id, arr);
+  }
+  return ledger;
+}
+
+/**
+ * Same as loadLedgerForMonth but keeps income rows too (the monthly report
+ * needs both sides). The lt(amount_cents, 0) filter is the only difference.
+ */
+async function loadLedgerForMonthWithIncome(
+  db: Db,
+  userId: string,
+  monthKey: string
+): Promise<Ledger> {
+  const [y, m] = monthKey.split("-").map(Number);
+  const nextMonth = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, "0")}`;
+  const [txnsRes, overRes, rulesRes, splitsRes] = await Promise.all([
+    db
+      .from("transactions")
+      .select("id, posted_at, merchant_normalized, amount_cents, kind, pending")
+      .eq("user_id", userId)
+      .gte("posted_at", `${monthKey}-01`)
+      .lt("posted_at", `${nextMonth}-01`)
+      .eq("pending", false)
+      .neq("amount_cents", 0)
+      .limit(5000),
+    db.from("transaction_overrides").select("transaction_id, category").eq("user_id", userId),
+    db.from("category_rules").select("match_pattern, category").eq("user_id", userId),
+    db.from("splits").select("transaction_id, category, amount_cents").eq("user_id", userId),
+  ]);
+  if (txnsRes.error) throw new Error(`sweep report ledger-read: ${txnsRes.error.message}`);
+  const ledger: Ledger = {
+    txns: (txnsRes.data ?? []) as LedgerTxn[],
+    accountNames: new Map(),
+    overrides: new Map((overRes.data ?? []).map((o) => [o.transaction_id, o.category])),
+    rules: (rulesRes.data ?? []).map((r) => ({
+      matchPattern: r.match_pattern,
+      category: r.category,
+    })),
+    splits: new Map<string, Array<{ category: string; amount_cents: number }>>(),
+  };
+  for (const s of splitsRes.data ?? []) {
+    const arr = ledger.splits.get(s.transaction_id) ?? [];
+    arr.push({ category: s.category, amount_cents: s.amount_cents });
+    ledger.splits.set(s.transaction_id, arr);
+  }
+  return ledger;
+}
+/**
  * Budget-pace warnings. loadBudgetMonth() is session-bound (it reads through
  * the request's auth cookies), which don't exist in the cron context — so
  * the same spend-vs-limit computation runs here against the service client.
@@ -214,38 +310,7 @@ async function budgetPaceSections(
   if (limits.length === 0) return [];
 
   const monthPrefix = month.slice(0, 7);
-  const [y, m] = monthPrefix.split("-").map(Number);
-  const nextMonth = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, "0")}`;
-  const [txnsRes, overRes, rulesRes, splitsRes] = await Promise.all([
-    db
-      .from("transactions")
-      .select("id, posted_at, merchant_normalized, amount_cents, kind, pending")
-      .eq("user_id", userId)
-      .gte("posted_at", `${monthPrefix}-01`)
-      .lt("posted_at", `${nextMonth}-01`)
-      .eq("pending", false)
-      .lt("amount_cents", 0)
-      .limit(5000),
-    db.from("transaction_overrides").select("transaction_id, category").eq("user_id", userId),
-    db.from("category_rules").select("match_pattern, category").eq("user_id", userId),
-    db.from("splits").select("transaction_id, category, amount_cents").eq("user_id", userId),
-  ]);
-  if (txnsRes.error) throw new Error(`sweep ledger-read: ${txnsRes.error.message}`);
-  const ledger: Ledger = {
-    txns: (txnsRes.data ?? []) as LedgerTxn[],
-    accountNames: new Map(),
-    overrides: new Map((overRes.data ?? []).map((o) => [o.transaction_id, o.category])),
-    rules: (rulesRes.data ?? []).map((r) => ({
-      matchPattern: r.match_pattern,
-      category: r.category,
-    })),
-    splits: new Map<string, Array<{ category: string; amount_cents: number }>>(),
-  };
-  for (const s of splitsRes.data ?? []) {
-    const arr = ledger.splits.get(s.transaction_id) ?? [];
-    arr.push({ category: s.category, amount_cents: s.amount_cents });
-    ledger.splits.set(s.transaction_id, arr);
-  }
+  const ledger = await loadLedgerForMonth(db, userId, monthPrefix);
 
   const spentByCat = new Map<string, number>();
   for (const t of ledger.txns) {
@@ -331,8 +396,42 @@ async function fridayRecapSection(
   };
 }
 
-/** Best-effort account name for the fee copy ("your Chase account"). */
-async function feeAccountLabel(
+/**
+ * Monthly spending report data for one YYYY-MM. Returns null when the month
+ * has zero posted transactions — the report stays silent ("quiet months
+ * stay silent", like the digest). Thrown errors are the caller's to handle.
+ */
+async function monthlyReportData(
+  db: Db,
+  userId: string,
+  monthKey: string
+): Promise<{ summary: MonthSummary; finishLineMonthlyCents: number | null } | null> {
+  const ledger = await loadLedgerForMonthWithIncome(db, userId, monthKey);
+  const txns: SpendTxn[] = ledger.txns.map((t) => {
+    const eff = effectiveCategory(ledger, t);
+    return {
+      id: t.id,
+      date: t.posted_at.slice(0, 10),
+      merchant: t.merchant_normalized,
+      amount_cents: t.amount_cents,
+      kind: t.kind,
+      pending: t.pending,
+      category: eff.removed ? undefined : eff.category,
+    };
+  });
+  const summary = summarizeMonth(txns, monthKey);
+  if (summary.txnCount === 0) return null;
+  const { data: fire } = await db
+    .from("fire_settings")
+    .select("annual_spending_cents")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const finishLineMonthlyCents =
+    fire?.annual_spending_cents != null ? Math.round(fire.annual_spending_cents / 12) : null;
+  return { summary, finishLineMonthlyCents };
+}
+
+/** Best-effort account name for the fee copy ("your Chase account"). */async function feeAccountLabel(
   db: Db,
   userId: string,
   f: SweepFinding
@@ -714,10 +813,35 @@ async function sweepUser(
   // there is no progress-tracking query yet — intentionally not gathered.
   // unusual_spend (Phase 2): no detector routine exists yet — same.
 
+  // ---- monthly spending report (1st of the month, standalone email) ----
+  // Fires inside the normal 06:45–07:00 window like everything else, so
+  // quiet hours and the 2/day cap apply via the shared assembly below.
+  let monthlyReport: ComposedEmail | null = null;
+  let monthlySummary: MonthSummary | null = null;
+  if (enabled("monthly_spending_report") && isFirstOfMonth(timezone, now)) {
+    const monthKey = previousMonthKey(timezone, now);
+    try {
+      const report = await monthlyReportData(db, userId, monthKey);
+      if (report) {
+        monthlySummary = report.summary;
+        monthlyReport = {
+          type: "monthly_spending_report",
+          dedupeKey: spendingReportKey(userId, monthKey),
+          subject: monthlyReportSubject(report.summary),
+          sections: monthlyReportSections(report.summary, report.finishLineMonthlyCents),
+        };
+      }
+      // null (empty month) → silent: no email, no log row, no push.
+    } catch (e) {
+      console.warn(`[notifications] monthly report read failed for ${userId}`, e);
+    }
+  }
+
   // ---- assemble, cap, send ----
   const pending: ComposedEmail[] = digest
     ? [foldUrgentIntoDigest(digest, urgents)]
     : urgents;
+  if (monthlyReport) pending.push(monthlyReport);
 
   const dayStart = startOfLocalDayUtc(timezone, now);
   const { count: sentToday } = await db
@@ -754,6 +878,9 @@ async function sweepUser(
   }
 
   let sent = 0;
+  // Set when the monthly report email was actually generated this sweep
+  // (sent or log-only) — gates the push teaser. Stays null when silenced.
+  let monthlyReportPushed: MonthSummary | null = null;
   // Personalized greeting, best-effort from the auth record's metadata.
   const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
   const fullName =
@@ -828,6 +955,11 @@ async function sweepUser(
       status,
     });
     if (written === "duplicate") continue; // already sent — skip
+    if (em.type === "monthly_spending_report" && monthlySummary) {
+      // Email generated (sent or log-only) — the push teaser may fire.
+      // Silenced paths (prefs, cap, empty month) never reach here.
+      monthlyReportPushed = monthlySummary;
+    }
     if (status === "sent") {
       sent++;
       // Buckets/labels only — never money or PII.
@@ -839,11 +971,20 @@ async function sweepUser(
   // Inert until the VAPID keys exist and the user has opted in; failures
   // here never affect the email results above.
   try {
-    await deliverUrgentPushes(
-      db,
-      userId,
-      pushCandidates(urgents, digestSections, dateKey, enabled)
-    );
+    const candidates = pushCandidates(urgents, digestSections, dateKey, enabled);
+    if (monthlyReportPushed) {
+      const push = monthlyReportPush(monthlyReportPushed);
+      const monthKey = monthlyReportPushed.monthKey;
+      candidates.push({
+        type: "monthly_spending_report",
+        title: push.title,
+        body: push.body,
+        url: "/spending",
+        tag: `spending-report:${monthKey}`,
+        dedupeKey: `push:${spendingReportKey(userId, monthKey)}`,
+      });
+    }
+    await deliverUrgentPushes(db, userId, candidates);
   } catch (e) {
     console.warn(`[notifications] push sweep failed for ${userId}`, e);
   }

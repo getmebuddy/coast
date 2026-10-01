@@ -120,6 +120,7 @@ const CARD_DEFS: Record<string, { heading: string; subhead: string }> = {
   refund_landed: { heading: "Refunds", subhead: "Money back in your account." },
   trial_converting: { heading: "Trials ending soon", subhead: "Decide before they convert." },
   friday_recap: { heading: "Your week", subhead: "A quick look back." },
+  monthly_spending_report: { heading: "Monthly spending report", subhead: "Income, spending, and your finish-line pace." },
 };
 
 function cardFor(type: string): { heading: string; subhead: string } {
